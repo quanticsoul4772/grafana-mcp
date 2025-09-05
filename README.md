@@ -35,7 +35,7 @@ npm install
 npm run build
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -77,7 +77,7 @@ The server supports multiple authentication methods:
    GRAFANA_TOKEN=admin:password
    ```
 
-## 🏃‍♂️ Usage
+## Usage
 
 ### Development
 
@@ -120,7 +120,7 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 }
 ```
 
-## 🛠 Available Tools
+## Available Tools
 
 ### Dashboard Tools (8 tools)
 - `search_dashboards` - Find dashboards by title, tags, or metadata
@@ -173,7 +173,7 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 - `test_notification_channel` - Test notification delivery
 - `get_alert_history` - Query alert history
 
-## 📋 Examples
+## Examples
 
 ### Dashboard Search
 ```typescript
@@ -217,7 +217,7 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 }
 ```
 
-## 🏗 Architecture
+## Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -241,7 +241,7 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 - **TLS Support** - Full certificate validation and client certificates
 - **Minimal Privilege** - Tools operate with least required permissions
 
-## 🐳 Deployment
+## Deployment
 
 ### Docker
 
@@ -270,7 +270,7 @@ services:
       - ./logs:/app/logs
 ```
 
-## 🔧 Development
+## Development
 
 ### Project Structure
 
@@ -328,7 +328,7 @@ grafana-mcp/
 - **Zod Validation** - Runtime type checking for all inputs
 - **Security First** - Automatic credential sanitization in all outputs
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
@@ -344,7 +344,7 @@ npm run test:watch
 npm test -- dashboard.test.ts
 ```
 
-## 📊 Monitoring
+## Monitoring
 
 ### Debug Mode
 
@@ -367,7 +367,7 @@ The server provides health information through:
 - Error logs with categorization
 - Connection status monitoring
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our contributing guidelines:
 
