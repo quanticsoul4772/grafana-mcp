@@ -1,0 +1,62 @@
+{
+  "name": "grafana-mcp",
+  "version": "1.0.0",
+  "description": "Grafana MCP Server - AI-powered Grafana integration",
+  "type": "module",
+  "main": "build/main.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quanticsoul4772/grafana-mcp.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/main.ts",
+    "start": "node build/main.js",
+    "clean": "rm -rf build",
+    "prepare": "npm run build",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run",
+    "lint": "eslint src --ext .ts --max-warnings 200",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,json,md}\"",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "grafana",
+    "monitoring",
+    "observability",
+    "model-context-protocol",
+    "prometheus",
+    "loki",
+    "alerting"
+  ],
+  "author": "quanticsoul4772",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.2",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.24.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/node": "^22.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
