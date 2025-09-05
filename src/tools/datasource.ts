@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
-import { DatasourceService } from "../services/datasource.js";
-import { GetDatasourceSchema, GetDatasourceByNameSchema } from "../types.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { ToolRegistry } from '../tool-registry.js';
+import { DatasourceService } from '../services/datasource.js';
+import { GetDatasourceSchema, GetDatasourceByNameSchema } from '../types.js';
 
 /**
  * Register datasource-related MCP tools
@@ -14,8 +14,8 @@ export function registerDatasourceTools(
   // List datasources
   registry.registerTool(
     {
-      name: "list_datasources",
-      description: "List all configured datasources with their details",
+      name: 'list_datasources',
+      description: 'List all configured datasources with their details',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async () => {
@@ -25,7 +25,7 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Configured Datasources (${datasources.length} total):**\\n\\n${datasources
                 .map(
                   (ds) =>
@@ -34,21 +34,21 @@ export function registerDatasourceTools(
                     `  - ID: ${ds.id}\\n` +
                     `  - URL: ${ds.url}\\n` +
                     `  - Access: ${ds.access}\\n` +
-                    `  - Default: ${ds.isDefault ? "Yes" : "No"}\\n` +
-                    `  - Read Only: ${ds.readOnly ? "Yes" : "No"}\\n` +
-                    `  - Basic Auth: ${ds.basicAuth ? "Enabled" : "Disabled"}`,
+                    `  - Default: ${ds.isDefault ? 'Yes' : 'No'}\\n` +
+                    `  - Read Only: ${ds.readOnly ? 'Yes' : 'No'}\\n` +
+                    `  - Basic Auth: ${ds.basicAuth ? 'Enabled' : 'Disabled'}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing datasources: ${errorMessage}`,
             },
           ],
@@ -61,8 +61,8 @@ export function registerDatasourceTools(
   // Get datasource by UID
   registry.registerTool(
     {
-      name: "get_datasource_by_uid",
-      description: "Get detailed information about a datasource using its UID",
+      name: 'get_datasource_by_uid',
+      description: 'Get detailed information about a datasource using its UID',
       inputSchema: zodToJsonSchema(GetDatasourceSchema),
     },
     async (request) => {
@@ -73,21 +73,21 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Datasource Details: ${datasource.name}**\\n\\n` +
-                "**Basic Information:**\\n" +
+                '**Basic Information:**\\n' +
                 `- Name: ${datasource.name}\\n` +
                 `- Type: ${datasource.type}\\n` +
                 `- UID: ${datasource.uid}\\n` +
                 `- ID: ${datasource.id}\\n` +
                 `- URL: ${datasource.url}\\n\\n` +
-                "**Configuration:**\\n" +
+                '**Configuration:**\\n' +
                 `- Access Mode: ${datasource.access}\\n` +
-                `- Default Datasource: ${datasource.isDefault ? "Yes" : "No"}\\n` +
-                `- Read Only: ${datasource.readOnly ? "Yes" : "No"}\\n` +
-                `- Basic Authentication: ${datasource.basicAuth ? "Enabled" : "Disabled"}\\n` +
-                `- With Credentials: ${datasource.withCredentials ? "Yes" : "No"}\\n\\n` +
+                `- Default Datasource: ${datasource.isDefault ? 'Yes' : 'No'}\\n` +
+                `- Read Only: ${datasource.readOnly ? 'Yes' : 'No'}\\n` +
+                `- Basic Authentication: ${datasource.basicAuth ? 'Enabled' : 'Disabled'}\\n` +
+                `- With Credentials: ${datasource.withCredentials ? 'Yes' : 'No'}\\n\\n` +
                 `**JSON Configuration:**\\n${
                   Object.keys(datasource.jsonData).length > 0
                     ? Object.entries(datasource.jsonData)
@@ -95,19 +95,19 @@ export function registerDatasourceTools(
                           ([key, value]) =>
                             `- ${key}: ${JSON.stringify(value)}`,
                         )
-                        .join("\\n")
-                    : "No additional configuration"
+                        .join('\\n')
+                    : 'No additional configuration'
                 }`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting datasource: ${errorMessage}`,
             },
           ],
@@ -120,8 +120,8 @@ export function registerDatasourceTools(
   // Get datasource by name
   registry.registerTool(
     {
-      name: "get_datasource_by_name",
-      description: "Get detailed information about a datasource using its name",
+      name: 'get_datasource_by_name',
+      description: 'Get detailed information about a datasource using its name',
       inputSchema: zodToJsonSchema(GetDatasourceByNameSchema),
     },
     async (request) => {
@@ -134,21 +134,21 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Datasource Details: ${datasource.name}**\\n\\n` +
-                "**Basic Information:**\\n" +
+                '**Basic Information:**\\n' +
                 `- Name: ${datasource.name}\\n` +
                 `- Type: ${datasource.type}\\n` +
                 `- UID: ${datasource.uid}\\n` +
                 `- ID: ${datasource.id}\\n` +
                 `- URL: ${datasource.url}\\n\\n` +
-                "**Configuration:**\\n" +
+                '**Configuration:**\\n' +
                 `- Access Mode: ${datasource.access}\\n` +
-                `- Default Datasource: ${datasource.isDefault ? "Yes" : "No"}\\n` +
-                `- Read Only: ${datasource.readOnly ? "Yes" : "No"}\\n` +
-                `- Basic Authentication: ${datasource.basicAuth ? "Enabled" : "Disabled"}\\n` +
-                `- With Credentials: ${datasource.withCredentials ? "Yes" : "No"}\\n\\n` +
+                `- Default Datasource: ${datasource.isDefault ? 'Yes' : 'No'}\\n` +
+                `- Read Only: ${datasource.readOnly ? 'Yes' : 'No'}\\n` +
+                `- Basic Authentication: ${datasource.basicAuth ? 'Enabled' : 'Disabled'}\\n` +
+                `- With Credentials: ${datasource.withCredentials ? 'Yes' : 'No'}\\n\\n` +
                 `**JSON Configuration:**\\n${
                   Object.keys(datasource.jsonData).length > 0
                     ? Object.entries(datasource.jsonData)
@@ -156,19 +156,19 @@ export function registerDatasourceTools(
                           ([key, value]) =>
                             `- ${key}: ${JSON.stringify(value)}`,
                         )
-                        .join("\\n")
-                    : "No additional configuration"
+                        .join('\\n')
+                    : 'No additional configuration'
                 }`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting datasource: ${errorMessage}`,
             },
           ],
@@ -181,8 +181,8 @@ export function registerDatasourceTools(
   // Test datasource connection
   registry.registerTool(
     {
-      name: "test_datasource_connection",
-      description: "Test the connection to a datasource by UID",
+      name: 'test_datasource_connection',
+      description: 'Test the connection to a datasource by UID',
       inputSchema: zodToJsonSchema(GetDatasourceSchema),
     },
     async (request) => {
@@ -193,25 +193,25 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Datasource Connection Test Results:**\\n\\n" +
-                `Status: ${result.status || "Unknown"}\\n` +
-                `Message: ${result.message || "No message provided"}\\n${
+                '**Datasource Connection Test Results:**\\n\\n' +
+                `Status: ${result.status || 'Unknown'}\\n` +
+                `Message: ${result.message || 'No message provided'}\\n${
                   result.details
                     ? `Details: ${JSON.stringify(result.details, null, 2)}`
-                    : ""
+                    : ''
                 }`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error testing datasource connection: ${errorMessage}`,
             },
           ],
@@ -224,12 +224,12 @@ export function registerDatasourceTools(
   // Get datasources by type
   registry.registerTool(
     {
-      name: "get_datasources_by_type",
+      name: 'get_datasources_by_type',
       description:
-        "Get all datasources of a specific type (e.g., prometheus, loki, mysql)",
+        'Get all datasources of a specific type (e.g., prometheus, loki, mysql)',
       inputSchema: zodToJsonSchema(
         z.object({
-          type: z.string().describe("The datasource type to filter by"),
+          type: z.string().describe('The datasource type to filter by'),
         }),
       ),
     },
@@ -242,7 +242,7 @@ export function registerDatasourceTools(
           return {
             content: [
               {
-                type: "text",
+                type: 'text',
                 text: `No datasources found of type: ${type}`,
               },
             ],
@@ -252,27 +252,27 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**${type.charAt(0).toUpperCase() + type.slice(1)} Datasources (${datasources.length} found):**\\n\\n${datasources
                 .map(
                   (ds) =>
                     `**${ds.name}**\\n` +
                     `  - UID: ${ds.uid}\\n` +
                     `  - URL: ${ds.url}\\n` +
-                    `  - Default: ${ds.isDefault ? "Yes" : "No"}\\n` +
+                    `  - Default: ${ds.isDefault ? 'Yes' : 'No'}\\n` +
                     `  - Access: ${ds.access}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting datasources by type: ${errorMessage}`,
             },
           ],
@@ -285,8 +285,8 @@ export function registerDatasourceTools(
   // Get default datasource
   registry.registerTool(
     {
-      name: "get_default_datasource",
-      description: "Get the default datasource for the organization",
+      name: 'get_default_datasource',
+      description: 'Get the default datasource for the organization',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async () => {
@@ -297,8 +297,8 @@ export function registerDatasourceTools(
           return {
             content: [
               {
-                type: "text",
-                text: "No default datasource found in this organization.",
+                type: 'text',
+                text: 'No default datasource found in this organization.',
               },
             ],
           };
@@ -307,7 +307,7 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Default Datasource: ${datasource.name}**\\n\\n` +
                 `- Type: ${datasource.type}\\n` +
@@ -319,11 +319,11 @@ export function registerDatasourceTools(
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting default datasource: ${errorMessage}`,
             },
           ],
@@ -336,19 +336,19 @@ export function registerDatasourceTools(
   // Check if datasource exists
   registry.registerTool(
     {
-      name: "check_datasource_exists",
-      description: "Check if a datasource exists by UID or name",
+      name: 'check_datasource_exists',
+      description: 'Check if a datasource exists by UID or name',
       inputSchema: zodToJsonSchema(
         z
           .object({
-            uid: z.string().describe("The datasource UID to check").optional(),
+            uid: z.string().describe('The datasource UID to check').optional(),
             name: z
               .string()
-              .describe("The datasource name to check")
+              .describe('The datasource name to check')
               .optional(),
           })
           .refine((data) => data.uid || data.name, {
-            message: "Either uid or name must be provided",
+            message: 'Either uid or name must be provided',
           }),
       ),
     },
@@ -360,7 +360,7 @@ export function registerDatasourceTools(
         };
 
         let exists = false;
-        let identifier = "";
+        let identifier = '';
 
         if (uid) {
           exists = await datasourceService.datasourceExists(uid);
@@ -373,18 +373,18 @@ export function registerDatasourceTools(
         return {
           content: [
             {
-              type: "text",
-              text: `Datasource with ${identifier} ${exists ? "exists" : "does not exist"}.`,
+              type: 'text',
+              text: `Datasource with ${identifier} ${exists ? 'exists' : 'does not exist'}.`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error checking datasource existence: ${errorMessage}`,
             },
           ],

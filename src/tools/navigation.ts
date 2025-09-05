@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
-import { NavigationService } from "../services/navigation.js";
-import { GenerateDeepLinkSchema } from "../types.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { ToolRegistry } from '../tool-registry.js';
+import { NavigationService } from '../services/navigation.js';
+import { GenerateDeepLinkSchema } from '../types.js';
 
 /**
  * Register navigation-related MCP tools
@@ -14,9 +14,9 @@ export function registerNavigationTools(
   // Generate deeplink
   registry.registerTool(
     {
-      name: "generate_deeplink",
+      name: 'generate_deeplink',
       description:
-        "Generate a deeplink URL for Grafana dashboards, panels, or explore view",
+        'Generate a deeplink URL for Grafana dashboards, panels, or explore view',
       inputSchema: zodToJsonSchema(GenerateDeepLinkSchema),
     },
     async (request) => {
@@ -24,53 +24,53 @@ export function registerNavigationTools(
         const params = GenerateDeepLinkSchema.parse(request.params.arguments);
         const deeplink = navigationService.generateDeepLink(params);
 
-        let description = "";
+        let description = '';
         switch (params.type) {
-          case "dashboard":
+          case 'dashboard':
             description = params.dashboardUid
               ? `Dashboard: ${params.dashboardUid}`
-              : "Dashboard (UID required)";
+              : 'Dashboard (UID required)';
             break;
-          case "panel":
+          case 'panel':
             description = `Panel ${params.panelId} in dashboard ${params.dashboardUid}`;
             break;
-          case "explore":
+          case 'explore':
             description = params.datasourceUid
               ? `Explore view with datasource: ${params.datasourceUid}`
-              : "Explore view";
+              : 'Explore view';
             break;
         }
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Generated Deeplink**\\n\\n" +
+                '**Generated Deeplink**\\n\\n' +
                 `**Type:** ${params.type}\\n` +
                 `**Description:** ${description}\\n` +
                 `**URL:** ${deeplink.url}\\n\\n` +
                 `**Parameters:**\\n${
-                  params.from ? `- From: ${params.from}\\n` : ""
-                }${params.to ? `- To: ${params.to}\\n` : ""}${
-                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ""
+                  params.from ? `- From: ${params.from}\\n` : ''
+                }${params.to ? `- To: ${params.to}\\n` : ''}${
+                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ''
                 }${
                   params.vars && Object.keys(params.vars).length > 0
                     ? `- Variables: ${Object.entries(params.vars)
                         .map(([k, v]) => `${k}=${v}`)
-                        .join(", ")}\\n`
-                    : ""
+                        .join(', ')}\\n`
+                    : ''
                 }\\n**Usage:**\\nClick or copy this URL to navigate directly to the specified Grafana view.`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error generating deeplink: ${errorMessage}`,
             },
           ],
@@ -83,9 +83,9 @@ export function registerNavigationTools(
   // Generate dashboard URL
   registry.registerTool(
     {
-      name: "generate_dashboard_url",
+      name: 'generate_dashboard_url',
       description:
-        "Generate a URL for a specific dashboard with optional time range and variables",
+        'Generate a URL for a specific dashboard with optional time range and variables',
       inputSchema: zodToJsonSchema(
         z.object({
           dashboardUid: z.string().min(1),
@@ -123,32 +123,32 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Dashboard URL Generated**\\n\\n" +
+                '**Dashboard URL Generated**\\n\\n' +
                 `**Dashboard UID:** ${params.dashboardUid}\\n` +
                 `**URL:** ${deeplink.url}\\n\\n` +
                 `**Parameters:**\\n${
-                  params.from ? `- From: ${params.from}\\n` : ""
-                }${params.to ? `- To: ${params.to}\\n` : ""}${
-                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ""
+                  params.from ? `- From: ${params.from}\\n` : ''
+                }${params.to ? `- To: ${params.to}\\n` : ''}${
+                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ''
                 }${
                   params.variables && Object.keys(params.variables).length > 0
                     ? `- Variables: ${Object.entries(params.variables)
                         .map(([k, v]) => `${k}=${v}`)
-                        .join(", ")}\\n`
-                    : ""
-                }${params.panelId ? `- Panel ID: ${params.panelId}\\n` : ""}`,
+                        .join(', ')}\\n`
+                    : ''
+                }${params.panelId ? `- Panel ID: ${params.panelId}\\n` : ''}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error generating dashboard URL: ${errorMessage}`,
             },
           ],
@@ -161,9 +161,9 @@ export function registerNavigationTools(
   // Generate panel URL
   registry.registerTool(
     {
-      name: "generate_panel_url",
+      name: 'generate_panel_url',
       description:
-        "Generate a URL for a specific panel with optional time range",
+        'Generate a URL for a specific panel with optional time range',
       inputSchema: zodToJsonSchema(
         z.object({
           dashboardUid: z.string().min(1),
@@ -201,33 +201,33 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Panel URL Generated**\\n\\n" +
+                '**Panel URL Generated**\\n\\n' +
                 `**Dashboard UID:** ${params.dashboardUid}\\n` +
                 `**Panel ID:** ${params.panelId}\\n` +
                 `**URL:** ${deeplink.url}\\n\\n` +
                 `**Parameters:**\\n${
-                  params.from ? `- From: ${params.from}\\n` : ""
-                }${params.to ? `- To: ${params.to}\\n` : ""}${
-                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ""
+                  params.from ? `- From: ${params.from}\\n` : ''
+                }${params.to ? `- To: ${params.to}\\n` : ''}${
+                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ''
                 }${
                   params.variables && Object.keys(params.variables).length > 0
                     ? `- Variables: ${Object.entries(params.variables)
                         .map(([k, v]) => `${k}=${v}`)
-                        .join(", ")}\\n`
-                    : ""
+                        .join(', ')}\\n`
+                    : ''
                 }`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error generating panel URL: ${errorMessage}`,
             },
           ],
@@ -240,9 +240,9 @@ export function registerNavigationTools(
   // Generate explore URL
   registry.registerTool(
     {
-      name: "generate_explore_url",
+      name: 'generate_explore_url',
       description:
-        "Generate a URL for the Explore view with optional datasource and query",
+        'Generate a URL for the Explore view with optional datasource and query',
       inputSchema: zodToJsonSchema(
         z.object({
           datasourceUid: z.string().min(1),
@@ -280,28 +280,28 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Explore URL Generated**\\n\\n" +
+                '**Explore URL Generated**\\n\\n' +
                 `**URL:** ${deeplink.url}\\n\\n` +
-                "**Parameters:**\\n" +
+                '**Parameters:**\\n' +
                 `- Datasource UID: ${params.datasourceUid}\\n${
-                  params.query ? `- Query: ${params.query}\\n` : ""
-                }${params.from ? `- From: ${params.from}\\n` : ""}${
-                  params.to ? `- To: ${params.to}\\n` : ""
+                  params.query ? `- Query: ${params.query}\\n` : ''
+                }${params.from ? `- From: ${params.from}\\n` : ''}${
+                  params.to ? `- To: ${params.to}\\n` : ''
                 }${
-                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ""
-                }${params.queryType ? `- Query Type: ${params.queryType}\\n` : ""}`,
+                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ''
+                }${params.queryType ? `- Query Type: ${params.queryType}\\n` : ''}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error generating explore URL: ${errorMessage}`,
             },
           ],
@@ -314,9 +314,9 @@ export function registerNavigationTools(
   // Generate Prometheus explore URL
   registry.registerTool(
     {
-      name: "generate_prometheus_explore_url",
+      name: 'generate_prometheus_explore_url',
       description:
-        "Generate an Explore URL for Prometheus queries with specific options",
+        'Generate an Explore URL for Prometheus queries with specific options',
       inputSchema: zodToJsonSchema(
         z.object({
           datasourceUid: z.string().min(1),
@@ -356,29 +356,29 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Prometheus Explore URL Generated**\\n\\n" +
+                '**Prometheus Explore URL Generated**\\n\\n' +
                 `**URL:** ${deeplink.url}\\n\\n` +
-                "**Parameters:**\\n" +
+                '**Parameters:**\\n' +
                 `- Datasource UID: ${params.datasourceUid}\\n` +
                 `- Query: ${params.query}\\n${
-                  params.from ? `- From: ${params.from}\\n` : ""
-                }${params.to ? `- To: ${params.to}\\n` : ""}${
-                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ""
+                  params.from ? `- From: ${params.from}\\n` : ''
+                }${params.to ? `- To: ${params.to}\\n` : ''}${
+                  params.refresh ? `- Refresh: ${params.refresh}\\n` : ''
                 }${
-                  params.step ? `- Step: ${params.step}\\n` : ""
+                  params.step ? `- Step: ${params.step}\\n` : ''
                 }- Range Query: ${params.range !== false}\\n`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error generating Prometheus explore URL: ${errorMessage}`,
             },
           ],
@@ -391,8 +391,8 @@ export function registerNavigationTools(
   // Generate Loki explore URL
   registry.registerTool(
     {
-      name: "generate_loki_explore_url",
-      description: "Generate an Explore URL for Loki log queries",
+      name: 'generate_loki_explore_url',
+      description: 'Generate an Explore URL for Loki log queries',
       inputSchema: zodToJsonSchema(
         z.object({
           datasourceUid: z.string().min(1),
@@ -426,27 +426,27 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Loki Explore URL Generated**\\n\\n" +
+                '**Loki Explore URL Generated**\\n\\n' +
                 `**URL:** ${deeplink.url}\\n\\n` +
-                "**Parameters:**\\n" +
+                '**Parameters:**\\n' +
                 `- Datasource UID: ${params.datasourceUid}\\n` +
                 `- Query: ${params.query}\\n${
-                  params.from ? `- From: ${params.from}\\n` : ""
+                  params.from ? `- From: ${params.from}\\n` : ''
                 }${
-                  params.to ? `- To: ${params.to}\\n` : ""
-                }${params.refresh ? `- Refresh: ${params.refresh}\\n` : ""}`,
+                  params.to ? `- To: ${params.to}\\n` : ''
+                }${params.refresh ? `- Refresh: ${params.refresh}\\n` : ''}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error generating Loki explore URL: ${errorMessage}`,
             },
           ],
@@ -459,8 +459,8 @@ export function registerNavigationTools(
   // Get time range presets
   registry.registerTool(
     {
-      name: "get_time_range_presets",
-      description: "Get common time range presets for Grafana",
+      name: 'get_time_range_presets',
+      description: 'Get common time range presets for Grafana',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async (_request) => {
@@ -470,7 +470,7 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Time Range Presets**\\n\\n${presets
                 .map(
                   (preset) =>
@@ -478,17 +478,17 @@ export function registerNavigationTools(
                     `  From: ${preset.from}\\n` +
                     `  To: ${preset.to}\\n`,
                 )
-                .join("\\n")}`,
+                .join('\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting time range presets: ${errorMessage}`,
             },
           ],
@@ -501,8 +501,8 @@ export function registerNavigationTools(
   // Validate time range
   registry.registerTool(
     {
-      name: "validate_time_range",
-      description: "Validate a time range for Grafana usage",
+      name: 'validate_time_range',
+      description: 'Validate a time range for Grafana usage',
       inputSchema: zodToJsonSchema(
         z.object({
           from: z.string().min(1),
@@ -521,30 +521,30 @@ export function registerNavigationTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Time Range Validation**\\n\\n" +
+                '**Time Range Validation**\\n\\n' +
                 `**From:** ${from}\\n` +
                 `**To:** ${to}\\n` +
-                `**Valid:** ${validation.isValid ? "Yes" : "No"}\\n${
-                  validation.error ? `**Error:** ${validation.error}\\n` : ""
+                `**Valid:** ${validation.isValid ? 'Yes' : 'No'}\\n${
+                  validation.error ? `**Error:** ${validation.error}\\n` : ''
                 }${
                   validation.isValid
-                    ? "\\n**Parsed Times:**\\n" +
+                    ? '\\n**Parsed Times:**\\n' +
                       `- From: ${navigationService.parseTimeRange(from, to).from}\\n` +
                       `- To: ${navigationService.parseTimeRange(from, to).to}\\n`
-                    : ""
+                    : ''
                 }`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error validating time range: ${errorMessage}`,
             },
           ],

@@ -2,8 +2,8 @@
  * Core interfaces and abstractions for the Grafana MCP Server
  */
 
-import { GrafanaHttpClient } from "../http-client.js";
-import { Config } from "../types.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { Config } from '../types.js';
 
 /**
  * Base interface for all services

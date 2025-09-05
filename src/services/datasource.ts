@@ -1,5 +1,5 @@
-import { GrafanaHttpClient } from "../http-client.js";
-import { Datasource } from "../types.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { Datasource } from '../types.js';
 
 /**
  * Service for managing Grafana datasources
@@ -11,7 +11,7 @@ export class DatasourceService {
    * List all datasources
    */
   async listDatasources(): Promise<Datasource[]> {
-    return this.httpClient.get<Datasource[]>("/api/datasources");
+    return this.httpClient.get<Datasource[]>('/api/datasources');
   }
 
   /**
@@ -41,7 +41,7 @@ export class DatasourceService {
    * Create datasource
    */
   async createDatasource(datasource: Partial<Datasource>): Promise<any> {
-    return this.httpClient.post("/api/datasources", datasource);
+    return this.httpClient.post('/api/datasources', datasource);
   }
 
   /**
@@ -81,7 +81,7 @@ export class DatasourceService {
    * Test datasource connection
    */
   async testDatasource(datasource: Partial<Datasource>): Promise<any> {
-    return this.httpClient.post("/api/datasources/test", datasource);
+    return this.httpClient.post('/api/datasources/test', datasource);
   }
 
   /**
@@ -97,16 +97,16 @@ export class DatasourceService {
   async proxyDatasourceRequest(
     uid: string,
     path: string,
-    method: "GET" | "POST" = "GET",
+    method: 'GET' | 'POST' = 'GET',
     data?: any,
     params?: Record<string, any>,
   ): Promise<any> {
     const url = `/api/datasources/proxy/uid/${uid}/${path}`;
 
     switch (method) {
-      case "GET":
+      case 'GET':
         return this.httpClient.get(url, params);
-      case "POST":
+      case 'POST':
         return this.httpClient.post(url, data);
       default:
         throw new Error(`Unsupported HTTP method: ${method}`);

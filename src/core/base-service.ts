@@ -2,10 +2,10 @@
  * Base service implementation providing common functionality
  */
 
-import { EventEmitter } from "events";
-import { IService, IHttpService, Result, AsyncResult } from "./interfaces.js";
-import { GrafanaHttpClient } from "../http-client.js";
-import { GrafanaError } from "../types.js";
+import { EventEmitter } from 'events';
+import { IService, IHttpService, Result, AsyncResult } from './interfaces.js';
+import { GrafanaHttpClient } from '../http-client.js';
+import { GrafanaError } from '../types.js';
 
 /**
  * Abstract base service with common functionality
@@ -16,7 +16,7 @@ export abstract class BaseService extends EventEmitter implements IService {
 
   constructor(
     public readonly name: string,
-    public readonly version: string = "1.0.0"
+    public readonly version = '1.0.0',
   ) {
     super();
   }
@@ -83,7 +83,7 @@ export abstract class BaseService extends EventEmitter implements IService {
    */
   protected async execute<T>(
     operation: () => Promise<T>,
-    context?: string
+    context?: string,
   ): AsyncResult<T> {
     try {
       const data = await operation();
@@ -101,7 +101,7 @@ export abstract class BaseService extends EventEmitter implements IService {
    */
   protected async executeOrThrow<T>(
     operation: () => Promise<T>,
-    context?: string
+    context?: string,
   ): Promise<T> {
     const result = await this.execute(operation, context);
     if (!result.success) {
@@ -123,7 +123,7 @@ export abstract class BaseService extends EventEmitter implements IService {
         name: 'ServiceError',
         message: `${context}: ${error.message}`,
         error: error.message,
-        status: 500
+        status: 500,
       };
     }
 
@@ -131,7 +131,7 @@ export abstract class BaseService extends EventEmitter implements IService {
       name: 'ServiceError',
       message: `${context}: Unknown error`,
       error: String(error),
-      status: 500
+      status: 500,
     };
   }
 
@@ -148,7 +148,7 @@ export abstract class BaseHttpService extends BaseService implements IHttpServic
   constructor(
     name: string,
     public readonly httpClient: GrafanaHttpClient,
-    version: string = "1.0.0"
+    version = '1.0.0',
   ) {
     super(name, version);
   }

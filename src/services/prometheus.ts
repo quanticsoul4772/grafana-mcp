@@ -1,7 +1,7 @@
-import { GrafanaHttpClient } from "../http-client.js";
-import { PrometheusQueryResult, PrometheusMetric } from "../types.js";
-import { BaseHttpService } from "../core/base-service.js";
-import { AsyncResult } from "../core/interfaces.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { PrometheusQueryResult, PrometheusMetric } from '../types.js';
+import { BaseHttpService } from '../core/base-service.js';
+import { AsyncResult } from '../core/interfaces.js';
 
 /**
  * Service for querying Prometheus datasources through Grafana
@@ -24,7 +24,7 @@ export class PrometheusService extends BaseHttpService {
   }): Promise<PrometheusQueryResult> {
     const { datasourceUid, query, start, end, step, instant = false } = options;
 
-    const endpoint = instant ? "query" : "query_range";
+    const endpoint = instant ? 'query' : 'query_range';
     const params: Record<string, any> = { query };
 
     if (!instant) {
@@ -107,7 +107,7 @@ export class PrometheusService extends BaseHttpService {
   ): Promise<{ data: string[] }> {
     const params: Record<string, any> = {};
     if (match && match.length > 0) {
-      params["match[]"] = match;
+      params['match[]'] = match;
     }
 
     return this.httpClient.get(
@@ -126,7 +126,7 @@ export class PrometheusService extends BaseHttpService {
   ): Promise<{ data: string[] }> {
     const params: Record<string, any> = {};
     if (match && match.length > 0) {
-      params["match[]"] = match;
+      params['match[]'] = match;
     }
 
     return this.httpClient.get(
@@ -145,7 +145,7 @@ export class PrometheusService extends BaseHttpService {
     end?: string,
   ): Promise<{ data: PrometheusMetric[] }> {
     const params: Record<string, any> = {
-      "match[]": match,
+      'match[]': match,
     };
 
     if (start) params.start = start;
@@ -162,7 +162,7 @@ export class PrometheusService extends BaseHttpService {
    */
   async getTargets(
     datasourceUid: string,
-    state?: "active" | "dropped" | "any",
+    state?: 'active' | 'dropped' | 'any',
   ): Promise<any> {
     const params = state ? { state } : {};
     return this.httpClient.get(
@@ -176,7 +176,7 @@ export class PrometheusService extends BaseHttpService {
    */
   async getAlertingRules(
     datasourceUid: string,
-    type?: "alert" | "record",
+    type?: 'alert' | 'record',
   ): Promise<any> {
     const params = type ? { type } : {};
     return this.httpClient.get(
@@ -250,7 +250,7 @@ export class PrometheusService extends BaseHttpService {
   parseQuery(query: string): { isValid: boolean; error?: string } {
     // Basic validation - could be enhanced with a proper PromQL parser
     if (!query || query.trim().length === 0) {
-      return { isValid: false, error: "Query is empty" };
+      return { isValid: false, error: 'Query is empty' };
     }
 
     // Check for some common syntax errors
@@ -258,7 +258,7 @@ export class PrometheusService extends BaseHttpService {
     const closeBraces = (query.match(/}/g) || []).length;
 
     if (openBraces !== closeBraces) {
-      return { isValid: false, error: "Unmatched braces in query" };
+      return { isValid: false, error: 'Unmatched braces in query' };
     }
 
     return { isValid: true };
@@ -268,12 +268,12 @@ export class PrometheusService extends BaseHttpService {
    * Format time value for Prometheus API
    */
   formatTime(time: string | number | Date): string {
-    if (typeof time === "string") {
+    if (typeof time === 'string') {
       // Assume it's already in the correct format or a relative time
       return time;
     }
 
-    if (typeof time === "number") {
+    if (typeof time === 'number') {
       // Unix timestamp
       return String(time);
     }

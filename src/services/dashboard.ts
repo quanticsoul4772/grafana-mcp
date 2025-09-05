@@ -1,7 +1,7 @@
-import { GrafanaHttpClient } from "../http-client.js";
-import { Dashboard, DashboardDetail, Panel, Target } from "../types.js";
-import { BaseHttpService } from "../core/base-service.js";
-import { AsyncResult } from "../core/interfaces.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { Dashboard, DashboardDetail, Panel, Target } from '../types.js';
+import { BaseHttpService } from '../core/base-service.js';
+import { AsyncResult } from '../core/interfaces.js';
 
 /**
  * Service for managing Grafana dashboards
@@ -81,7 +81,7 @@ export class DashboardService extends BaseHttpService {
       params.type = options.type;
     }
 
-    return this.httpClient.get<Dashboard[]>("/api/search", params);
+    return this.httpClient.get<Dashboard[]>('/api/search', params);
   }
 
   /**
@@ -113,7 +113,7 @@ export class DashboardService extends BaseHttpService {
       payload.message = options.message;
     }
 
-    return this.httpClient.post("/api/dashboards/db", payload);
+    return this.httpClient.post('/api/dashboards/db', payload);
   }
 
   /**
@@ -148,7 +148,7 @@ export class DashboardService extends BaseHttpService {
       const queries =
         panel.targets?.map((target: Target) => ({
           refId: target.refId,
-          query: target.expr || target.logQL || "",
+          query: target.expr || target.logQL || '',
           queryType: target.queryType,
           datasource: target.datasource,
         })) || [];

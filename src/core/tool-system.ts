@@ -2,10 +2,10 @@
  * Declarative tool registration system
  */
 
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { IToolMetadata, IToolRegistration, IService } from "./interfaces.js";
-import { ToolRegistry } from "../tool-registry.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { IToolMetadata, IToolRegistration, IService } from './interfaces.js';
+import { ToolRegistry } from '../tool-registry.js';
 
 /**
  * Tool decorator metadata
@@ -35,14 +35,14 @@ export function Tool(options: ToolDecoratorOptions) {
       category: options.category || 'general',
       version: '1.0.0',
       tags: options.tags,
-      deprecated: options.deprecated
+      deprecated: options.deprecated,
     };
 
     target.constructor.__tools.push({
       metadata: toolMetadata,
       method: propertyName,
       schema: options.schema,
-      handler: descriptor.value
+      handler: descriptor.value,
     });
 
     return descriptor;
@@ -68,7 +68,7 @@ export class ToolRegistrationHelper {
    */
   static registerServiceTools<T extends IService>(
     registry: ToolRegistry,
-    service: T
+    service: T,
   ): IToolRegistration[] {
     const serviceClass = service.constructor as any;
     const tools = serviceClass.__tools || [];
@@ -84,16 +84,16 @@ export class ToolRegistrationHelper {
           // Bind the method to the service instance
           const boundHandler = handler.bind(service);
           return await boundHandler(request);
-        }
+        },
       };
 
       registry.registerTool(
         {
           name: metadata.name,
           description: metadata.description,
-          inputSchema: registration.schema
+          inputSchema: registration.schema,
         },
-        registration.handler
+        registration.handler,
       );
 
       registrations.push(registration);
@@ -175,13 +175,13 @@ export class ToolBuilder {
       category: this.metadata.category || 'general',
       version: this.metadata.version || '1.0.0',
       tags: this.metadata.tags,
-      deprecated: this.metadata.deprecated
+      deprecated: this.metadata.deprecated,
     };
 
     return {
       metadata: toolMetadata,
       schema: this.schema ? zodToJsonSchema(this.schema) : {},
-      handler: this.handler
+      handler: this.handler,
     };
   }
 
@@ -192,9 +192,9 @@ export class ToolBuilder {
       {
         name: registration.metadata.name,
         description: registration.metadata.description,
-        inputSchema: registration.schema
+        inputSchema: registration.schema,
       },
-      registration.handler
+      registration.handler,
     );
 
     return registration;
@@ -224,9 +224,9 @@ export class ToolCollection {
         {
           name: tool.metadata.name,
           description: tool.metadata.description,
-          inputSchema: tool.schema
+          inputSchema: tool.schema,
         },
-        tool.handler
+        tool.handler,
       );
     }
   }

@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 // import { measurePerformance } from "./performance-monitor.js";
 
 /**
@@ -16,7 +16,7 @@ export class ObjectPool<T> {
     factory: () => T,
     maxSize = 10,
     reset?: (item: T) => void,
-    validate?: (item: T) => boolean
+    validate?: (item: T) => boolean,
   ) {
     this.factory = factory;
     this.maxSize = maxSize;
@@ -124,7 +124,7 @@ export class ServiceContainer extends EventEmitter {
     factory: () => T, 
     maxPoolSize = 10,
     reset?: (item: T) => void,
-    validate?: (item: T) => boolean
+    validate?: (item: T) => boolean,
   ): void {
     const pool = new ObjectPool(factory, maxPoolSize, reset, validate);
     this.pools.set(name, pool);

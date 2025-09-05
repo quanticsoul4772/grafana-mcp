@@ -1,5 +1,5 @@
-import { GrafanaHttpClient } from "../http-client.js";
-import { LokiQueryResult } from "../types.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { LokiQueryResult } from '../types.js';
 
 /**
  * Service for querying Loki datasources through Grafana
@@ -16,7 +16,7 @@ export class LokiService {
     start?: string;
     end?: string;
     limit?: number;
-    direction?: "forward" | "backward";
+    direction?: 'forward' | 'backward';
     step?: string;
   }): Promise<LokiQueryResult> {
     const {
@@ -25,13 +25,13 @@ export class LokiService {
       start,
       end,
       limit = 100,
-      direction = "backward",
+      direction = 'backward',
       step,
     } = options;
 
     // Determine if this is a metric query or log query
     const isMetricQuery = this.isMetricQuery(query);
-    const endpoint = isMetricQuery ? "query_range" : "query_range";
+    const endpoint = isMetricQuery ? 'query_range' : 'query_range';
 
     const params: Record<string, any> = {
       query,
@@ -58,7 +58,7 @@ export class LokiService {
     start?: string;
     end?: string;
     limit?: number;
-    direction?: "forward" | "backward";
+    direction?: 'forward' | 'backward';
   }): Promise<LokiQueryResult> {
     return this.query({
       ...options,
@@ -153,7 +153,7 @@ export class LokiService {
     end?: string,
   ): Promise<{ data: Array<Record<string, string>> }> {
     const params: Record<string, any> = {
-      "match[]": match,
+      'match[]': match,
     };
 
     if (start) params.start = this.formatTime(start);
@@ -256,35 +256,35 @@ export class LokiService {
    */
   private isMetricQuery(query: string): boolean {
     const metricFunctions = [
-      "rate",
-      "rate_counter",
-      "bytes_rate",
-      "bytes_over_time",
-      "count_over_time",
-      "sum_over_time",
-      "avg_over_time",
-      "max_over_time",
-      "min_over_time",
-      "stddev_over_time",
-      "stdvar_over_time",
-      "quantile_over_time",
-      "first_over_time",
-      "last_over_time",
-      "absent_over_time",
+      'rate',
+      'rate_counter',
+      'bytes_rate',
+      'bytes_over_time',
+      'count_over_time',
+      'sum_over_time',
+      'avg_over_time',
+      'max_over_time',
+      'min_over_time',
+      'stddev_over_time',
+      'stdvar_over_time',
+      'quantile_over_time',
+      'first_over_time',
+      'last_over_time',
+      'absent_over_time',
     ];
 
     const aggregationFunctions = [
-      "sum",
-      "min",
-      "max",
-      "avg",
-      "stddev",
-      "stdvar",
-      "count",
-      "count_values",
-      "bottomk",
-      "topk",
-      "quantile",
+      'sum',
+      'min',
+      'max',
+      'avg',
+      'stddev',
+      'stdvar',
+      'count',
+      'count_values',
+      'bottomk',
+      'topk',
+      'quantile',
     ];
 
     const allFunctions = [...metricFunctions, ...aggregationFunctions];
@@ -300,10 +300,10 @@ export class LokiService {
   parseQuery(query: string): {
     isValid: boolean;
     error?: string;
-    type: "log" | "metric";
+    type: 'log' | 'metric';
   } {
     if (!query || query.trim().length === 0) {
-      return { isValid: false, error: "Query is empty", type: "log" };
+      return { isValid: false, error: 'Query is empty', type: 'log' };
     }
 
     // Basic validation
@@ -313,8 +313,8 @@ export class LokiService {
     if (openBraces !== closeBraces) {
       return {
         isValid: false,
-        error: "Unmatched braces in query",
-        type: "log",
+        error: 'Unmatched braces in query',
+        type: 'log',
       };
     }
 
@@ -324,12 +324,12 @@ export class LokiService {
     if (openParens !== closeParens) {
       return {
         isValid: false,
-        error: "Unmatched parentheses in query",
-        type: "log",
+        error: 'Unmatched parentheses in query',
+        type: 'log',
       };
     }
 
-    const type = this.isMetricQuery(query) ? "metric" : "log";
+    const type = this.isMetricQuery(query) ? 'metric' : 'log';
     return { isValid: true, type };
   }
 
@@ -337,7 +337,7 @@ export class LokiService {
    * Format time value for Loki API
    */
   formatTime(time: string | number | Date): string {
-    if (typeof time === "string") {
+    if (typeof time === 'string') {
       // If it looks like a Unix timestamp in nanoseconds, return as-is
       if (/^\\d{19}$/.test(time)) {
         return time;
@@ -358,7 +358,7 @@ export class LokiService {
       return time;
     }
 
-    if (typeof time === "number") {
+    if (typeof time === 'number') {
       // Assume it's milliseconds, convert to nanoseconds
       return (time * 1000000).toString();
     }
@@ -392,7 +392,7 @@ export class LokiService {
   buildSelector(labels: Record<string, string>): string {
     const selectors = Object.entries(labels)
       .map(([key, value]) => `${key}="${value}"`)
-      .join(", ");
+      .join(', ');
 
     return `{${selectors}}`;
   }
@@ -408,7 +408,7 @@ export class LokiService {
     let query = this.buildSelector(labels);
 
     if (filters && filters.length > 0) {
-      query += ` ${filters.join(" ")}`;
+      query += ` ${filters.join(' ')}`;
     }
 
     if (lineFormat) {
@@ -430,7 +430,7 @@ export class LokiService {
     let query = this.buildSelector(labels);
 
     if (filters && filters.length > 0) {
-      query += ` ${filters.join(" ")}`;
+      query += ` ${filters.join(' ')}`;
     }
 
     query += ` | ${metricFunction}[${range}]`;

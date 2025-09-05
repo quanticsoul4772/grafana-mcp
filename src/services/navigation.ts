@@ -1,4 +1,4 @@
-import { Config, DeepLink } from "../types.js";
+import { Config, DeepLink } from '../types.js';
 
 /**
  * Service for generating Grafana navigation deeplinks
@@ -7,14 +7,14 @@ export class NavigationService {
   private baseUrl: string;
 
   constructor(config: Config) {
-    this.baseUrl = config.GRAFANA_URL.replace(/\/$/, ""); // Remove trailing slash
+    this.baseUrl = config.GRAFANA_URL.replace(/\/$/, ''); // Remove trailing slash
   }
 
   /**
    * Generate a deeplink URL
    */
   generateDeepLink(options: {
-    type: "dashboard" | "panel" | "explore";
+    type: 'dashboard' | 'panel' | 'explore';
     dashboardUid?: string;
     panelId?: number;
     datasourceUid?: string;
@@ -40,38 +40,38 @@ export class NavigationService {
       right,
     } = options;
 
-    let path = "";
-    let title = "";
+    let path = '';
+    let title = '';
     const params = new URLSearchParams();
 
     switch (type) {
-      case "dashboard":
+      case 'dashboard':
         if (!dashboardUid) {
-          throw new Error("dashboardUid is required for dashboard links");
+          throw new Error('dashboardUid is required for dashboard links');
         }
         path = `/d/${dashboardUid}`;
         title = `Dashboard ${dashboardUid}`;
 
         if (panelId) {
-          params.set("viewPanel", panelId.toString());
+          params.set('viewPanel', panelId.toString());
           title += ` - Panel ${panelId}`;
         }
         break;
 
-      case "panel":
+      case 'panel':
         if (!dashboardUid || !panelId) {
           throw new Error(
-            "dashboardUid and panelId are required for panel links",
+            'dashboardUid and panelId are required for panel links',
           );
         }
         path = `/d/${dashboardUid}`;
-        params.set("viewPanel", panelId.toString());
+        params.set('viewPanel', panelId.toString());
         title = `Panel ${panelId} in Dashboard ${dashboardUid}`;
         break;
 
-      case "explore":
-        path = "/explore";
-        title = "Explore";
+      case 'explore':
+        path = '/explore';
+        title = 'Explore';
 
         if (datasourceUid) {
           const exploreParams: Record<string, any> = {
@@ -82,15 +82,15 @@ export class NavigationService {
             exploreParams.expr = query;
           }
 
-          params.set("left", JSON.stringify(exploreParams));
+          params.set('left', JSON.stringify(exploreParams));
         }
 
         if (left) {
-          params.set("left", JSON.stringify(left));
+          params.set('left', JSON.stringify(left));
         }
 
         if (right) {
-          params.set("right", JSON.stringify(right));
+          params.set('right', JSON.stringify(right));
         }
         break;
 
@@ -100,15 +100,15 @@ export class NavigationService {
 
     // Add time range parameters
     if (from) {
-      params.set("from", from);
+      params.set('from', from);
     }
     if (to) {
-      params.set("to", to);
+      params.set('to', to);
     }
 
     // Add refresh parameter
     if (refresh) {
-      params.set("refresh", refresh);
+      params.set('refresh', refresh);
     }
 
     // Add dashboard variables
@@ -120,7 +120,7 @@ export class NavigationService {
 
     // Construct final URL
     const queryString = params.toString();
-    const url = `${this.baseUrl}${path}${queryString ? `?${queryString}` : ""}`;
+    const url = `${this.baseUrl}${path}${queryString ? `?${queryString}` : ''}`;
 
     return {
       url,
@@ -143,7 +143,7 @@ export class NavigationService {
     },
   ): DeepLink {
     return this.generateDeepLink({
-      type: "dashboard",
+      type: 'dashboard',
       dashboardUid,
       ...options,
     });
@@ -163,7 +163,7 @@ export class NavigationService {
     },
   ): DeepLink {
     return this.generateDeepLink({
-      type: "panel",
+      type: 'panel',
       dashboardUid,
       panelId,
       ...options,
@@ -201,7 +201,7 @@ export class NavigationService {
     };
 
     return this.generateDeepLink({
-      type: "explore",
+      type: 'explore',
       datasourceUid,
       left,
       right: rightPaneOptions,
@@ -227,7 +227,7 @@ export class NavigationService {
 
     const leftPaneOptions: Record<string, any> = {
       expr: query,
-      queryType: "",
+      queryType: '',
       ...(range && { range: true }),
       ...(step && { step }),
     };
@@ -252,7 +252,7 @@ export class NavigationService {
   ): DeepLink {
     const leftPaneOptions = {
       expr: query,
-      queryType: "",
+      queryType: '',
     };
 
     return this.generateExploreLink(datasourceUid, {
@@ -267,8 +267,8 @@ export class NavigationService {
   generateAlertsLink(): DeepLink {
     return {
       url: `${this.baseUrl}/alerting/list`,
-      type: "dashboard", // Generic type
-      title: "Alerts",
+      type: 'dashboard', // Generic type
+      title: 'Alerts',
     };
   }
 
@@ -278,7 +278,7 @@ export class NavigationService {
   generateAlertRuleLink(ruleUid: string): DeepLink {
     return {
       url: `${this.baseUrl}/alerting/${ruleUid}/view`,
-      type: "dashboard", // Generic type
+      type: 'dashboard', // Generic type
       title: `Alert Rule ${ruleUid}`,
     };
   }
@@ -289,8 +289,8 @@ export class NavigationService {
   generateDatasourcesLink(): DeepLink {
     return {
       url: `${this.baseUrl}/datasources`,
-      type: "dashboard", // Generic type
-      title: "Datasources",
+      type: 'dashboard', // Generic type
+      title: 'Datasources',
     };
   }
 
@@ -300,7 +300,7 @@ export class NavigationService {
   generateDatasourceLink(datasourceUid: string): DeepLink {
     return {
       url: `${this.baseUrl}/datasources/edit/${datasourceUid}`,
-      type: "dashboard", // Generic type
+      type: 'dashboard', // Generic type
       title: `Datasource ${datasourceUid}`,
     };
   }
@@ -311,8 +311,8 @@ export class NavigationService {
   generateTeamsLink(): DeepLink {
     return {
       url: `${this.baseUrl}/org/teams`,
-      type: "dashboard", // Generic type
-      title: "Teams",
+      type: 'dashboard', // Generic type
+      title: 'Teams',
     };
   }
 
@@ -322,7 +322,7 @@ export class NavigationService {
   generateTeamLink(teamId: number): DeepLink {
     return {
       url: `${this.baseUrl}/org/teams/edit/${teamId}`,
-      type: "dashboard", // Generic type
+      type: 'dashboard', // Generic type
       title: `Team ${teamId}`,
     };
   }
@@ -333,8 +333,8 @@ export class NavigationService {
   generateUsersLink(): DeepLink {
     return {
       url: `${this.baseUrl}/admin/users`,
-      type: "dashboard", // Generic type
-      title: "Users",
+      type: 'dashboard', // Generic type
+      title: 'Users',
     };
   }
 
@@ -344,7 +344,7 @@ export class NavigationService {
   generateUserLink(userId: number): DeepLink {
     return {
       url: `${this.baseUrl}/admin/users/edit/${userId}`,
-      type: "dashboard", // Generic type
+      type: 'dashboard', // Generic type
       title: `User ${userId}`,
     };
   }
@@ -355,7 +355,7 @@ export class NavigationService {
   generateFolderLink(folderUid: string): DeepLink {
     return {
       url: `${this.baseUrl}/dashboards/f/${folderUid}`,
-      type: "dashboard", // Generic type
+      type: 'dashboard', // Generic type
       title: `Folder ${folderUid}`,
     };
   }
@@ -363,11 +363,11 @@ export class NavigationService {
   /**
    * Parse relative time strings to absolute timestamps
    */
-  parseTimeRange(from: string, to = "now"): { from: string; to: string } {
+  parseTimeRange(from: string, to = 'now'): { from: string; to: string } {
     const now = Date.now();
 
     const parseTime = (time: string): string => {
-      if (time === "now") {
+      if (time === 'now') {
         return now.toString();
       }
 
@@ -379,25 +379,25 @@ export class NavigationService {
 
         let milliseconds = 0;
         switch (unit) {
-          case "s":
+          case 's':
             milliseconds = value * 1000;
             break;
-          case "m":
+          case 'm':
             milliseconds = value * 60 * 1000;
             break;
-          case "h":
+          case 'h':
             milliseconds = value * 60 * 60 * 1000;
             break;
-          case "d":
+          case 'd':
             milliseconds = value * 24 * 60 * 60 * 1000;
             break;
-          case "w":
+          case 'w':
             milliseconds = value * 7 * 24 * 60 * 60 * 1000;
             break;
-          case "M":
+          case 'M':
             milliseconds = value * 30 * 24 * 60 * 60 * 1000;
             break;
-          case "y":
+          case 'y':
             milliseconds = value * 365 * 24 * 60 * 60 * 1000;
             break;
         }
@@ -428,16 +428,16 @@ export class NavigationService {
       const toTime = parseInt(parsed.to);
 
       if (isNaN(fromTime) || isNaN(toTime)) {
-        return { isValid: false, error: "Invalid time format" };
+        return { isValid: false, error: 'Invalid time format' };
       }
 
       if (fromTime >= toTime) {
-        return { isValid: false, error: "From time must be before to time" };
+        return { isValid: false, error: 'From time must be before to time' };
       }
 
       return { isValid: true };
     } catch (_error) {
-      return { isValid: false, error: "Failed to parse time range" };
+      return { isValid: false, error: 'Failed to parse time range' };
     }
   }
 
@@ -446,22 +446,22 @@ export class NavigationService {
    */
   getTimeRangePresets(): Array<{ label: string; from: string; to: string }> {
     return [
-      { label: "Last 5 minutes", from: "now-5m", to: "now" },
-      { label: "Last 15 minutes", from: "now-15m", to: "now" },
-      { label: "Last 30 minutes", from: "now-30m", to: "now" },
-      { label: "Last 1 hour", from: "now-1h", to: "now" },
-      { label: "Last 3 hours", from: "now-3h", to: "now" },
-      { label: "Last 6 hours", from: "now-6h", to: "now" },
-      { label: "Last 12 hours", from: "now-12h", to: "now" },
-      { label: "Last 24 hours", from: "now-24h", to: "now" },
-      { label: "Last 2 days", from: "now-2d", to: "now" },
-      { label: "Last 7 days", from: "now-7d", to: "now" },
-      { label: "Last 30 days", from: "now-30d", to: "now" },
-      { label: "Last 90 days", from: "now-90d", to: "now" },
-      { label: "Last 6 months", from: "now-6M", to: "now" },
-      { label: "Last 1 year", from: "now-1y", to: "now" },
-      { label: "Last 2 years", from: "now-2y", to: "now" },
-      { label: "Last 5 years", from: "now-5y", to: "now" },
+      { label: 'Last 5 minutes', from: 'now-5m', to: 'now' },
+      { label: 'Last 15 minutes', from: 'now-15m', to: 'now' },
+      { label: 'Last 30 minutes', from: 'now-30m', to: 'now' },
+      { label: 'Last 1 hour', from: 'now-1h', to: 'now' },
+      { label: 'Last 3 hours', from: 'now-3h', to: 'now' },
+      { label: 'Last 6 hours', from: 'now-6h', to: 'now' },
+      { label: 'Last 12 hours', from: 'now-12h', to: 'now' },
+      { label: 'Last 24 hours', from: 'now-24h', to: 'now' },
+      { label: 'Last 2 days', from: 'now-2d', to: 'now' },
+      { label: 'Last 7 days', from: 'now-7d', to: 'now' },
+      { label: 'Last 30 days', from: 'now-30d', to: 'now' },
+      { label: 'Last 90 days', from: 'now-90d', to: 'now' },
+      { label: 'Last 6 months', from: 'now-6M', to: 'now' },
+      { label: 'Last 1 year', from: 'now-1y', to: 'now' },
+      { label: 'Last 2 years', from: 'now-2y', to: 'now' },
+      { label: 'Last 5 years', from: 'now-5y', to: 'now' },
     ];
   }
 }

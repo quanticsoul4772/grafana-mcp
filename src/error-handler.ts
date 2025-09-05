@@ -7,14 +7,14 @@ import {
   formatUserError,
   formatInternalError,
   ErrorCategory,
-} from "./security-utils.js";
+} from './security-utils.js';
 
 /**
  * MCP tool response interface
  */
 interface ToolResponse {
   content: Array<{
-    type: "text";
+    type: 'text';
     text: string;
   }>;
   isError?: boolean;
@@ -69,7 +69,7 @@ export function handleToolError(
   return {
     content: [
       {
-        type: "text",
+        type: 'text',
         text: contextualMessage,
       },
     ],
@@ -105,7 +105,7 @@ export function createSuccessResponse(message: string): ToolResponse {
   return {
     content: [
       {
-        type: "text",
+        type: 'text',
         text: message,
       },
     ],
@@ -128,9 +128,9 @@ export function validateRequiredParams(
 
   if (missing.length > 0) {
     const error = new Error(
-      `Missing required parameters: ${missing.join(", ")}`,
+      `Missing required parameters: ${missing.join(', ')}`,
     );
-    error.name = "ValidationError";
+    error.name = 'ValidationError';
     throw error;
   }
 }

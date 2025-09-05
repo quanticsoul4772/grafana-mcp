@@ -1,5 +1,5 @@
-import { GrafanaHttpClient } from "../http-client.js";
-import { AlertRule, ContactPoint } from "../types.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { AlertRule, ContactPoint } from '../types.js';
 
 /**
  * Service for managing Grafana alerting
@@ -11,7 +11,7 @@ export class AlertingService {
    * List all alert rules
    */
   async listAlertRules(): Promise<AlertRule[]> {
-    return this.httpClient.get<AlertRule[]>("/api/ruler/grafana/api/v1/rules");
+    return this.httpClient.get<AlertRule[]>('/api/ruler/grafana/api/v1/rules');
   }
 
   /**
@@ -41,7 +41,7 @@ export class AlertingService {
    */
   async createAlertRule(rule: Partial<AlertRule>): Promise<any> {
     if (!rule.folderUID) {
-      throw new Error("folderUID is required for creating alert rules");
+      throw new Error('folderUID is required for creating alert rules');
     }
 
     return this.httpClient.post(
@@ -82,7 +82,7 @@ export class AlertingService {
    * Test alert rule
    */
   async testAlertRule(rule: Partial<AlertRule>): Promise<any> {
-    return this.httpClient.post("/api/v1/eval", rule);
+    return this.httpClient.post('/api/v1/eval', rule);
   }
 
   /**
@@ -97,7 +97,7 @@ export class AlertingService {
    */
   async listContactPoints(): Promise<ContactPoint[]> {
     return this.httpClient.get<ContactPoint[]>(
-      "/api/v1/provisioning/contact-points",
+      '/api/v1/provisioning/contact-points',
     );
   }
 
@@ -115,7 +115,7 @@ export class AlertingService {
    */
   async createContactPoint(contactPoint: Partial<ContactPoint>): Promise<any> {
     return this.httpClient.post(
-      "/api/v1/provisioning/contact-points",
+      '/api/v1/provisioning/contact-points',
       contactPoint,
     );
   }
@@ -145,7 +145,7 @@ export class AlertingService {
    */
   async testContactPoint(contactPoint: Partial<ContactPoint>): Promise<any> {
     return this.httpClient.post(
-      "/api/v1/provisioning/contact-points/test",
+      '/api/v1/provisioning/contact-points/test',
       contactPoint,
     );
   }
@@ -154,28 +154,28 @@ export class AlertingService {
    * List notification policies
    */
   async listNotificationPolicies(): Promise<any[]> {
-    return this.httpClient.get("/api/v1/provisioning/policies");
+    return this.httpClient.get('/api/v1/provisioning/policies');
   }
 
   /**
    * Get notification policy tree
    */
   async getNotificationPolicyTree(): Promise<any> {
-    return this.httpClient.get("/api/v1/provisioning/policies");
+    return this.httpClient.get('/api/v1/provisioning/policies');
   }
 
   /**
    * Update notification policy tree
    */
   async updateNotificationPolicyTree(policyTree: any): Promise<any> {
-    return this.httpClient.put("/api/v1/provisioning/policies", policyTree);
+    return this.httpClient.put('/api/v1/provisioning/policies', policyTree);
   }
 
   /**
    * List mute timings
    */
   async listMuteTimings(): Promise<any[]> {
-    return this.httpClient.get("/api/v1/provisioning/mute-timings");
+    return this.httpClient.get('/api/v1/provisioning/mute-timings');
   }
 
   /**
@@ -192,7 +192,7 @@ export class AlertingService {
    */
   async createMuteTiming(muteTiming: any): Promise<any> {
     return this.httpClient.post(
-      "/api/v1/provisioning/mute-timings",
+      '/api/v1/provisioning/mute-timings',
       muteTiming,
     );
   }
@@ -220,7 +220,7 @@ export class AlertingService {
    * List alert instances (current alert status)
    */
   async listAlertInstances(): Promise<any[]> {
-    return this.httpClient.get("/api/alertmanager/grafana/api/v2/alerts");
+    return this.httpClient.get('/api/alertmanager/grafana/api/v2/alerts');
   }
 
   /**
@@ -250,7 +250,7 @@ export class AlertingService {
     comment: string;
   }): Promise<any> {
     return this.httpClient.post(
-      "/api/alertmanager/grafana/api/v2/silences",
+      '/api/alertmanager/grafana/api/v2/silences',
       silence,
     );
   }
@@ -259,7 +259,7 @@ export class AlertingService {
    * List silences
    */
   async listSilences(): Promise<any[]> {
-    return this.httpClient.get("/api/alertmanager/grafana/api/v2/silences");
+    return this.httpClient.get('/api/alertmanager/grafana/api/v2/silences');
   }
 
   /**
@@ -284,28 +284,28 @@ export class AlertingService {
    * Get alertmanager status
    */
   async getAlertmanagerStatus(): Promise<any> {
-    return this.httpClient.get("/api/alertmanager/grafana/api/v2/status");
+    return this.httpClient.get('/api/alertmanager/grafana/api/v2/status');
   }
 
   /**
    * Get alertmanager configuration
    */
   async getAlertmanagerConfig(): Promise<any> {
-    return this.httpClient.get("/api/v1/provisioning/alertmanagers");
+    return this.httpClient.get('/api/v1/provisioning/alertmanagers');
   }
 
   /**
    * Update alertmanager configuration
    */
   async updateAlertmanagerConfig(config: any): Promise<any> {
-    return this.httpClient.put("/api/v1/provisioning/alertmanagers", config);
+    return this.httpClient.put('/api/v1/provisioning/alertmanagers', config);
   }
 
   /**
    * Get alert rule groups
    */
   async getAlertRuleGroups(): Promise<any[]> {
-    return this.httpClient.get("/api/ruler/grafana/api/v1/rules");
+    return this.httpClient.get('/api/ruler/grafana/api/v1/rules');
   }
 
   /**
@@ -332,7 +332,7 @@ export class AlertingService {
   async exportAlertRules(folderUid?: string): Promise<any> {
     const params = folderUid ? { folderUid } : {};
     return this.httpClient.get(
-      "/api/ruler/grafana/api/v1/export/rules",
+      '/api/ruler/grafana/api/v1/export/rules',
       params,
     );
   }
@@ -342,7 +342,7 @@ export class AlertingService {
    */
   async importAlertRules(rules: any): Promise<any> {
     return this.httpClient.post(
-      "/api/ruler/grafana/api/v1/import/rules",
+      '/api/ruler/grafana/api/v1/import/rules',
       rules,
     );
   }

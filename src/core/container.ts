@@ -2,7 +2,7 @@
  * Dependency injection container implementation
  */
 
-import { IContainer } from "./interfaces.js";
+import { IContainer } from './interfaces.js';
 
 /**
  * Service lifetime enumeration
@@ -34,7 +34,7 @@ export class Container implements IContainer {
   register<T>(token: string | symbol, factory: () => T): void {
     this.services.set(token, {
       factory,
-      lifetime: ServiceLifetime.Transient
+      lifetime: ServiceLifetime.Transient,
     });
   }
 
@@ -44,7 +44,7 @@ export class Container implements IContainer {
   registerSingleton<T>(token: string | symbol, factory: () => T): void {
     this.services.set(token, {
       factory,
-      lifetime: ServiceLifetime.Singleton
+      lifetime: ServiceLifetime.Singleton,
     });
   }
 
@@ -54,7 +54,7 @@ export class Container implements IContainer {
   registerScoped<T>(token: string | symbol, factory: () => T): void {
     this.services.set(token, {
       factory,
-      lifetime: ServiceLifetime.Scoped
+      lifetime: ServiceLifetime.Scoped,
     });
   }
 
@@ -65,7 +65,7 @@ export class Container implements IContainer {
     this.services.set(token, {
       factory: () => instance,
       lifetime: ServiceLifetime.Singleton,
-      instance
+      instance,
     });
   }
 
@@ -129,7 +129,7 @@ export class Container implements IContainer {
         // Transient and scoped services get fresh registrations
         child.services.set(token, {
           factory: registration.factory,
-          lifetime: registration.lifetime
+          lifetime: registration.lifetime,
         });
       }
     }

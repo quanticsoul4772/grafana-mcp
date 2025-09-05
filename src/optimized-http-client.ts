@@ -1,10 +1,10 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
-import https from "https";
-import http from "http";
-import fs from "fs";
-import { Config, TLSConfig } from "./types.js";
-import { ResilientErrorHandler } from "./retry-client.js";
-import { performanceMonitor } from "./performance-monitor.js";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import { Config, TLSConfig } from './types.js';
+import { ResilientErrorHandler } from './retry-client.js';
+import { performanceMonitor } from './performance-monitor.js';
 
 /**
  * Memory-optimized cache with LRU eviction and size limits
@@ -85,7 +85,7 @@ class OptimizedCache<T> {
     const targetSize = Math.floor(this.cache.size * 0.75);
     
     const entries = Array.from(this.cache.entries()).sort((a, b) => 
-      a[1].lastAccessed - b[1].lastAccessed
+      a[1].lastAccessed - b[1].lastAccessed,
     );
 
     for (let i = 0; i < this.cache.size - targetSize; i++) {
@@ -137,7 +137,7 @@ export class OptimizedGrafanaHttpClient {
       {
         failureThreshold: 3, // More sensitive circuit breaker
         timeoutMs: 30000, // 30 second timeout
-      }
+      },
     );
 
     this.client = this.createOptimizedAxiosInstance();
@@ -150,10 +150,10 @@ export class OptimizedGrafanaHttpClient {
       timeout: Math.min(this.config.GRAFANA_TIMEOUT, 10000), // Cap timeout at 10s
       headers: {
         Authorization: `Bearer ${this.config.GRAFANA_TOKEN}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "Accept-Encoding": "gzip, deflate", // Enable compression
-        "Connection": "keep-alive",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate', // Enable compression
+        'Connection': 'keep-alive',
       },
       // Optimized agents with connection pooling
       httpAgent: new http.Agent({
@@ -231,7 +231,7 @@ export class OptimizedGrafanaHttpClient {
       }
     } catch (error) {
       throw new Error(
-        `Failed to load TLS configuration: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to load TLS configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
 
@@ -259,7 +259,7 @@ export class OptimizedGrafanaHttpClient {
         
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // Response interceptor with metrics and caching
@@ -301,7 +301,7 @@ export class OptimizedGrafanaHttpClient {
         this.processRequestQueue();
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -395,7 +395,7 @@ export class OptimizedGrafanaHttpClient {
             const response = await this.client.get<T>(url, { params });
             return response.data;
           },
-          `GET ${url}`
+          `GET ${url}`,
         );
       });
 
@@ -419,7 +419,7 @@ export class OptimizedGrafanaHttpClient {
           const response = await this.client.post<T>(url, data, config);
           return response.data;
         },
-        `POST ${url}`
+        `POST ${url}`,
       );
     });
   }

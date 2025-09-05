@@ -2,8 +2,8 @@
  * Standardized error handling patterns and utilities
  */
 
-import { GrafanaError } from "../types.js";
-import { Result } from "./interfaces.js";
+import { GrafanaError } from '../types.js';
+import { Result } from './interfaces.js';
 
 /**
  * Standard error categories
@@ -29,8 +29,8 @@ export class AppError extends Error {
     message: string,
     public readonly code: string,
     public readonly category: ErrorCategory,
-    public readonly statusCode: number = 500,
-    public readonly details?: Record<string, any>
+    public readonly statusCode = 500,
+    public readonly details?: Record<string, any>,
   ) {
     super(message);
     this.name = 'AppError';
@@ -42,7 +42,7 @@ export class AppError extends Error {
       name: this.name,
       message: this.message,
       error: this.message,
-      status: this.statusCode
+      status: this.statusCode,
     };
   }
 
@@ -53,7 +53,7 @@ export class AppError extends Error {
       code: this.code,
       category: this.category,
       statusCode: this.statusCode,
-      details: this.details
+      details: this.details,
     };
   }
 }
@@ -72,7 +72,7 @@ export class ValidationError extends AppError {
  * Authentication error
  */
 export class AuthenticationError extends AppError {
-  constructor(message: string = 'Authentication required') {
+  constructor(message = 'Authentication required') {
     super(message, 'AUTHENTICATION_ERROR', ErrorCategory.Authentication, 401);
     this.name = 'AuthenticationError';
   }
@@ -82,7 +82,7 @@ export class AuthenticationError extends AppError {
  * Authorization error
  */
 export class AuthorizationError extends AppError {
-  constructor(message: string = 'Insufficient permissions') {
+  constructor(message = 'Insufficient permissions') {
     super(message, 'AUTHORIZATION_ERROR', ErrorCategory.Authorization, 403);
     this.name = 'AuthorizationError';
   }
@@ -174,7 +174,7 @@ export class ErrorHandler {
    */
   static async safeExecute<T>(
     operation: () => Promise<T>,
-    context?: string
+    context?: string,
   ): Promise<Result<T, AppError>> {
     try {
       const data = await operation();
@@ -191,7 +191,7 @@ export class ErrorHandler {
     return {
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `Error (${error.code}): ${error.message}`,
         },
       ],
@@ -211,7 +211,7 @@ export class ErrorHandler {
     const logData = {
       error: error.toJSON(),
       context,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     switch (error.category) {
@@ -244,7 +244,7 @@ export class ErrorHandler {
  */
 export function withErrorHandling<TArgs extends any[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
-  context?: string
+  context?: string,
 ) {
   return async (...args: TArgs): Promise<TResult> => {
     try {

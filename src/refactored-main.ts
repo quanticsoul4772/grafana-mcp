@@ -4,32 +4,32 @@
  * Refactored Grafana MCP Server with modern patterns and architecture
  */
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+} from '@modelcontextprotocol/sdk/types.js';
 
 // Core infrastructure
-import { Container, ServiceTokens } from "./core/container.js";
-import { ServiceRegistry } from "./core/service-registry.js";
-import { IAppContext, IServiceHealth } from "./core/interfaces.js";
-import { ErrorHandler, AppError } from "./core/error-handling.js";
+import { Container, ServiceTokens } from './core/container.js';
+import { ServiceRegistry } from './core/service-registry.js';
+import { IAppContext, IServiceHealth } from './core/interfaces.js';
+import { ErrorHandler, AppError } from './core/error-handling.js';
 
 // Configuration and HTTP client
-import { getConfig } from "./config.js";
-import { GrafanaHttpClient } from "./http-client.js";
-import { ToolRegistry } from "./tool-registry.js";
+import { getConfig } from './config.js';
+import { GrafanaHttpClient } from './http-client.js';
+import { ToolRegistry } from './tool-registry.js';
 
 // Services
-import { DashboardService } from "./services/dashboard.js";
-import { DatasourceService } from "./services/datasource.js";
-import { PrometheusService } from "./services/prometheus.js";
-import { LokiService } from "./services/loki.js";
-import { AlertingService } from "./services/alerting.js";
-import { AdminService } from "./services/admin.js";
-import { NavigationService } from "./services/navigation.js";
+import { DashboardService } from './services/dashboard.js';
+import { DatasourceService } from './services/datasource.js';
+import { PrometheusService } from './services/prometheus.js';
+import { LokiService } from './services/loki.js';
+import { AlertingService } from './services/alerting.js';
+import { AdminService } from './services/admin.js';
+import { NavigationService } from './services/navigation.js';
 
 /**
  * Application context implementation
@@ -38,7 +38,7 @@ class AppContext implements IAppContext {
   constructor(
     public readonly config: any,
     public readonly container: Container,
-    public readonly serviceRegistry: ServiceRegistry
+    public readonly serviceRegistry: ServiceRegistry,
   ) {}
 
   async getHealth(): Promise<IServiceHealth[]> {
@@ -58,44 +58,44 @@ const SERVICE_CONFIG = [
     name: 'dashboards',
     token: ServiceTokens.DashboardService,
     factory: (httpClient: GrafanaHttpClient) => new DashboardService(httpClient),
-    enabled: true
+    enabled: true,
   },
   {
     name: 'datasources',
     token: ServiceTokens.DatasourceService,
     factory: (httpClient: GrafanaHttpClient) => new DatasourceService(httpClient),
-    enabled: true
+    enabled: true,
   },
   {
     name: 'prometheus',
     token: ServiceTokens.PrometheusService,
     factory: (httpClient: GrafanaHttpClient) => new PrometheusService(httpClient),
-    enabled: true
+    enabled: true,
   },
   {
     name: 'loki',
     token: ServiceTokens.LokiService,
     factory: (httpClient: GrafanaHttpClient) => new LokiService(httpClient),
-    enabled: true
+    enabled: true,
   },
   {
     name: 'alerting',
     token: ServiceTokens.AlertingService,
     factory: (httpClient: GrafanaHttpClient) => new AlertingService(httpClient),
-    enabled: true
+    enabled: true,
   },
   {
     name: 'admin',
     token: ServiceTokens.AdminService,
     factory: (httpClient: GrafanaHttpClient) => new AdminService(httpClient),
-    enabled: true
+    enabled: true,
   },
   {
     name: 'navigation',
     token: ServiceTokens.NavigationService,
     factory: (httpClient: GrafanaHttpClient) => new NavigationService(httpClient),
-    enabled: true
-  }
+    enabled: true,
+  },
 ];
 
 /**
@@ -108,14 +108,14 @@ class RefactoredGrafanaMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: "grafana-mcp",
-        version: "2.0.0",
+        name: 'grafana-mcp',
+        version: '2.0.0',
       },
       {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
   }
 
@@ -137,7 +137,7 @@ class RefactoredGrafanaMCPServer {
       this.appContext = new AppContext(
         container.resolve(ServiceTokens.Config),
         container,
-        serviceRegistry
+        serviceRegistry,
       );
 
       // Register and initialize services
@@ -166,12 +166,12 @@ class RefactoredGrafanaMCPServer {
     
     container.registerSingleton(
       ServiceTokens.HttpClient,
-      () => new GrafanaHttpClient(config)
+      () => new GrafanaHttpClient(config),
     );
     
     container.registerSingleton(
       ServiceTokens.ToolRegistry,
-      () => new ToolRegistry()
+      () => new ToolRegistry(),
     );
 
     return container;
@@ -260,7 +260,7 @@ class RefactoredGrafanaMCPServer {
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error executing ${toolName}: ${appError.message}`,
             },
           ],

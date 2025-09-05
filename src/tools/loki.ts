@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
-import { LokiService } from "../services/loki.js";
-import { QueryLokiSchema } from "../types.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { ToolRegistry } from '../tool-registry.js';
+import { LokiService } from '../services/loki.js';
+import { QueryLokiSchema } from '../types.js';
 
 /**
  * Register Loki-related MCP tools
@@ -14,9 +14,9 @@ export function registerLokiTools(
   // Query Loki logs
   registry.registerTool(
     {
-      name: "query_loki",
+      name: 'query_loki',
       description:
-        "Execute a LogQL query against a Loki datasource to search logs",
+        'Execute a LogQL query against a Loki datasource to search logs',
       inputSchema: zodToJsonSchema(QueryLokiSchema),
     },
     async (request) => {
@@ -28,7 +28,7 @@ export function registerLokiTools(
           return {
             content: [
               {
-                type: "text",
+                type: 'text',
                 text: `No logs found for query: ${params.query}`,
               },
             ],
@@ -40,7 +40,7 @@ export function registerLokiTools(
             timestamp: new Date(parseInt(timestamp) / 1000000).toISOString(),
             labels: Object.entries(stream.stream)
               .map(([key, value]) => `${key}="${value}"`)
-              .join(", "),
+              .join(', '),
             message: logLine,
           })),
         );
@@ -54,9 +54,9 @@ export function registerLokiTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Loki Query Results**\\n\\n" +
+                '**Loki Query Results**\\n\\n' +
                 `Query: \`${params.query}\`\\n` +
                 `Datasource: ${params.datasourceUid}\\n` +
                 `Log Entries: ${logEntries.length}\\n` +
@@ -67,18 +67,18 @@ export function registerLokiTools(
                       `**${entry.timestamp}** {${entry.labels}}\\n${entry.message}`,
                   )
                   .join(
-                    "\\n\\n",
-                  )}${logEntries.length > 50 ? `\\n\\n... and ${logEntries.length - 50} more entries` : ""}`,
+                    '\\n\\n',
+                  )}${logEntries.length > 50 ? `\\n\\n... and ${logEntries.length - 50} more entries` : ''}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error querying Loki: ${errorMessage}`,
             },
           ],
@@ -91,18 +91,18 @@ export function registerLokiTools(
   // Get Loki labels
   registry.registerTool(
     {
-      name: "get_loki_labels",
-      description: "Get all label names available in a Loki datasource",
+      name: 'get_loki_labels',
+      description: 'Get all label names available in a Loki datasource',
       inputSchema: zodToJsonSchema(
         z.object({
-          datasourceUid: z.string().describe("The Loki datasource UID"),
+          datasourceUid: z.string().describe('The Loki datasource UID'),
           start: z
             .string()
-            .describe("Start time (RFC3339 or Unix timestamp)")
+            .describe('Start time (RFC3339 or Unix timestamp)')
             .optional(),
           end: z
             .string()
-            .describe("End time (RFC3339 or Unix timestamp)")
+            .describe('End time (RFC3339 or Unix timestamp)')
             .optional(),
         }),
       ),
@@ -125,20 +125,20 @@ export function registerLokiTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Loki Labels (${labels.length} total)**\\n\\n${labels
                 .map((label) => `- ${label}`)
-                .join("\\n")}`,
+                .join('\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting Loki labels: ${errorMessage}`,
             },
           ],
@@ -151,19 +151,19 @@ export function registerLokiTools(
   // Get Loki label values
   registry.registerTool(
     {
-      name: "get_loki_label_values",
-      description: "Get all values for a specific label in a Loki datasource",
+      name: 'get_loki_label_values',
+      description: 'Get all values for a specific label in a Loki datasource',
       inputSchema: zodToJsonSchema(
         z.object({
-          datasourceUid: z.string().describe("The Loki datasource UID"),
-          label: z.string().describe("The label name to get values for"),
+          datasourceUid: z.string().describe('The Loki datasource UID'),
+          label: z.string().describe('The label name to get values for'),
           start: z
             .string()
-            .describe("Start time (RFC3339 or Unix timestamp)")
+            .describe('Start time (RFC3339 or Unix timestamp)')
             .optional(),
           end: z
             .string()
-            .describe("End time (RFC3339 or Unix timestamp)")
+            .describe('End time (RFC3339 or Unix timestamp)')
             .optional(),
         }),
       ),
@@ -189,20 +189,20 @@ export function registerLokiTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Values for label "${label}" (${values.length} total)**\\n\\n${values
                 .map((value) => `- ${value}`)
-                .join("\\n")}`,
+                .join('\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting Loki label values: ${errorMessage}`,
             },
           ],
@@ -215,12 +215,12 @@ export function registerLokiTools(
   // Get Loki series
   registry.registerTool(
     {
-      name: "get_loki_series",
+      name: 'get_loki_series',
       description:
-        "Get series (label combinations) matching label selectors from a Loki datasource",
+        'Get series (label combinations) matching label selectors from a Loki datasource',
       inputSchema: zodToJsonSchema(
         z.object({
-          datasourceUid: z.string().describe("The Loki datasource UID"),
+          datasourceUid: z.string().describe('The Loki datasource UID'),
           match: z
             .array(z.string())
             .describe(
@@ -228,11 +228,11 @@ export function registerLokiTools(
             ),
           start: z
             .string()
-            .describe("Start time (RFC3339 or Unix timestamp)")
+            .describe('Start time (RFC3339 or Unix timestamp)')
             .optional(),
           end: z
             .string()
-            .describe("End time (RFC3339 or Unix timestamp)")
+            .describe('End time (RFC3339 or Unix timestamp)')
             .optional(),
         }),
       ),
@@ -258,24 +258,24 @@ export function registerLokiTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Loki Series (${series.length} total)**\\n\\n${series
                 .map((s) =>
                   Object.entries(s)
                     .map(([key, value]) => `${key}="${value}"`)
-                    .join(", "),
+                    .join(', '),
                 )
-                .join("\\n")}`,
+                .join('\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting Loki series: ${errorMessage}`,
             },
           ],
@@ -288,9 +288,9 @@ export function registerLokiTools(
   // Build LogQL query
   registry.registerTool(
     {
-      name: "build_logql_query",
+      name: 'build_logql_query',
       description:
-        "Help build a LogQL query with suggestions for log stream selectors and filters",
+        'Help build a LogQL query with suggestions for log stream selectors and filters',
       inputSchema: zodToJsonSchema(
         z.object({
           labels: z
@@ -300,20 +300,20 @@ export function registerLokiTools(
             ),
           filter: z
             .string()
-            .describe("Log line filter pattern (regex or contains)")
+            .describe('Log line filter pattern (regex or contains)')
             .optional(),
           operation: z
-            .enum(["rate", "count_over_time", "sum", "avg", "min", "max"])
-            .describe("LogQL operation/function to apply")
+            .enum(['rate', 'count_over_time', 'sum', 'avg', 'min', 'max'])
+            .describe('LogQL operation/function to apply')
             .optional(),
           timeWindow: z
             .string()
             .describe('Time window for operations (e.g., "5m")')
             .optional(),
           filterType: z
-            .enum(["contains", "regex", "exact"])
-            .describe("Type of filter to apply")
-            .default("contains")
+            .enum(['contains', 'regex', 'exact'])
+            .describe('Type of filter to apply')
+            .default('contains')
             .optional(),
         }),
       ),
@@ -325,32 +325,32 @@ export function registerLokiTools(
           filter,
           operation,
           timeWindow,
-          filterType = "contains",
+          filterType = 'contains',
         } = request.params.arguments as {
           labels: Record<string, string>;
           filter?: string;
           operation?: string;
           timeWindow?: string;
-          filterType?: "contains" | "regex" | "exact";
+          filterType?: 'contains' | 'regex' | 'exact';
         };
 
         // Build stream selector
         const streamSelector = Object.entries(labels)
           .map(([key, value]) => `${key}="${value}"`)
-          .join(",");
+          .join(',');
 
         let query = `{${streamSelector}}`;
 
         // Add filter
         if (filter) {
           switch (filterType) {
-            case "regex":
+            case 'regex':
               query += ` |~ \`${filter}\``;
               break;
-            case "exact":
+            case 'exact':
               query += ` |= "${filter}"`;
               break;
-            case "contains":
+            case 'contains':
             default:
               query += ` |= "${filter}"`;
               break;
@@ -360,16 +360,16 @@ export function registerLokiTools(
         // Add operation
         if (operation && timeWindow) {
           switch (operation) {
-            case "rate":
+            case 'rate':
               query = `rate(${query}[${timeWindow}])`;
               break;
-            case "count_over_time":
+            case 'count_over_time':
               query = `count_over_time(${query}[${timeWindow}])`;
               break;
-            case "sum":
-            case "avg":
-            case "min":
-            case "max":
+            case 'sum':
+            case 'avg':
+            case 'min':
+            case 'max':
               query = `${operation}(rate(${query}[${timeWindow}]))`;
               break;
           }
@@ -378,32 +378,32 @@ export function registerLokiTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Built LogQL Query:**\\n\\n" +
+                '**Built LogQL Query:**\\n\\n' +
                 `\`${query}\`\\n\\n` +
-                "**Query Components:**\\n" +
+                '**Query Components:**\\n' +
                 `- Stream selector: {${streamSelector}}\\n${
-                  filter ? `- Filter: ${filter} (${filterType})\\n` : ""
-                }${operation ? `- Operation: ${operation}\\n` : ""}${
-                  timeWindow ? `- Time window: ${timeWindow}\\n` : ""
+                  filter ? `- Filter: ${filter} (${filterType})\\n` : ''
+                }${operation ? `- Operation: ${operation}\\n` : ''}${
+                  timeWindow ? `- Time window: ${timeWindow}\\n` : ''
                 }\\n**Usage:**\\nCopy this query and use it with the \`query_loki\` tool.\\n\\n` +
-                "**LogQL Tips:**\\n" +
-                "- Use `|=` for exact string matching\\n" +
-                "- Use `|~` for regex matching\\n" +
-                "- Use `!=` to exclude strings\\n" +
-                "- Use `!~` to exclude regex patterns\\n" +
+                '**LogQL Tips:**\\n' +
+                '- Use `|=` for exact string matching\\n' +
+                '- Use `|~` for regex matching\\n' +
+                '- Use `!=` to exclude strings\\n' +
+                '- Use `!~` to exclude regex patterns\\n' +
                 '- Chain multiple filters: `{job="nginx"} |= "error" |~ "timeout.*"`',
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error building LogQL query: ${errorMessage}`,
             },
           ],
@@ -416,12 +416,12 @@ export function registerLokiTools(
   // Get Loki stats
   registry.registerTool(
     {
-      name: "get_loki_stats",
+      name: 'get_loki_stats',
       description:
-        "Get statistics about ingestion and query performance from a Loki datasource",
+        'Get statistics about ingestion and query performance from a Loki datasource',
       inputSchema: zodToJsonSchema(
         z.object({
-          datasourceUid: z.string().describe("The Loki datasource UID"),
+          datasourceUid: z.string().describe('The Loki datasource UID'),
         }),
       ),
     },
@@ -430,14 +430,14 @@ export function registerLokiTools(
         const { datasourceUid } = request.params.arguments as {
           datasourceUid: string;
         };
-        const stats = await lokiService.getIndexStats(datasourceUid, "*");
+        const stats = await lokiService.getIndexStats(datasourceUid, '*');
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "**Loki Statistics**\\n\\n" +
+                '**Loki Statistics**\\n\\n' +
                 `Datasource: ${datasourceUid}\\n\\n` +
                 `**Ingestion Stats:**\\n${JSON.stringify(stats, null, 2)}`,
             },
@@ -445,11 +445,11 @@ export function registerLokiTools(
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting Loki stats: ${errorMessage}`,
             },
           ],

@@ -1,13 +1,13 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
-import { DashboardService } from "../services/dashboard.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { ToolRegistry } from '../tool-registry.js';
+import { DashboardService } from '../services/dashboard.js';
 import {
   SearchDashboardsSchema,
   GetDashboardSchema,
   UpdateDashboardSchema,
-} from "../types.js";
-import { handleToolError } from "../error-handler.js";
+} from '../types.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register dashboard-related MCP tools
@@ -19,8 +19,8 @@ export function registerDashboardTools(
   // Search dashboards
   registry.registerTool(
     {
-      name: "search_dashboards",
-      description: "Search for dashboards by title, tags, or other metadata",
+      name: 'search_dashboards',
+      description: 'Search for dashboards by title, tags, or other metadata',
       inputSchema: zodToJsonSchema(SearchDashboardsSchema),
     },
     async (request) => {
@@ -31,22 +31,22 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Found ${dashboards.length} dashboards:\\n\\n${dashboards
                 .map(
                   (d) =>
                     `**${d.title}** (${d.uid})\\n` +
                     `  URL: ${d.url}\\n` +
-                    `  Tags: ${d.tags.join(", ") || "None"}\\n` +
-                    `  Folder: ${d.folderTitle || "General"}\\n` +
-                    `  Starred: ${d.isStarred ? "Yes" : "No"}`,
+                    `  Tags: ${d.tags.join(', ') || 'None'}\\n` +
+                    `  Folder: ${d.folderTitle || 'General'}\\n` +
+                    `  Starred: ${d.isStarred ? 'Yes' : 'No'}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
-        return handleToolError(error, "search_dashboards", "search");
+        return handleToolError(error, 'search_dashboards', 'search');
       }
     },
   );
@@ -54,8 +54,8 @@ export function registerDashboardTools(
   // Get dashboard by UID
   registry.registerTool(
     {
-      name: "get_dashboard_by_uid",
-      description: "Get full dashboard details using its unique identifier",
+      name: 'get_dashboard_by_uid',
+      description: 'Get full dashboard details using its unique identifier',
       inputSchema: zodToJsonSchema(GetDashboardSchema),
     },
     async (request) => {
@@ -69,20 +69,20 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Dashboard: ${dashboard.title}**\\n\\n` +
-                "**Basic Info:**\\n" +
+                '**Basic Info:**\\n' +
                 `- UID: ${dashboard.uid}\\n` +
                 `- ID: ${dashboard.id}\\n` +
                 `- Version: ${dashboard.version}\\n` +
-                `- Tags: ${dashboard.tags.join(", ") || "None"}\\n` +
+                `- Tags: ${dashboard.tags.join(', ') || 'None'}\\n` +
                 `- Timezone: ${dashboard.timezone}\\n` +
-                `- Refresh: ${dashboard.refresh || "None"}\\n\\n` +
-                "**Folder Info:**\\n" +
+                `- Refresh: ${dashboard.refresh || 'None'}\\n\\n` +
+                '**Folder Info:**\\n' +
                 `- Folder: ${meta.folderTitle}\\n` +
                 `- Folder UID: ${meta.folderUid}\\n\\n` +
-                "**Metadata:**\\n" +
+                '**Metadata:**\\n' +
                 `- Created: ${meta.created}\\n` +
                 `- Updated: ${meta.updated}\\n` +
                 `- Created by: ${meta.createdBy}\\n` +
@@ -95,18 +95,18 @@ export function registerDashboardTools(
                     (panel) =>
                       `- Panel ${panel.id}: "${panel.title}" (${panel.type})`,
                   )
-                  .join("\\n")}${
+                  .join('\\n')}${
                   dashboard.panels.length > 0
-                    ? "\\n\\n**Time Range:**\\n" +
+                    ? '\\n\\n**Time Range:**\\n' +
                       `- From: ${dashboard.time?.from}\\n` +
                       `- To: ${dashboard.time?.to}`
-                    : ""
+                    : ''
                 }`,
             },
           ],
         };
       } catch (error) {
-        return handleToolError(error, "get_dashboard_by_uid", "get");
+        return handleToolError(error, 'get_dashboard_by_uid', 'get');
       }
     },
   );
@@ -114,9 +114,9 @@ export function registerDashboardTools(
   // Update or create dashboard
   registry.registerTool(
     {
-      name: "update_dashboard",
+      name: 'update_dashboard',
       description:
-        "Update an existing dashboard or create a new one. Use with caution due to context window limitations.",
+        'Update an existing dashboard or create a new one. Use with caution due to context window limitations.',
       inputSchema: zodToJsonSchema(UpdateDashboardSchema),
     },
     async (request) => {
@@ -127,21 +127,21 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                `Dashboard ${params.overwrite ? "updated" : "created"} successfully:\\n\\n` +
+                `Dashboard ${params.overwrite ? 'updated' : 'created'} successfully:\\n\\n` +
                 `- Dashboard UID: ${result.uid}\\n` +
                 `- Dashboard ID: ${result.id}\\n` +
                 `- Version: ${result.version}\\n` +
                 `- URL: ${result.url}\\n` +
                 `- Status: ${result.status}\\n${
-                  params.message ? `- Message: ${params.message}\\n` : ""
+                  params.message ? `- Message: ${params.message}\\n` : ''
                 }`,
             },
           ],
         };
       } catch (error) {
-        return handleToolError(error, "update_dashboard", "update");
+        return handleToolError(error, 'update_dashboard', 'update');
       }
     },
   );
@@ -149,9 +149,9 @@ export function registerDashboardTools(
   // Get dashboard panel queries
   registry.registerTool(
     {
-      name: "get_dashboard_panel_queries",
+      name: 'get_dashboard_panel_queries',
       description:
-        "Get the title, query string, and datasource information from every panel in a dashboard",
+        'Get the title, query string, and datasource information from every panel in a dashboard',
       inputSchema: zodToJsonSchema(GetDashboardSchema),
     },
     async (request) => {
@@ -162,7 +162,7 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Dashboard Panel Queries: ${panelInfo.title}**\\n\\n` +
                 `Dashboard UID: ${panelInfo.uid}\\n` +
@@ -173,26 +173,26 @@ export function registerDashboardTools(
                         ? panel.queries
                             .map(
                               (q) =>
-                                `    - ${q.refId}: ${q.query}${q.datasource ? ` (${q.datasource.type}: ${q.datasource.uid})` : ""}`,
+                                `    - ${q.refId}: ${q.query}${q.datasource ? ` (${q.datasource.type}: ${q.datasource.uid})` : ''}`,
                             )
-                            .join("\\n")
-                        : "    No queries defined";
+                            .join('\\n')
+                        : '    No queries defined';
 
                     return (
                       `**Panel ${panel.id}: ${panel.title}**\\n` +
                       `  Type: ${panel.type}\\n${
                         panel.datasource
                           ? `  Default Datasource: ${panel.datasource.type} (${panel.datasource.uid})\\n`
-                          : ""
+                          : ''
                       }  Queries:\\n${queries}`
                     );
                   })
-                  .join("\\n\\n")}`,
+                  .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
-        return handleToolError(error, "get_dashboard_panel_queries", "get");
+        return handleToolError(error, 'get_dashboard_panel_queries', 'get');
       }
     },
   );
@@ -200,8 +200,8 @@ export function registerDashboardTools(
   // Get dashboard versions
   registry.registerTool(
     {
-      name: "get_dashboard_versions",
-      description: "Get version history for a dashboard",
+      name: 'get_dashboard_versions',
+      description: 'Get version history for a dashboard',
       inputSchema: zodToJsonSchema(GetDashboardSchema),
     },
     async (request) => {
@@ -212,7 +212,7 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Dashboard Versions for ${uid}:**\\n\\n` +
                 `Total Versions: ${versions.length}\\n\\n${versions
@@ -221,15 +221,15 @@ export function registerDashboardTools(
                       `**Version ${version.version}**\\n` +
                       `  Created: ${version.created}\\n` +
                       `  Created by: ${version.createdBy}\\n` +
-                      `  Message: ${version.message || "No message"}\\n` +
-                      `  Parent Version: ${version.parentVersion || "None"}`,
+                      `  Message: ${version.message || 'No message'}\\n` +
+                      `  Parent Version: ${version.parentVersion || 'None'}`,
                   )
-                  .join("\\n\\n")}`,
+                  .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
-        return handleToolError(error, "get_dashboard_versions", "get");
+        return handleToolError(error, 'get_dashboard_versions', 'get');
       }
     },
   );
@@ -237,8 +237,8 @@ export function registerDashboardTools(
   // Restore dashboard version
   registry.registerTool(
     {
-      name: "restore_dashboard_version",
-      description: "Restore a dashboard to a specific version",
+      name: 'restore_dashboard_version',
+      description: 'Restore a dashboard to a specific version',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -260,7 +260,7 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `Dashboard restored to version ${version}:\\n\\n` +
                 `- Dashboard UID: ${result.uid}\\n` +
@@ -270,7 +270,7 @@ export function registerDashboardTools(
           ],
         };
       } catch (error) {
-        return handleToolError(error, "restore_dashboard_version", "restore");
+        return handleToolError(error, 'restore_dashboard_version', 'restore');
       }
     },
   );
@@ -278,8 +278,8 @@ export function registerDashboardTools(
   // Delete dashboard
   registry.registerTool(
     {
-      name: "delete_dashboard",
-      description: "Delete a dashboard by UID",
+      name: 'delete_dashboard',
+      description: 'Delete a dashboard by UID',
       inputSchema: zodToJsonSchema(GetDashboardSchema),
     },
     async (request) => {
@@ -290,13 +290,13 @@ export function registerDashboardTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Dashboard ${uid} deleted successfully.`,
             },
           ],
         };
       } catch (error) {
-        return handleToolError(error, "delete_dashboard", "delete");
+        return handleToolError(error, 'delete_dashboard', 'delete');
       }
     },
   );

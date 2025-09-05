@@ -1,5 +1,5 @@
-import { performance, PerformanceObserver } from "perf_hooks";
-import { EventEmitter } from "events";
+import { performance, PerformanceObserver } from 'perf_hooks';
+import { EventEmitter } from 'events';
 
 export interface PerformanceMetrics {
   timestamp: number;
@@ -238,19 +238,19 @@ export class PerformanceMonitor extends EventEmitter {
 
     // Generate optimization recommendations
     if (current.averageResponseTime > 1000) {
-      recommendations.push("Consider enabling response caching for frequently accessed data");
+      recommendations.push('Consider enabling response caching for frequently accessed data');
     }
 
     if (current.cacheHitRate < 0.5) {
-      recommendations.push("Increase cache TTL or implement more aggressive caching strategies");
+      recommendations.push('Increase cache TTL or implement more aggressive caching strategies');
     }
 
     if (current.memoryUsage.heapUsed > 50 * 1024 * 1024) {
-      recommendations.push("Monitor for memory leaks and consider implementing object pooling");
+      recommendations.push('Monitor for memory leaks and consider implementing object pooling');
     }
 
     if (current.errorRate > 0.02) {
-      recommendations.push("Implement circuit breaker patterns and improve error handling");
+      recommendations.push('Implement circuit breaker patterns and improve error handling');
     }
 
     return {
@@ -285,15 +285,15 @@ export class PerformanceMonitor extends EventEmitter {
     const recommendations: string[] = [];
 
     if (heapUtilization > 0.8) {
-      recommendations.push("Heap utilization is high - consider garbage collection tuning");
+      recommendations.push('Heap utilization is high - consider garbage collection tuning');
     }
 
     if (externalMemoryRatio > 0.5) {
-      recommendations.push("High external memory usage - review buffer and stream usage");
+      recommendations.push('High external memory usage - review buffer and stream usage');
     }
 
     if (usage.arrayBuffers > 10 * 1024 * 1024) {
-      recommendations.push("Large ArrayBuffer usage detected - optimize binary data handling");
+      recommendations.push('Large ArrayBuffer usage detected - optimize binary data handling');
     }
 
     return {

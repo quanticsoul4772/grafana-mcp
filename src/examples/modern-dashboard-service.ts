@@ -2,12 +2,12 @@
  * Example of a modern dashboard service using the new architecture patterns
  */
 
-import { z } from "zod";
-import { BaseHttpService } from "../core/base-service.js";
-import { Tool, ToolService } from "../core/tool-system.js";
-import { HandleErrors, ValidationError, NotFoundError } from "../core/error-handling.js";
-import { GrafanaHttpClient } from "../http-client.js";
-import { AsyncResult } from "../core/interfaces.js";
+import { z } from 'zod';
+import { BaseHttpService } from '../core/base-service.js';
+import { Tool, ToolService } from '../core/tool-system.js';
+import { HandleErrors, ValidationError, NotFoundError } from '../core/error-handling.js';
+import { GrafanaHttpClient } from '../http-client.js';
+import { AsyncResult } from '../core/interfaces.js';
 
 /**
  * Input schemas for tools
@@ -83,7 +83,7 @@ export class ModernDashboardService extends BaseHttpService {
     description: 'Search for dashboards by title, tags, or other metadata with advanced filtering',
     category: 'dashboards',
     tags: ['search', 'filter'],
-    schema: SearchDashboardsSchema
+    schema: SearchDashboardsSchema,
   })
   @HandleErrors('searchDashboards')
   async searchDashboards(request: any): Promise<any> {
@@ -98,13 +98,13 @@ export class ModernDashboardService extends BaseHttpService {
     return {
       content: [
         {
-          type: "text",
-          text: `Found ${result.data.length} dashboards:\n\n` +
+          type: 'text',
+          text: `Found ${result.data.length} dashboards:\n\n${ 
                 result.data.map(d => 
                   `• **${d.title}** (${d.uid})\n` +
                   `  Tags: ${d.tags.join(', ') || 'none'}\n` +
-                  `  URL: ${d.url}`
-                ).join('\n\n'),
+                  `  URL: ${d.url}`,
+                ).join('\n\n')}`,
         },
       ],
     };
@@ -118,7 +118,7 @@ export class ModernDashboardService extends BaseHttpService {
     description: 'Retrieve a specific dashboard by its UID',
     category: 'dashboards',
     tags: ['retrieve'],
-    schema: GetDashboardSchema
+    schema: GetDashboardSchema,
   })
   @HandleErrors('getDashboard')
   async getDashboard(request: any): Promise<any> {
@@ -135,7 +135,7 @@ export class ModernDashboardService extends BaseHttpService {
     return {
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `# Dashboard: ${dashboard.dashboard.title}\n\n` +
                 `**UID:** ${dashboard.uid}\n` +
                 `**ID:** ${dashboard.id || 'N/A'}\n` +
@@ -144,7 +144,7 @@ export class ModernDashboardService extends BaseHttpService {
                 `**Panels:** ${dashboard.dashboard.panels?.length || 0}\n` +
                 `**Created:** ${dashboard.meta.created}\n` +
                 `**Updated:** ${dashboard.meta.updated}\n\n` +
-                `**Permissions:**\n` +
+                '**Permissions:**\n' +
                 `- Can Save: ${dashboard.meta.canSave}\n` +
                 `- Can Edit: ${dashboard.meta.canEdit}\n` +
                 `- Can Admin: ${dashboard.meta.canAdmin}`,
@@ -161,7 +161,7 @@ export class ModernDashboardService extends BaseHttpService {
     description: 'Create a new dashboard with the specified configuration',
     category: 'dashboards',
     tags: ['create'],
-    schema: CreateDashboardSchema
+    schema: CreateDashboardSchema,
   })
   @HandleErrors('createDashboard')
   async createDashboard(request: any): Promise<any> {
@@ -178,8 +178,8 @@ export class ModernDashboardService extends BaseHttpService {
     return {
       content: [
         {
-          type: "text",
-          text: `✅ Dashboard created successfully!\n\n` +
+          type: 'text',
+          text: '✅ Dashboard created successfully!\n\n' +
                 `**Title:** ${response.dashboard.title}\n` +
                 `**UID:** ${response.dashboard.uid}\n` +
                 `**ID:** ${response.dashboard.id}\n` +

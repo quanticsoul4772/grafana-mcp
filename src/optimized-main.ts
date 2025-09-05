@@ -4,32 +4,32 @@
  * Optimized Grafana MCP Server with advanced performance features
  */
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { getConfig } from "./config.js";
-import { ToolRegistry } from "./tool-registry.js";
-import { ServiceContainer, StringInterner, AsyncOperationManager } from "./service-pool.js";
-import { OptimizedGrafanaHttpClient } from "./optimized-http-client.js";
-import { performanceMonitor } from "./performance-monitor.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { getConfig } from './config.js';
+import { ToolRegistry } from './tool-registry.js';
+import { ServiceContainer, StringInterner, AsyncOperationManager } from './service-pool.js';
+import { OptimizedGrafanaHttpClient } from './optimized-http-client.js';
+import { performanceMonitor } from './performance-monitor.js';
 
 // Import service classes
-import { DashboardService } from "./services/dashboard.js";
-import { DatasourceService } from "./services/datasource.js";
-import { PrometheusService } from "./services/prometheus.js";
-import { LokiService } from "./services/loki.js";
-import { AlertingService } from "./services/alerting.js";
-import { AdminService } from "./services/admin.js";
-import { NavigationService } from "./services/navigation.js";
+import { DashboardService } from './services/dashboard.js';
+import { DatasourceService } from './services/datasource.js';
+import { PrometheusService } from './services/prometheus.js';
+import { LokiService } from './services/loki.js';
+import { AlertingService } from './services/alerting.js';
+import { AdminService } from './services/admin.js';
+import { NavigationService } from './services/navigation.js';
 
 // Import tool registration functions
-import { registerDashboardTools } from "./tools/dashboard.js";
-import { registerDatasourceTools } from "./tools/datasource.js";
-import { registerPrometheusTools } from "./tools/prometheus.js";
-import { registerLokiTools } from "./tools/loki.js";
-import { registerAlertingTools } from "./tools/alerting.js";
-import { registerAdminTools } from "./tools/admin.js";
-import { registerNavigationTools } from "./tools/navigation.js";
+import { registerDashboardTools } from './tools/dashboard.js';
+import { registerDatasourceTools } from './tools/datasource.js';
+import { registerPrometheusTools } from './tools/prometheus.js';
+import { registerLokiTools } from './tools/loki.js';
+import { registerAlertingTools } from './tools/alerting.js';
+import { registerAdminTools } from './tools/admin.js';
+import { registerNavigationTools } from './tools/navigation.js';
 
 /**
  * Optimized Grafana MCP Server class
@@ -45,14 +45,14 @@ class OptimizedGrafanaMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: "grafana-mcp",
-        version: "1.0.0",
+        name: 'grafana-mcp',
+        version: '1.0.0',
       },
       {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
     this.registry = new ToolRegistry();
@@ -136,7 +136,7 @@ class OptimizedGrafanaMCPServer {
           const serviceInstance = this.serviceContainer.get(service) as any;
           fn(this.registry, serviceInstance);
           return name;
-        })
+        }),
       );
 
     const registeredTools = await Promise.all(registrationPromises);
@@ -202,8 +202,8 @@ class OptimizedGrafanaMCPServer {
           return {
             content: [
               {
-                type: "text",
-                text: `Error executing ${toolName}: ${error instanceof Error ? error.message : "Unknown error"}`,
+                type: 'text',
+                text: `Error executing ${toolName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
               },
             ],
             isError: true,

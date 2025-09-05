@@ -1,11 +1,11 @@
 // Core types for Grafana MCP Server
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // Configuration schema
 export const ConfigSchema = z.object({
-  GRAFANA_URL: z.string().url("GRAFANA_URL must be a valid URL"),
-  GRAFANA_TOKEN: z.string().min(1, "GRAFANA_TOKEN is required"),
+  GRAFANA_URL: z.string().url('GRAFANA_URL must be a valid URL'),
+  GRAFANA_TOKEN: z.string().min(1, 'GRAFANA_TOKEN is required'),
   GRAFANA_DEBUG: z.boolean().default(false),
   GRAFANA_TIMEOUT: z.number().int().positive().default(30000),
   GRAFANA_DISABLE_TOOLS: z.array(z.string()).default([]),
@@ -19,16 +19,16 @@ export type Config = z.infer<typeof ConfigSchema>;
 
 // Tool categories that can be disabled
 export type ToolCategory =
-  | "dashboards"
-  | "datasources"
-  | "prometheus"
-  | "loki"
-  | "alerting"
-  | "incident"
-  | "sift"
-  | "oncall"
-  | "admin"
-  | "navigation";
+  | 'dashboards'
+  | 'datasources'
+  | 'prometheus'
+  | 'loki'
+  | 'alerting'
+  | 'incident'
+  | 'sift'
+  | 'oncall'
+  | 'admin'
+  | 'navigation';
 
 // Dashboard types
 export interface Dashboard {
@@ -327,7 +327,7 @@ export interface GrafanaUser {
 // Navigation/deeplink types
 export interface DeepLink {
   url: string;
-  type: "dashboard" | "panel" | "explore";
+  type: 'dashboard' | 'panel' | 'explore';
   title?: string;
 }
 
@@ -399,11 +399,11 @@ export const QueryLokiSchema = z.object({
   start: z.string().optional(),
   end: z.string().optional(),
   limit: z.number().int().positive().max(5000).default(100),
-  direction: z.enum(["forward", "backward"]).default("backward"),
+  direction: z.enum(['forward', 'backward']).default('backward'),
 });
 
 export const GenerateDeepLinkSchema = z.object({
-  type: z.enum(["dashboard", "panel", "explore"]),
+  type: z.enum(['dashboard', 'panel', 'explore']),
   dashboardUid: z.string().optional(),
   panelId: z.number().optional(),
   datasourceUid: z.string().optional(),
@@ -416,7 +416,7 @@ export const GenerateDeepLinkSchema = z.object({
 export const CreateIncidentSchema = z.object({
   title: z.string().min(1),
   summary: z.string().optional(),
-  severity: z.enum(["critical", "high", "medium", "low"]).default("medium"),
+  severity: z.enum(['critical', 'high', 'medium', 'low']).default('medium'),
   labels: z
     .array(
       z.object({
@@ -431,6 +431,6 @@ export const AddActivityToIncidentSchema = z.object({
   incidentId: z.string().min(1),
   body: z.string().min(1),
   activityKind: z
-    .enum(["user_note", "status_change", "severity_change"])
-    .default("user_note"),
+    .enum(['user_note', 'status_change', 'severity_change'])
+    .default('user_note'),
 });

@@ -1,16 +1,16 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
-import https from "https";
-import http from "http";
-import fs from "fs";
-import { Config, HttpClientConfig, TLSConfig, GrafanaError } from "./types.js";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import { Config, HttpClientConfig, TLSConfig, GrafanaError } from './types.js';
 import {
   sanitizeHeaders,
   categorizeError,
   formatUserError,
   formatInternalError,
   safeStringify,
-} from "./security-utils.js";
-import { ResilientErrorHandler } from "./retry-client.js";
+} from './security-utils.js';
+import { ResilientErrorHandler } from './retry-client.js';
 
 /**
  * HTTP client for Grafana API with authentication, TLS support, and error handling
@@ -38,7 +38,7 @@ export class GrafanaHttpClient {
       {
         failureThreshold: 5,
         timeoutMs: 60000, // 1 minute circuit breaker timeout
-      }
+      },
     );
 
     const httpConfig: HttpClientConfig = {
@@ -46,8 +46,8 @@ export class GrafanaHttpClient {
       timeout: config.GRAFANA_TIMEOUT,
       headers: {
         Authorization: `Bearer ${config.GRAFANA_TOKEN}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       debug: config.GRAFANA_DEBUG,
       tlsConfig: this.createTLSConfig(config),
@@ -150,7 +150,7 @@ export class GrafanaHttpClient {
       }
     } catch (error) {
       throw new Error(
-        `Failed to load TLS configuration: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to load TLS configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
 
@@ -169,19 +169,19 @@ export class GrafanaHttpClient {
         );
         if (config.data) {
           console.log(
-            "[Grafana HTTP] Request body:",
+            '[Grafana HTTP] Request body:',
             safeStringify(config.data),
           );
         }
         if (config.params) {
           console.log(
-            "[Grafana HTTP] Query params:",
+            '[Grafana HTTP] Query params:',
             safeStringify(config.params),
           );
         }
         if (config.headers) {
           console.log(
-            "[Grafana HTTP] Headers:",
+            '[Grafana HTTP] Headers:',
             safeStringify(
               sanitizeHeaders(config.headers as Record<string, any>),
             ),
@@ -190,7 +190,7 @@ export class GrafanaHttpClient {
         return config;
       },
       (error) => {
-        console.error("[Grafana HTTP] Request error:", error);
+        console.error('[Grafana HTTP] Request error:', error);
         return Promise.reject(error);
       },
     );
@@ -203,10 +203,10 @@ export class GrafanaHttpClient {
           // Only log response data if it's not too large and sanitize it
           const responseStr = safeStringify(response.data);
           if (responseStr.length < 5000) {
-            console.log("[Grafana HTTP] Response:", responseStr);
+            console.log('[Grafana HTTP] Response:', responseStr);
           } else {
             console.log(
-              "[Grafana HTTP] Response: [Large response body - truncated for security]",
+              '[Grafana HTTP] Response: [Large response body - truncated for security]',
             );
           }
         }
@@ -219,7 +219,7 @@ export class GrafanaHttpClient {
           );
           if (error.response?.data) {
             console.error(
-              "[Grafana HTTP] Error response:",
+              '[Grafana HTTP] Error response:',
               safeStringify(error.response.data),
             );
           }
@@ -237,11 +237,11 @@ export class GrafanaHttpClient {
       (response) => response,
       (error: AxiosError) => {
         // Categorize the error for safe handling
-        const categorizedError = categorizeError(error, "HTTP Client");
+        const categorizedError = categorizeError(error, 'HTTP Client');
 
         // Log the internal error details for debugging
         console.error(
-          "[Grafana HTTP] Error:",
+          '[Grafana HTTP] Error:',
           formatInternalError(categorizedError),
         );
 
@@ -307,7 +307,7 @@ export class GrafanaHttpClient {
           const response = await this.client.get<T>(url, { params });
           return response.data;
         },
-        `GET ${url}`
+        `GET ${url}`,
       );
 
       this.setCachedResponse(cacheKey, result);
@@ -319,7 +319,7 @@ export class GrafanaHttpClient {
         const response = await this.client.get<T>(url, { params });
         return response.data;
       },
-      `GET ${url}`
+      `GET ${url}`,
     );
   }
 
@@ -431,7 +431,7 @@ export class GrafanaHttpClient {
    */
   async testConnection(): Promise<boolean> {
     try {
-      await this.get("/api/health");
+      await this.get('/api/health');
       return true;
     } catch (_error) {
       return false;
@@ -442,6 +442,6 @@ export class GrafanaHttpClient {
    * Get Grafana instance information
    */
   async getInstanceInfo(): Promise<any> {
-    return this.get("/api/frontend/settings");
+    return this.get('/api/frontend/settings');
   }
 }

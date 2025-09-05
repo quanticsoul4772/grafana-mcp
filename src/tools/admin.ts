@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
-import { AdminService } from "../services/admin.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { ToolRegistry } from '../tool-registry.js';
+import { AdminService } from '../services/admin.js';
 
 /**
  * Register admin-related MCP tools
@@ -13,8 +13,8 @@ export function registerAdminTools(
   // List teams
   registry.registerTool(
     {
-      name: "list_teams",
-      description: "List all teams in the organization",
+      name: 'list_teams',
+      description: 'List all teams in the organization',
       inputSchema: zodToJsonSchema(
         z.object({
           page: z.number().int().positive().default(1),
@@ -36,7 +36,7 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Teams (${result.totalCount} total)**\\n\\n${result.teams
                 .map(
                   (team) =>
@@ -46,17 +46,17 @@ export function registerAdminTools(
                     `  Members: ${team.memberCount}\\n` +
                     `  Permission: ${team.permission}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing teams: ${errorMessage}`,
             },
           ],
@@ -69,8 +69,8 @@ export function registerAdminTools(
   // Get team by UID
   registry.registerTool(
     {
-      name: "get_team_by_uid",
-      description: "Get team details by UID",
+      name: 'get_team_by_uid',
+      description: 'Get team details by UID',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -85,7 +85,7 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Team: ${team.name}**\\n\\n` +
                 `- UID: ${team.uid}\\n` +
@@ -99,11 +99,11 @@ export function registerAdminTools(
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting team: ${errorMessage}`,
             },
           ],
@@ -116,8 +116,8 @@ export function registerAdminTools(
   // List users
   registry.registerTool(
     {
-      name: "list_users",
-      description: "List all users in the organization",
+      name: 'list_users',
+      description: 'List all users in the organization',
       inputSchema: zodToJsonSchema(
         z.object({
           page: z.number().int().positive().default(1),
@@ -139,28 +139,28 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Users (${result.totalCount} total)**\\n\\n${result.users
                 .map(
                   (user) =>
                     `**${user.name}** (${user.login})\\n` +
                     `  ID: ${user.id}\\n` +
                     `  Email: ${user.email}\\n` +
-                    `  Admin: ${user.isGrafanaAdmin ? "Yes" : "No"}\\n` +
-                    `  Disabled: ${user.isDisabled ? "Yes" : "No"}\\n` +
+                    `  Admin: ${user.isGrafanaAdmin ? 'Yes' : 'No'}\\n` +
+                    `  Disabled: ${user.isDisabled ? 'Yes' : 'No'}\\n` +
                     `  Last Updated: ${user.updatedAt}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing users: ${errorMessage}`,
             },
           ],
@@ -173,8 +173,8 @@ export function registerAdminTools(
   // Get current user
   registry.registerTool(
     {
-      name: "get_current_user",
-      description: "Get current user information",
+      name: 'get_current_user',
+      description: 'Get current user information',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async (_request) => {
@@ -184,7 +184,7 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Current User: ${user.name}**\\n\\n` +
                 `- ID: ${user.id}\\n` +
@@ -192,9 +192,9 @@ export function registerAdminTools(
                 `- Email: ${user.email}\\n` +
                 `- Theme: ${user.theme}\\n` +
                 `- Organization ID: ${user.orgId}\\n` +
-                `- Grafana Admin: ${user.isGrafanaAdmin ? "Yes" : "No"}\\n` +
-                `- Disabled: ${user.isDisabled ? "Yes" : "No"}\\n` +
-                `- External: ${user.isExternal ? "Yes" : "No"}\\n` +
+                `- Grafana Admin: ${user.isGrafanaAdmin ? 'Yes' : 'No'}\\n` +
+                `- Disabled: ${user.isDisabled ? 'Yes' : 'No'}\\n` +
+                `- External: ${user.isExternal ? 'Yes' : 'No'}\\n` +
                 `- Created: ${user.createdAt}\\n` +
                 `- Updated: ${user.updatedAt}`,
             },
@@ -202,11 +202,11 @@ export function registerAdminTools(
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting current user: ${errorMessage}`,
             },
           ],
@@ -219,8 +219,8 @@ export function registerAdminTools(
   // List folders
   registry.registerTool(
     {
-      name: "list_folders",
-      description: "List all folders",
+      name: 'list_folders',
+      description: 'List all folders',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async (_request) => {
@@ -230,27 +230,27 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Folders (${folders.length} total)**\\n\\n${folders
                 .map(
                   (folder) =>
                     `**${folder.title}** (${folder.uid})\\n` +
                     `  ID: ${folder.id}\\n` +
                     `  URL: ${folder.url}\\n${
-                      folder.parentUid ? `  Parent: ${folder.parentUid}\\n` : ""
+                      folder.parentUid ? `  Parent: ${folder.parentUid}\\n` : ''
                     }`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing folders: ${errorMessage}`,
             },
           ],
@@ -263,8 +263,8 @@ export function registerAdminTools(
   // Get folder by UID
   registry.registerTool(
     {
-      name: "get_folder_by_uid",
-      description: "Get folder details by UID",
+      name: 'get_folder_by_uid',
+      description: 'Get folder details by UID',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -279,7 +279,7 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Folder: ${folder.title}**\\n\\n` +
                 `- UID: ${folder.uid}\\n` +
@@ -290,21 +290,21 @@ export function registerAdminTools(
                 `- Updated: ${folder.updated}\\n` +
                 `- Created By: ${folder.createdBy}\\n` +
                 `- Updated By: ${folder.updatedBy}\\n${
-                  folder.parentUid ? `- Parent UID: ${folder.parentUid}\\n` : ""
-                }- Can Save: ${folder.canSave ? "Yes" : "No"}\\n` +
-                `- Can Edit: ${folder.canEdit ? "Yes" : "No"}\\n` +
-                `- Can Admin: ${folder.canAdmin ? "Yes" : "No"}\\n` +
-                `- Can Delete: ${folder.canDelete ? "Yes" : "No"}`,
+                  folder.parentUid ? `- Parent UID: ${folder.parentUid}\\n` : ''
+                }- Can Save: ${folder.canSave ? 'Yes' : 'No'}\\n` +
+                `- Can Edit: ${folder.canEdit ? 'Yes' : 'No'}\\n` +
+                `- Can Admin: ${folder.canAdmin ? 'Yes' : 'No'}\\n` +
+                `- Can Delete: ${folder.canDelete ? 'Yes' : 'No'}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting folder: ${errorMessage}`,
             },
           ],
@@ -317,8 +317,8 @@ export function registerAdminTools(
   // List API keys
   registry.registerTool(
     {
-      name: "list_api_keys",
-      description: "List all API keys",
+      name: 'list_api_keys',
+      description: 'List all API keys',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async (_request) => {
@@ -328,7 +328,7 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**API Keys (${apiKeys.length} total)**\\n\\n${apiKeys
                 .map(
                   (key) =>
@@ -336,20 +336,20 @@ export function registerAdminTools(
                     `  ID: ${key.id}\\n` +
                     `  Role: ${key.role}\\n` +
                     `  Created: ${key.created}\\n` +
-                    `  Expires: ${key.expiration || "Never"}\\n` +
-                    `  Last Used: ${key.lastUsedAt || "Never"}`,
+                    `  Expires: ${key.expiration || 'Never'}\\n` +
+                    `  Last Used: ${key.lastUsedAt || 'Never'}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing API keys: ${errorMessage}`,
             },
           ],
@@ -362,8 +362,8 @@ export function registerAdminTools(
   // List service accounts
   registry.registerTool(
     {
-      name: "list_service_accounts",
-      description: "List all service accounts",
+      name: 'list_service_accounts',
+      description: 'List all service accounts',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async (_request) => {
@@ -373,7 +373,7 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Service Accounts (${serviceAccounts.length} total)**\\n\\n${serviceAccounts
                 .map(
                   (sa) =>
@@ -381,21 +381,21 @@ export function registerAdminTools(
                     `  ID: ${sa.id}\\n` +
                     `  Login: ${sa.login}\\n` +
                     `  Role: ${sa.role}\\n` +
-                    `  Disabled: ${sa.isDisabled ? "Yes" : "No"}\\n` +
+                    `  Disabled: ${sa.isDisabled ? 'Yes' : 'No'}\\n` +
                     `  Created: ${sa.created}\\n` +
                     `  Avatar URL: ${sa.avatarUrl}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing service accounts: ${errorMessage}`,
             },
           ],
@@ -408,8 +408,8 @@ export function registerAdminTools(
   // Get current organization
   registry.registerTool(
     {
-      name: "get_current_organization",
-      description: "Get current organization information",
+      name: 'get_current_organization',
+      description: 'Get current organization information',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async (_request) => {
@@ -419,25 +419,25 @@ export function registerAdminTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Current Organization: ${org.name}**\\n\\n` +
                 `- ID: ${org.id}\\n` +
-                `- Address: ${org.address1 || "N/A"}\\n` +
-                `- City: ${org.city || "N/A"}\\n` +
-                `- Country: ${org.country || "N/A"}\\n` +
-                `- State: ${org.state || "N/A"}\\n` +
-                `- ZIP Code: ${org.zipCode || "N/A"}`,
+                `- Address: ${org.address1 || 'N/A'}\\n` +
+                `- City: ${org.city || 'N/A'}\\n` +
+                `- Country: ${org.country || 'N/A'}\\n` +
+                `- State: ${org.state || 'N/A'}\\n` +
+                `- ZIP Code: ${org.zipCode || 'N/A'}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting current organization: ${errorMessage}`,
             },
           ],

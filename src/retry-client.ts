@@ -27,8 +27,8 @@ export class RetryableHttpClient {
    */
   async withRetry<T>(
     operation: () => Promise<T>,
-    operationName = "HTTP request",
-    customOptions?: Partial<RetryOptions>
+    operationName = 'HTTP request',
+    customOptions?: Partial<RetryOptions>,
   ): Promise<T> {
     const opts = { ...this.options, ...customOptions };
     let lastError: any;
@@ -55,7 +55,7 @@ export class RetryableHttpClient {
         if (this.options.maxRetries > 1) {
           console.warn(
             `${operationName} failed (attempt ${attempt}/${opts.maxRetries + 1}), retrying in ${delay}ms...`,
-            this.getErrorMessage(error)
+            this.getErrorMessage(error),
           );
         }
 
@@ -134,13 +134,13 @@ export class CircuitBreaker {
 
   constructor(
     private failureThreshold = 5,
-    private timeoutMs = 60000
+    private timeoutMs = 60000,
   ) {}
 
   /**
    * Execute operation with circuit breaker protection
    */
-  async execute<T>(operation: () => Promise<T>, operationName = "operation"): Promise<T> {
+  async execute<T>(operation: () => Promise<T>, operationName = 'operation'): Promise<T> {
     if (this.state === 'OPEN') {
       if (this.shouldAttemptReset()) {
         this.state = 'HALF_OPEN';
@@ -226,12 +226,12 @@ export class ResilientErrorHandler {
       failureThreshold?: number;
       timeoutMs?: number;
       monitoringPeriodMs?: number;
-    }
+    },
   ) {
     this.retryClient = new RetryableHttpClient({ ...DEFAULT_RETRY_OPTIONS, ...retryOptions });
     this.circuitBreaker = new CircuitBreaker(
       circuitBreakerOptions?.failureThreshold,
-      circuitBreakerOptions?.timeoutMs
+      circuitBreakerOptions?.timeoutMs,
     );
   }
 
@@ -240,8 +240,8 @@ export class ResilientErrorHandler {
    */
   async executeWithResilience<T>(
     operation: () => Promise<T>,
-    operationName = "operation",
-    customRetryOptions?: Partial<RetryOptions>
+    operationName = 'operation',
+    customRetryOptions?: Partial<RetryOptions>,
   ): Promise<T> {
     return this.circuitBreaker.execute(async () => {
       return this.retryClient.withRetry(operation, operationName, customRetryOptions);

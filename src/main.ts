@@ -1,33 +1,33 @@
 #!/usr/bin/env node
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+} from '@modelcontextprotocol/sdk/types.js';
 
-import { config } from "./config.js";
-import { GrafanaHttpClient } from "./http-client.js";
-import { ToolRegistry } from "./tool-registry.js";
+import { config } from './config.js';
+import { GrafanaHttpClient } from './http-client.js';
+import { ToolRegistry } from './tool-registry.js';
 
 // Import services
-import { DashboardService } from "./services/dashboard.js";
-import { DatasourceService } from "./services/datasource.js";
-import { PrometheusService } from "./services/prometheus.js";
-import { LokiService } from "./services/loki.js";
-import { AlertingService } from "./services/alerting.js";
-import { AdminService } from "./services/admin.js";
-import { NavigationService } from "./services/navigation.js";
+import { DashboardService } from './services/dashboard.js';
+import { DatasourceService } from './services/datasource.js';
+import { PrometheusService } from './services/prometheus.js';
+import { LokiService } from './services/loki.js';
+import { AlertingService } from './services/alerting.js';
+import { AdminService } from './services/admin.js';
+import { NavigationService } from './services/navigation.js';
 
 // Import tool registrations
-import { registerDashboardTools } from "./tools/dashboard.js";
-import { registerAdminTools } from "./tools/admin.js";
-import { registerDatasourceTools } from "./tools/datasource.js";
-import { registerPrometheusTools } from "./tools/prometheus.js";
-import { registerLokiTools } from "./tools/loki.js";
-import { registerAlertingTools } from "./tools/alerting.js";
-import { registerNavigationTools } from "./tools/navigation.js";
+import { registerDashboardTools } from './tools/dashboard.js';
+import { registerAdminTools } from './tools/admin.js';
+import { registerDatasourceTools } from './tools/datasource.js';
+import { registerPrometheusTools } from './tools/prometheus.js';
+import { registerLokiTools } from './tools/loki.js';
+import { registerAlertingTools } from './tools/alerting.js';
+import { registerNavigationTools } from './tools/navigation.js';
 
 /**
  * Main entry point for the Grafana MCP Server
@@ -52,8 +52,8 @@ async function main() {
     // Create MCP server
     const server = new Server(
       {
-        name: "grafana-mcp",
-        version: "1.0.0",
+        name: 'grafana-mcp',
+        version: '1.0.0',
       },
       {
         capabilities: {
@@ -68,31 +68,31 @@ async function main() {
       !disabledTools.includes(category);
 
     // Register tools by category - only register tools that have been converted
-    if (isToolCategoryEnabled("dashboards")) {
+    if (isToolCategoryEnabled('dashboards')) {
       registerDashboardTools(toolRegistry, dashboardService);
     }
 
-    if (isToolCategoryEnabled("admin")) {
+    if (isToolCategoryEnabled('admin')) {
       registerAdminTools(toolRegistry, adminService);
     }
 
-    if (isToolCategoryEnabled("datasources")) {
+    if (isToolCategoryEnabled('datasources')) {
       registerDatasourceTools(toolRegistry, datasourceService);
     }
 
-    if (isToolCategoryEnabled("prometheus")) {
+    if (isToolCategoryEnabled('prometheus')) {
       registerPrometheusTools(toolRegistry, prometheusService);
     }
 
-    if (isToolCategoryEnabled("loki")) {
+    if (isToolCategoryEnabled('loki')) {
       registerLokiTools(toolRegistry, lokiService);
     }
 
-    if (isToolCategoryEnabled("alerting")) {
+    if (isToolCategoryEnabled('alerting')) {
       registerAlertingTools(toolRegistry, alertingService);
     }
 
-    if (isToolCategoryEnabled("navigation")) {
+    if (isToolCategoryEnabled('navigation')) {
       registerNavigationTools(toolRegistry, navigationService);
     }
 
@@ -111,7 +111,7 @@ async function main() {
           return {
             content: [
               {
-                type: "text",
+                type: 'text',
                 text: `Tool "${name}" not found`,
               },
             ],
@@ -124,13 +124,13 @@ async function main() {
         return result;
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         console.error(`[ERROR] Tool ${name} failed:`, errorMessage);
 
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error executing tool ${name}: ${errorMessage}`,
             },
           ],
@@ -149,7 +149,7 @@ async function main() {
 
       if (config.GRAFANA_DEBUG) {
         console.error(
-          `[DEBUG] Available tools: ${tools.map((t) => t.name).join(", ")}`,
+          `[DEBUG] Available tools: ${tools.map((t) => t.name).join(', ')}`,
         );
       }
 
@@ -161,38 +161,38 @@ async function main() {
     await server.connect(transport);
 
     // Log startup information
-    console.error("[INFO] Grafana MCP Server started");
+    console.error('[INFO] Grafana MCP Server started');
     console.error(`[INFO] Connected to Grafana at: ${config.GRAFANA_URL}`);
     console.error(
-      `[INFO] Debug mode: ${config.GRAFANA_DEBUG ? "enabled" : "disabled"}`,
+      `[INFO] Debug mode: ${config.GRAFANA_DEBUG ? 'enabled' : 'disabled'}`,
     );
     console.error(`[INFO] Timeout: ${config.GRAFANA_TIMEOUT}ms`);
     console.error(`[INFO] Registered ${toolRegistry.getTools().length} tools`);
 
     if (disabledTools.length > 0) {
       console.error(
-        `[INFO] Disabled tool categories: ${disabledTools.join(", ")}`,
+        `[INFO] Disabled tool categories: ${disabledTools.join(', ')}`,
       );
     }
   } catch (error) {
-    console.error("[ERROR] Failed to start Grafana MCP Server:", error);
+    console.error('[ERROR] Failed to start Grafana MCP Server:', error);
     process.exit(1);
   }
 }
 
 // Handle graceful shutdown
-process.on("SIGINT", () => {
-  console.error("[INFO] Shutting down Grafana MCP Server...");
+process.on('SIGINT', () => {
+  console.error('[INFO] Shutting down Grafana MCP Server...');
   process.exit(0);
 });
 
-process.on("SIGTERM", () => {
-  console.error("[INFO] Shutting down Grafana MCP Server...");
+process.on('SIGTERM', () => {
+  console.error('[INFO] Shutting down Grafana MCP Server...');
   process.exit(0);
 });
 
 // Start the server
 main().catch((error) => {
-  console.error("[ERROR] Unhandled error:", error);
+  console.error('[ERROR] Unhandled error:', error);
   process.exit(1);
 });

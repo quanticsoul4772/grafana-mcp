@@ -1,5 +1,5 @@
-import { GrafanaHttpClient } from "../http-client.js";
-import { Team, GrafanaUser } from "../types.js";
+import { GrafanaHttpClient } from '../http-client.js';
+import { Team, GrafanaUser } from '../types.js';
 
 /**
  * Service for managing Grafana admin operations (teams, users, etc.)
@@ -22,7 +22,7 @@ export class AdminService {
     perPage: number;
   }> {
     const params = { page, perpage };
-    return this.httpClient.get("/api/teams/search", params);
+    return this.httpClient.get('/api/teams/search', params);
   }
 
   /**
@@ -50,7 +50,7 @@ export class AdminService {
    * Create team
    */
   async createTeam(team: { name: string; email?: string }): Promise<any> {
-    return this.httpClient.post("/api/teams", team);
+    return this.httpClient.post('/api/teams', team);
   }
 
   /**
@@ -94,7 +94,7 @@ export class AdminService {
   async updateTeamMemberPermissions(
     teamId: number,
     userId: number,
-    permission: "Member" | "Admin",
+    permission: 'Member' | 'Admin',
   ): Promise<any> {
     return this.httpClient.put(`/api/teams/${teamId}/members/${userId}`, {
       permission,
@@ -130,7 +130,7 @@ export class AdminService {
     perPage: number;
   }> {
     const params = { page, perpage };
-    return this.httpClient.get("/api/org/users", params);
+    return this.httpClient.get('/api/org/users', params);
   }
 
   /**
@@ -153,7 +153,7 @@ export class AdminService {
    * Get current user
    */
   async getCurrentUser(): Promise<GrafanaUser> {
-    return this.httpClient.get<GrafanaUser>("/api/user");
+    return this.httpClient.get<GrafanaUser>('/api/user');
   }
 
   /**
@@ -166,7 +166,7 @@ export class AdminService {
     password: string;
     orgId?: number;
   }): Promise<any> {
-    return this.httpClient.post("/api/admin/users", user);
+    return this.httpClient.post('/api/admin/users', user);
   }
 
   /**
@@ -206,7 +206,7 @@ export class AdminService {
    * Disable/enable user
    */
   async setUserStatus(id: number, disabled: boolean): Promise<any> {
-    const endpoint = disabled ? "disable" : "enable";
+    const endpoint = disabled ? 'disable' : 'enable';
     return this.httpClient.post(`/api/admin/users/${id}/${endpoint}`);
   }
 
@@ -230,21 +230,21 @@ export class AdminService {
    * Get current organization
    */
   async getCurrentOrganization(): Promise<any> {
-    return this.httpClient.get("/api/org");
+    return this.httpClient.get('/api/org');
   }
 
   /**
    * Update current organization
    */
   async updateCurrentOrganization(org: { name?: string }): Promise<any> {
-    return this.httpClient.put("/api/org", org);
+    return this.httpClient.put('/api/org', org);
   }
 
   /**
    * Get organization users
    */
   async getOrganizationUsers(): Promise<any[]> {
-    return this.httpClient.get("/api/org/users");
+    return this.httpClient.get('/api/org/users');
   }
 
   /**
@@ -252,9 +252,9 @@ export class AdminService {
    */
   async addUserToOrganization(
     loginOrEmail: string,
-    role: "Viewer" | "Editor" | "Admin",
+    role: 'Viewer' | 'Editor' | 'Admin',
   ): Promise<any> {
-    return this.httpClient.post("/api/org/users", {
+    return this.httpClient.post('/api/org/users', {
       loginOrEmail,
       role,
     });
@@ -265,7 +265,7 @@ export class AdminService {
    */
   async updateUserRoleInOrganization(
     userId: number,
-    role: "Viewer" | "Editor" | "Admin",
+    role: 'Viewer' | 'Editor' | 'Admin',
   ): Promise<any> {
     return this.httpClient.patch(`/api/org/users/${userId}`, { role });
   }
@@ -283,7 +283,7 @@ export class AdminService {
    * List folders
    */
   async listFolders(): Promise<any[]> {
-    return this.httpClient.get("/api/folders");
+    return this.httpClient.get('/api/folders');
   }
 
   /**
@@ -301,7 +301,7 @@ export class AdminService {
     uid?: string;
     parentUid?: string;
   }): Promise<any> {
-    return this.httpClient.post("/api/folders", folder);
+    return this.httpClient.post('/api/folders', folder);
   }
 
   /**
@@ -349,7 +349,7 @@ export class AdminService {
    * List API keys
    */
   async listApiKeys(): Promise<any[]> {
-    return this.httpClient.get("/api/auth/keys");
+    return this.httpClient.get('/api/auth/keys');
   }
 
   /**
@@ -357,10 +357,10 @@ export class AdminService {
    */
   async createApiKey(apiKey: {
     name: string;
-    role: "Viewer" | "Editor" | "Admin";
+    role: 'Viewer' | 'Editor' | 'Admin';
     secondsToLive?: number;
   }): Promise<any> {
-    return this.httpClient.post("/api/auth/keys", apiKey);
+    return this.httpClient.post('/api/auth/keys', apiKey);
   }
 
   /**
@@ -376,7 +376,7 @@ export class AdminService {
    * List service accounts
    */
   async listServiceAccounts(): Promise<any[]> {
-    return this.httpClient.get("/api/serviceaccounts");
+    return this.httpClient.get('/api/serviceaccounts');
   }
 
   /**
@@ -391,10 +391,10 @@ export class AdminService {
    */
   async createServiceAccount(serviceAccount: {
     name: string;
-    role: "Viewer" | "Editor" | "Admin";
+    role: 'Viewer' | 'Editor' | 'Admin';
     isDisabled?: boolean;
   }): Promise<any> {
-    return this.httpClient.post("/api/serviceaccounts", serviceAccount);
+    return this.httpClient.post('/api/serviceaccounts', serviceAccount);
   }
 
   /**
@@ -404,7 +404,7 @@ export class AdminService {
     id: number,
     serviceAccount: {
       name?: string;
-      role?: "Viewer" | "Editor" | "Admin";
+      role?: 'Viewer' | 'Editor' | 'Admin';
       isDisabled?: boolean;
     },
   ): Promise<any> {

@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
-import { AlertingService } from "../services/alerting.js";
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { ToolRegistry } from '../tool-registry.js';
+import { AlertingService } from '../services/alerting.js';
 
 /**
  * Register alerting-related MCP tools
@@ -13,8 +13,8 @@ export function registerAlertingTools(
   // List alert rules
   registry.registerTool(
     {
-      name: "list_alert_rules",
-      description: "List all alert rules in Grafana",
+      name: 'list_alert_rules',
+      description: 'List all alert rules in Grafana',
       inputSchema: zodToJsonSchema(
         z.object({
           folderUID: z.string().optional(),
@@ -44,7 +44,7 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Alert Rules (${rules.length} total)**\\n\\n${rules
                 .map(
                   (rule) =>
@@ -58,17 +58,17 @@ export function registerAlertingTools(
                     `  Exec Error State: ${rule.execErrState}\\n` +
                     `  Updated: ${rule.updated}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing alert rules: ${errorMessage}`,
             },
           ],
@@ -81,8 +81,8 @@ export function registerAlertingTools(
   // Get alert rule by UID
   registry.registerTool(
     {
-      name: "get_alert_rule",
-      description: "Get detailed information about a specific alert rule",
+      name: 'get_alert_rule',
+      description: 'Get detailed information about a specific alert rule',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -97,53 +97,53 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Alert Rule: ${rule.title}**\\n\\n` +
-                "**Basic Information:**\\n" +
+                '**Basic Information:**\\n' +
                 `- UID: ${rule.uid}\\n` +
                 `- Title: ${rule.title}\\n` +
                 `- Folder UID: ${rule.folderUID}\\n` +
                 `- Rule Group: ${rule.ruleGroup}\\n` +
                 `- Org ID: ${rule.orgID}\\n\\n` +
-                "**Configuration:**\\n" +
+                '**Configuration:**\\n' +
                 `- Condition: ${rule.condition}\\n` +
                 `- Interval: ${rule.intervalSeconds} seconds\\n` +
                 `- For Duration: ${rule.for}\\n` +
                 `- No Data State: ${rule.noDataState}\\n` +
                 `- Execution Error State: ${rule.execErrState}\\n\\n` +
-                "**Metadata:**\\n" +
+                '**Metadata:**\\n' +
                 `- Updated: ${rule.updated}\\n\\n` +
                 `**Labels:**\\n${
                   Object.keys(rule.labels).length > 0
                     ? Object.entries(rule.labels)
                         .map(([key, value]) => `- ${key}: ${value}`)
-                        .join("\\n")
-                    : "No labels defined"
+                        .join('\\n')
+                    : 'No labels defined'
                 }\\n\\n` +
                 `**Annotations:**\\n${
                   Object.keys(rule.annotations).length > 0
                     ? Object.entries(rule.annotations)
                         .map(([key, value]) => `- ${key}: ${value}`)
-                        .join("\\n")
-                    : "No annotations defined"
+                        .join('\\n')
+                    : 'No annotations defined'
                 }\\n\\n` +
                 `**Query Data:**\\n${rule.data
                   .map(
                     (query: any, index: number) =>
                       `Query ${index + 1}: ${JSON.stringify(query, null, 2)}`,
                   )
-                  .join("\\n\\n")}`,
+                  .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting alert rule: ${errorMessage}`,
             },
           ],
@@ -156,8 +156,8 @@ export function registerAlertingTools(
   // Create alert rule
   registry.registerTool(
     {
-      name: "create_alert_rule",
-      description: "Create a new alert rule",
+      name: 'create_alert_rule',
+      description: 'Create a new alert rule',
       inputSchema: zodToJsonSchema(
         z.object({
           title: z.string().min(1),
@@ -166,9 +166,9 @@ export function registerAlertingTools(
           folderUID: z.string().min(1),
           ruleGroup: z.string().min(1),
           intervalSeconds: z.number().default(60),
-          forDuration: z.string().default("5m"),
-          noDataState: z.enum(["NoData", "Alerting", "OK"]).default("NoData"),
-          execErrState: z.enum(["Alerting", "OK"]).default("Alerting"),
+          forDuration: z.string().default('5m'),
+          noDataState: z.enum(['NoData', 'Alerting', 'OK']).default('NoData'),
+          execErrState: z.enum(['Alerting', 'OK']).default('Alerting'),
           labels: z.record(z.string()).optional(),
           annotations: z.record(z.string()).optional(),
         }),
@@ -182,9 +182,9 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "Alert rule created successfully:\\n\\n" +
+                'Alert rule created successfully:\\n\\n' +
                 `- UID: ${result.uid}\\n` +
                 `- Title: ${result.title}\\n` +
                 `- Folder: ${result.folderUID}\\n` +
@@ -194,11 +194,11 @@ export function registerAlertingTools(
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error creating alert rule: ${errorMessage}`,
             },
           ],
@@ -211,8 +211,8 @@ export function registerAlertingTools(
   // Update alert rule
   registry.registerTool(
     {
-      name: "update_alert_rule",
-      description: "Update an existing alert rule",
+      name: 'update_alert_rule',
+      description: 'Update an existing alert rule',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -221,8 +221,8 @@ export function registerAlertingTools(
           data: z.array(z.any()).optional(),
           intervalSeconds: z.number().optional(),
           forDuration: z.string().optional(),
-          noDataState: z.enum(["NoData", "Alerting", "OK"]).optional(),
-          execErrState: z.enum(["Alerting", "OK"]).optional(),
+          noDataState: z.enum(['NoData', 'Alerting', 'OK']).optional(),
+          execErrState: z.enum(['Alerting', 'OK']).optional(),
           labels: z.record(z.string()).optional(),
           annotations: z.record(z.string()).optional(),
         }),
@@ -239,9 +239,9 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
-                "Alert rule updated successfully:\\n\\n" +
+                'Alert rule updated successfully:\\n\\n' +
                 `- UID: ${result.uid}\\n` +
                 `- Title: ${result.title}\\n` +
                 `- Updated: ${result.updated}`,
@@ -250,11 +250,11 @@ export function registerAlertingTools(
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error updating alert rule: ${errorMessage}`,
             },
           ],
@@ -267,8 +267,8 @@ export function registerAlertingTools(
   // Delete alert rule
   registry.registerTool(
     {
-      name: "delete_alert_rule",
-      description: "Delete an alert rule by UID",
+      name: 'delete_alert_rule',
+      description: 'Delete an alert rule by UID',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -283,18 +283,18 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Alert rule ${uid} deleted successfully.`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error deleting alert rule: ${errorMessage}`,
             },
           ],
@@ -307,8 +307,8 @@ export function registerAlertingTools(
   // List contact points
   registry.registerTool(
     {
-      name: "list_contact_points",
-      description: "List all notification contact points",
+      name: 'list_contact_points',
+      description: 'List all notification contact points',
       inputSchema: zodToJsonSchema(z.object({})),
     },
     async () => {
@@ -318,7 +318,7 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Contact Points (${contactPoints.length} total)**\\n\\n${contactPoints
                 .map(
                   (cp) =>
@@ -327,17 +327,17 @@ export function registerAlertingTools(
                     `  Disable Resolve Message: ${cp.disableResolveMessage}\\n` +
                     `  Settings: ${Object.keys(cp.settings).length} configuration items`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing contact points: ${errorMessage}`,
             },
           ],
@@ -350,8 +350,8 @@ export function registerAlertingTools(
   // Get contact point
   registry.registerTool(
     {
-      name: "get_contact_point",
-      description: "Get detailed information about a specific contact point",
+      name: 'get_contact_point',
+      description: 'Get detailed information about a specific contact point',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
@@ -366,7 +366,7 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `**Contact Point: ${contactPoint.name}**\\n\\n` +
                 `- UID: ${contactPoint.uid}\\n` +
@@ -375,19 +375,19 @@ export function registerAlertingTools(
                 `**Settings:**\\n${Object.entries(contactPoint.settings)
                   .map(
                     ([key, value]) =>
-                      `- ${key}: ${typeof value === "string" ? value : JSON.stringify(value)}`,
+                      `- ${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`,
                   )
-                  .join("\\n")}`,
+                  .join('\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error getting contact point: ${errorMessage}`,
             },
           ],
@@ -400,20 +400,20 @@ export function registerAlertingTools(
   // Test contact point
   registry.registerTool(
     {
-      name: "test_contact_point",
-      description: "Send a test notification to a contact point",
+      name: 'test_contact_point',
+      description: 'Send a test notification to a contact point',
       inputSchema: zodToJsonSchema(
         z.object({
           uid: z.string().min(1),
           message: z
             .string()
-            .default("Test notification from Grafana MCP Server"),
+            .default('Test notification from Grafana MCP Server'),
         }),
       ),
     },
     async (request) => {
       try {
-        const { uid, message = "Test notification from Grafana MCP Server" } =
+        const { uid, message = 'Test notification from Grafana MCP Server' } =
           request.params.arguments as {
             uid: string;
             message?: string;
@@ -425,25 +425,25 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text:
                 `Test notification sent to contact point ${uid}:\\n\\n` +
-                `Status: ${result.status || "Success"}\\n` +
+                `Status: ${result.status || 'Success'}\\n` +
                 `Message: ${message}\\n${
                   result.details
                     ? `Details: ${JSON.stringify(result.details, null, 2)}`
-                    : ""
+                    : ''
                 }`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error testing contact point: ${errorMessage}`,
             },
           ],
@@ -456,8 +456,8 @@ export function registerAlertingTools(
   // Get alert rule groups
   registry.registerTool(
     {
-      name: "list_alert_rule_groups",
-      description: "List all alert rule groups",
+      name: 'list_alert_rule_groups',
+      description: 'List all alert rule groups',
       inputSchema: zodToJsonSchema(
         z.object({
           folderUID: z.string().optional(),
@@ -474,7 +474,7 @@ export function registerAlertingTools(
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `**Alert Rule Groups (${groups.length} total)**\\n\\n${groups
                 .map(
                   (group: any) =>
@@ -483,17 +483,17 @@ export function registerAlertingTools(
                     `  Interval: ${group.interval}\\n` +
                     `  Rules: ${group.rules.length}`,
                 )
-                .join("\\n\\n")}`,
+                .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+          error instanceof Error ? error.message : 'Unknown error occurred';
         return {
           content: [
             {
-              type: "text",
+              type: 'text',
               text: `Error listing alert rule groups: ${errorMessage}`,
             },
           ],

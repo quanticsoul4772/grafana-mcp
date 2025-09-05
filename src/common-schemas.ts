@@ -1,11 +1,11 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Common reusable Zod schemas for better type safety and consistency
  */
 
 // Basic identifier schemas
-export const UidSchema = z.string().min(1, "UID cannot be empty");
+export const UidSchema = z.string().min(1, 'UID cannot be empty');
 export const IdSchema = z.number().int().positive();
 
 // Branded types for better type safety
@@ -30,14 +30,14 @@ export const TimeRangeSchema = z.object({
 });
 
 export const OptionalTimeRangeSchema = z.object({
-  start: z.string().describe("Start time (RFC3339 or Unix timestamp)").optional(),
-  end: z.string().describe("End time (RFC3339 or Unix timestamp)").optional(),
+  start: z.string().describe('Start time (RFC3339 or Unix timestamp)').optional(),
+  end: z.string().describe('End time (RFC3339 or Unix timestamp)').optional(),
 });
 
 // Pagination schemas
 export const PaginationSchema = z.object({
-  page: z.number().int().positive().default(1).describe("Page number (1-based)"),
-  limit: z.number().int().positive().max(1000).default(100).describe("Items per page (max 1000)"),
+  page: z.number().int().positive().default(1).describe('Page number (1-based)'),
+  limit: z.number().int().positive().max(1000).default(100).describe('Items per page (max 1000)'),
 });
 
 export const PerPageSchema = z.object({
@@ -46,12 +46,12 @@ export const PerPageSchema = z.object({
 });
 
 // Common field schemas
-export const TagsSchema = z.array(z.string()).optional().describe("Tags for filtering");
-export const FolderSchema = z.string().optional().describe("Folder name or UID");
+export const TagsSchema = z.array(z.string()).optional().describe('Tags for filtering');
+export const FolderSchema = z.string().optional().describe('Folder name or UID');
 
 // Query schemas
-export const PromQLQuerySchema = z.string().min(1, "PromQL query cannot be empty");
-export const LogQLQuerySchema = z.string().min(1, "LogQL query cannot be empty");
+export const PromQLQuerySchema = z.string().min(1, 'PromQL query cannot be empty');
+export const LogQLQuerySchema = z.string().min(1, 'LogQL query cannot be empty');
 
 // Extended query schemas with validation
 export const PrometheusQueryParamsSchema = z.object({
@@ -59,20 +59,20 @@ export const PrometheusQueryParamsSchema = z.object({
   datasourceUid: DataSourceUIDSchema,
   start: z.string().optional(),
   end: z.string().optional(),
-  step: z.string().optional().describe("Query resolution step width"),
+  step: z.string().optional().describe('Query resolution step width'),
 });
 
 export const LokiQueryParamsSchema = z.object({
   query: LogQLQuerySchema,
   datasourceUid: DataSourceUIDSchema,
   limit: z.number().int().positive().max(5000).default(1000),
-  direction: z.enum(["forward", "backward"]).default("backward"),
+  direction: z.enum(['forward', 'backward']).default('backward'),
   ...OptionalTimeRangeSchema.shape,
 });
 
 // Search schemas
 export const SearchSchema = z.object({
-  query: z.string().optional().describe("Search query string"),
+  query: z.string().optional().describe('Search query string'),
   tags: TagsSchema,
   folder: FolderSchema,
   ...PaginationSchema.shape,
@@ -80,31 +80,31 @@ export const SearchSchema = z.object({
 
 // Labels and series schemas
 export const LabelMatchersSchema = z.array(z.string()).describe(
-  'Label matchers (e.g., ["{job=\\"prometheus\\"}"])'
+  'Label matchers (e.g., ["{job=\\"prometheus\\"}"])',
 );
 
 export const LabelsSchema = z.record(z.string()).describe(
-  'Labels as key-value pairs (e.g., {"job": "nginx", "level": "error"})'
+  'Labels as key-value pairs (e.g., {"job": "nginx", "level": "error"})',
 );
 
 // Advanced query building schemas
 export const MetricFiltersSchema = z.record(z.string()).optional().describe(
-  "Label filters as key-value pairs"
+  'Label filters as key-value pairs',
 );
 
 export const PrometheusBuilderSchema = z.object({
-  metric: z.string().min(1, "Base metric name required"),
+  metric: z.string().min(1, 'Base metric name required'),
   filters: MetricFiltersSchema,
-  function: z.string().optional().describe("Prometheus function (rate, sum, avg, etc.)"),
+  function: z.string().optional().describe('Prometheus function (rate, sum, avg, etc.)'),
   timeWindow: z.string().optional().describe('Time window for functions (e.g., "5m")'),
 });
 
 export const LokiBuilderSchema = z.object({
   labels: LabelsSchema,
-  filter: z.string().optional().describe("Log line filter pattern"),
-  operation: z.enum(["rate", "count_over_time", "sum", "avg", "min", "max"]).optional(),
+  filter: z.string().optional().describe('Log line filter pattern'),
+  operation: z.enum(['rate', 'count_over_time', 'sum', 'avg', 'min', 'max']).optional(),
   timeWindow: z.string().optional().describe('Time window for operations (e.g., "5m")'),
-  filterType: z.enum(["contains", "regex", "exact"]).default("contains").optional(),
+  filterType: z.enum(['contains', 'regex', 'exact']).default('contains').optional(),
 });
 
 // Configuration schemas
@@ -113,23 +113,23 @@ export const DatasourceTestSchema = z.object({
 });
 
 export const DashboardUpdateSchema = z.object({
-  dashboard: z.record(z.any()).describe("Full dashboard JSON configuration"),
-  folderId: z.number().int().optional().describe("Folder ID (0 for General)"),
+  dashboard: z.record(z.any()).describe('Full dashboard JSON configuration'),
+  folderId: z.number().int().optional().describe('Folder ID (0 for General)'),
   folderUid: FolderUIDSchema.optional(),
-  overwrite: z.boolean().default(false).describe("Overwrite existing dashboard"),
-  message: z.string().optional().describe("Commit message"),
+  overwrite: z.boolean().default(false).describe('Overwrite existing dashboard'),
+  message: z.string().optional().describe('Commit message'),
 });
 
 // Alert schemas  
 export const AlertRuleSchema = z.object({
   uid: AlertRuleUIDSchema.optional(),
-  title: z.string().min(1, "Alert rule title required"),
-  condition: z.string().min(1, "Alert condition required"),
+  title: z.string().min(1, 'Alert rule title required'),
+  condition: z.string().min(1, 'Alert condition required'),
   data: z.array(z.record(z.any())),
   intervalSeconds: z.number().int().positive().default(60),
-  noDataState: z.enum(["NoData", "Alerting", "OK"]).default("NoData"),
-  execErrState: z.enum(["Alerting", "OK"]).default("Alerting"),
-  for: z.string().default("5m").describe("Duration before alerting"),
+  noDataState: z.enum(['NoData', 'Alerting', 'OK']).default('NoData'),
+  execErrState: z.enum(['Alerting', 'OK']).default('Alerting'),
+  for: z.string().default('5m').describe('Duration before alerting'),
   annotations: z.record(z.string()).optional(),
   labels: z.record(z.string()).optional(),
 });
@@ -138,7 +138,7 @@ export const AlertRuleSchema = z.object({
 export const createValidationError = (field: string, message: string) => ({
   field,
   message,
-  code: "VALIDATION_ERROR" as const,
+  code: 'VALIDATION_ERROR' as const,
 });
 
 export const validateTimeRange = (start?: string, end?: string) => {
@@ -149,15 +149,15 @@ export const validateTimeRange = (start?: string, end?: string) => {
     const endTime = new Date(end);
     
     if (isNaN(startTime.getTime())) {
-      errors.push(createValidationError("start", "Invalid start time format"));
+      errors.push(createValidationError('start', 'Invalid start time format'));
     }
     
     if (isNaN(endTime.getTime())) {
-      errors.push(createValidationError("end", "Invalid end time format"));
+      errors.push(createValidationError('end', 'Invalid end time format'));
     }
     
     if (startTime > endTime) {
-      errors.push(createValidationError("timeRange", "Start time must be before end time"));
+      errors.push(createValidationError('timeRange', 'Start time must be before end time'));
     }
   }
   

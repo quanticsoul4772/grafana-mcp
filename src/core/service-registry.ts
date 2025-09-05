@@ -2,15 +2,15 @@
  * Service registry for managing services and their tool registrations
  */
 
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 import { 
   IService, 
   IServiceRegistry, 
   IServiceHealth, 
-  IToolRegistration 
-} from "./interfaces.js";
-import { ToolRegistry } from "../tool-registry.js";
-import { ToolRegistrationHelper } from "./tool-system.js";
+  IToolRegistration, 
+} from './interfaces.js';
+import { ToolRegistry } from '../tool-registry.js';
+import { ToolRegistrationHelper } from './tool-system.js';
 
 /**
  * Service registration information
@@ -44,7 +44,7 @@ export class ServiceRegistry extends EventEmitter implements IServiceRegistry {
       service,
       tools: [],
       enabled: true,
-      registeredAt: new Date()
+      registeredAt: new Date(),
     };
 
     this.services.set(service.name, registration);
@@ -86,7 +86,7 @@ export class ServiceRegistry extends EventEmitter implements IServiceRegistry {
       // Use the tool registration helper to register decorated tools
       const tools = ToolRegistrationHelper.registerServiceTools(
         this.toolRegistry, 
-        service
+        service,
       );
 
       registration.tools = tools;
@@ -165,8 +165,8 @@ export class ServiceRegistry extends EventEmitter implements IServiceRegistry {
           initialized: service.initialized,
           enabled: registration.enabled,
           toolsRegistered: registration.tools.length,
-          registeredAt: registration.registeredAt
-        }
+          registeredAt: registration.registeredAt,
+        },
       };
     } catch (error) {
       return {
@@ -176,8 +176,8 @@ export class ServiceRegistry extends EventEmitter implements IServiceRegistry {
         details: {
           error: error instanceof Error ? error.message : String(error),
           initialized: service.initialized,
-          enabled: registration.enabled
-        }
+          enabled: registration.enabled,
+        },
       };
     }
   }
@@ -187,7 +187,7 @@ export class ServiceRegistry extends EventEmitter implements IServiceRegistry {
    */
   async getAllServiceHealth(): Promise<IServiceHealth[]> {
     const healthChecks = this.getServiceNames().map(name => 
-      this.getServiceHealth(name)
+      this.getServiceHealth(name),
     );
 
     const results = await Promise.all(healthChecks);
@@ -218,7 +218,7 @@ export class ServiceRegistry extends EventEmitter implements IServiceRegistry {
    */
   async registerAllTools(): Promise<void> {
     const registrationPromises = this.getEnabledServices().map(service =>
-      this.registerTools(service)
+      this.registerTools(service),
     );
 
     await Promise.all(registrationPromises);

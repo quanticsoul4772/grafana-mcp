@@ -24,26 +24,26 @@ const SENSITIVE_PATTERNS = [
  * Sensitive header names to redact
  */
 const SENSITIVE_HEADERS = [
-  "authorization",
-  "x-api-key",
-  "x-auth-token",
-  "cookie",
-  "set-cookie",
+  'authorization',
+  'x-api-key',
+  'x-auth-token',
+  'cookie',
+  'set-cookie',
 ];
 
 /**
  * Sanitize an object by redacting sensitive fields
  */
 export function sanitizeObject(obj: any, depth = 0): any {
-  if (depth > 10) return "[Max Depth Reached]"; // Prevent infinite recursion
+  if (depth > 10) return '[Max Depth Reached]'; // Prevent infinite recursion
 
   if (obj === null || obj === undefined) return obj;
 
-  if (typeof obj === "string") {
+  if (typeof obj === 'string') {
     return sanitizeString(obj);
   }
 
-  if (typeof obj !== "object") return obj;
+  if (typeof obj !== 'object') return obj;
 
   if (Array.isArray(obj)) {
     return obj.map((item) => sanitizeObject(item, depth + 1));
@@ -52,7 +52,7 @@ export function sanitizeObject(obj: any, depth = 0): any {
   const sanitized: any = {};
   for (const [key, value] of Object.entries(obj)) {
     if (isSensitiveField(key)) {
-      sanitized[key] = "[REDACTED]";
+      sanitized[key] = '[REDACTED]';
     } else {
       sanitized[key] = sanitizeObject(value, depth + 1);
     }
@@ -82,9 +82,9 @@ function isSensitiveField(fieldName: string): boolean {
 function sanitizeString(str: string): string {
   // Mask potential tokens/keys (anything that looks like a long alphanumeric string)
   return str
-    .replace(/\b[A-Za-z0-9+/]{20,}={0,2}\b/g, "[REDACTED]")
-    .replace(/\b[A-Fa-f0-9]{32,}\b/g, "[REDACTED]")
-    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [REDACTED]");
+    .replace(/\b[A-Za-z0-9+/]{20,}={0,2}\b/g, '[REDACTED]')
+    .replace(/\b[A-Fa-f0-9]{32,}\b/g, '[REDACTED]')
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]');
 }
 
 /**
@@ -97,7 +97,7 @@ export function sanitizeHeaders(
 
   for (const [key, value] of Object.entries(headers)) {
     if (isSensitiveField(key)) {
-      sanitized[key] = "[REDACTED]";
+      sanitized[key] = '[REDACTED]';
     } else {
       sanitized[key] = sanitizeObject(value);
     }
@@ -110,10 +110,10 @@ export function sanitizeHeaders(
  * Error types for categorization
  */
 export enum ErrorCategory {
-  USER_ERROR = "user_error", // Safe to show to user
-  SYSTEM_ERROR = "system_error", // Internal error, don't expose details
-  NETWORK_ERROR = "network_error", // Connection issues, safe basic info
-  VALIDATION_ERROR = "validation_error", // Input validation, safe to show
+  USER_ERROR = 'user_error', // Safe to show to user
+  SYSTEM_ERROR = 'system_error', // Internal error, don't expose details
+  NETWORK_ERROR = 'network_error', // Connection issues, safe basic info
+  VALIDATION_ERROR = 'validation_error', // Input validation, safe to show
 }
 
 /**
@@ -134,7 +134,7 @@ export function categorizeError(
   error: any,
   context?: string,
 ): CategorizedError {
-  const contextPrefix = context ? `[${context}] ` : "";
+  const contextPrefix = context ? `[${context}] ` : '';
 
   // Network/HTTP errors
   if (error?.response?.status) {
@@ -144,7 +144,7 @@ export function categorizeError(
       return {
         category: ErrorCategory.USER_ERROR,
         publicMessage:
-          "Authentication failed. Please check your Grafana token.",
+          'Authentication failed. Please check your Grafana token.',
         internalMessage: `${contextPrefix}HTTP 401: ${error.message}`,
         statusCode: 401,
         originalError: error,
@@ -155,7 +155,7 @@ export function categorizeError(
       return {
         category: ErrorCategory.USER_ERROR,
         publicMessage:
-          "Permission denied. Insufficient privileges for this operation.",
+          'Permission denied. Insufficient privileges for this operation.',
         internalMessage: `${contextPrefix}HTTP 403: ${error.message}`,
         statusCode: 403,
         originalError: error,
@@ -166,7 +166,7 @@ export function categorizeError(
       return {
         category: ErrorCategory.USER_ERROR,
         publicMessage:
-          "Resource not found. Please verify the identifier and try again.",
+          'Resource not found. Please verify the identifier and try again.',
         internalMessage: `${contextPrefix}HTTP 404: ${error.message}`,
         statusCode: 404,
         originalError: error,
@@ -177,7 +177,7 @@ export function categorizeError(
       return {
         category: ErrorCategory.USER_ERROR,
         publicMessage:
-          "Invalid request. Please check your parameters and try again.",
+          'Invalid request. Please check your parameters and try again.',
         internalMessage: `${contextPrefix}HTTP ${status}: ${error.message}`,
         statusCode: status,
         originalError: error,
@@ -187,7 +187,7 @@ export function categorizeError(
     if (status >= 500) {
       return {
         category: ErrorCategory.SYSTEM_ERROR,
-        publicMessage: "Grafana server error. Please try again later.",
+        publicMessage: 'Grafana server error. Please try again later.',
         internalMessage: `${contextPrefix}HTTP ${status}: ${error.message}`,
         statusCode: status,
         originalError: error,
@@ -197,25 +197,25 @@ export function categorizeError(
 
   // Network connection errors
   if (
-    error?.code === "ECONNREFUSED" ||
-    error?.code === "ENOTFOUND" ||
-    error?.code === "ETIMEDOUT"
+    error?.code === 'ECONNREFUSED' ||
+    error?.code === 'ENOTFOUND' ||
+    error?.code === 'ETIMEDOUT'
   ) {
     return {
       category: ErrorCategory.NETWORK_ERROR,
       publicMessage:
-        "Unable to connect to Grafana. Please check the server URL and network connection.",
+        'Unable to connect to Grafana. Please check the server URL and network connection.',
       internalMessage: `${contextPrefix}Network error: ${error.message}`,
       originalError: error,
     };
   }
 
   // Validation errors (Zod, etc.)
-  if (error?.name === "ZodError" || error?.issues) {
+  if (error?.name === 'ZodError' || error?.issues) {
     return {
       category: ErrorCategory.VALIDATION_ERROR,
       publicMessage:
-        "Invalid input parameters. Please check your request and try again.",
+        'Invalid input parameters. Please check your request and try again.',
       internalMessage: `${contextPrefix}Validation error: ${error.message}`,
       originalError: error,
     };
@@ -224,8 +224,8 @@ export function categorizeError(
   // Default system error for unknown issues
   return {
     category: ErrorCategory.SYSTEM_ERROR,
-    publicMessage: "An unexpected error occurred. Please try again.",
-    internalMessage: `${contextPrefix}Unknown error: ${error?.message || "No error message available"}`,
+    publicMessage: 'An unexpected error occurred. Please try again.',
+    internalMessage: `${contextPrefix}Unknown error: ${error?.message || 'No error message available'}`,
     originalError: error,
   };
 }
@@ -256,7 +256,7 @@ export function formatInternalError(
     details.push(`Stack: ${categorizedError.originalError.stack}`);
   }
 
-  return details.join(" | ");
+  return details.join(' | ');
 }
 
 /**
@@ -267,6 +267,6 @@ export function safeStringify(obj: any, sanitize = true): string {
     const processedObj = sanitize ? sanitizeObject(obj) : obj;
     return JSON.stringify(processedObj, null, 2);
   } catch (_error) {
-    return "[Unable to serialize object - circular reference or other issue]";
+    return '[Unable to serialize object - circular reference or other issue]';
   }
 }
