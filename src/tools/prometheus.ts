@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { ToolRegistry } from "../tool-registry.js";
+import { ToolRegistry, ToolCategory } from "../tool-registry.js";
 import { PrometheusService } from "../services/prometheus.js";
 import { QueryPrometheusSchema } from "../types.js";
+import { CommonSchemas } from "../common-schemas.js";
 
 /**
  * Register Prometheus-related MCP tools
@@ -348,31 +349,22 @@ export function registerPrometheusTools(
     },
   );
 
-  // Build Prometheus query
-  registry.registerTool(
-    {
-      name: "build_prometheus_query",
-      description:
-        "Help build a Prometheus query with suggestions for metric names and operators",
-      inputSchema: zodToJsonSchema(
-        z.object({
-          metric: z.string().describe("Base metric name or pattern"),
-          filters: z
-            .record(z.string())
-            .describe("Label filters as key-value pairs")
-            .optional(),
-          function: z
-            .string()
-            .describe("Prometheus function to apply (rate, sum, avg, etc.)")
-            .optional(),
-          timeWindow: z
-            .string()
-            .describe('Time window for functions like rate() (e.g., "5m")')
-            .optional(),
-        }),
-      ),
-    },
-    async (request) => {
+  // Build Prometheus query - using enhanced registry and common schemas
+  if ('registerExtendedTool' in registry) {
+    (registry as any).registerExtendedTool(
+      {
+        name: "build_prometheus_query",
+        description:
+          "Help build a Prometheus query with suggestions for metric names and operators",
+        inputSchema: zodToJsonSchema(CommonSchemas.prometheusBuilder),
+        category: "prometheus" as ToolCategory,
+        version: "1.0.0",
+        metadata: {
+          complexity: "medium",
+          cacheableResult: false,
+        },
+      },
+    async (request: { params: { arguments: any } }) => {
       try {
         const {
           metric,
@@ -438,4 +430,5 @@ export function registerPrometheusTools(
       }
     },
   );
+  }
 }

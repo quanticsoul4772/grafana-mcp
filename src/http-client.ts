@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
 import https from "https";
+import http from "http";
 import fs from "fs";
 import { Config, HttpClientConfig, TLSConfig, GrafanaError } from "./types.js";
 import {
@@ -9,6 +10,7 @@ import {
   formatInternalError,
   safeStringify,
 } from "./security-utils.js";
+import { ResilientErrorHandler } from "./retry-client.js";
 
 /**
  * HTTP client for Grafana API with authentication, TLS support, and error handling
@@ -16,9 +18,28 @@ import {
 export class GrafanaHttpClient {
   private client: AxiosInstance;
   private config: Config;
+  private static tlsFileCache = new Map<string, Buffer>();
+  private responseCache = new Map<string, { data: any; expires: number }>();
+  private readonly CACHE_TTL = 60000; // 1 minute cache TTL
+  private resilientHandler: ResilientErrorHandler;
 
   constructor(config: Config) {
     this.config = config;
+
+    // Initialize resilient error handler
+    this.resilientHandler = new ResilientErrorHandler(
+      {
+        maxRetries: 3,
+        baseDelayMs: 1000,
+        maxDelayMs: 10000,
+        exponentialBase: 2,
+        retryableStatuses: [408, 429, 500, 502, 503, 504],
+      },
+      {
+        failureThreshold: 5,
+        timeoutMs: 60000, // 1 minute circuit breaker timeout
+      }
+    );
 
     const httpConfig: HttpClientConfig = {
       baseURL: config.GRAFANA_URL,
@@ -64,6 +85,13 @@ export class GrafanaHttpClient {
       baseURL: config.baseURL,
       timeout: config.timeout,
       headers: config.headers,
+      // Add connection pooling for better performance
+      httpAgent: new http.Agent({
+        keepAlive: true,
+        maxSockets: 10,
+        maxFreeSockets: 5,
+        timeout: config.timeout,
+      }),
     };
 
     // Configure TLS if needed
@@ -86,33 +114,39 @@ export class GrafanaHttpClient {
   }
 
   /**
+   * Load TLS file with caching to avoid repeated file reads
+   */
+  private loadTLSFile(filepath: string): Buffer {
+    if (!GrafanaHttpClient.tlsFileCache.has(filepath)) {
+      if (!fs.existsSync(filepath)) {
+        throw new Error(`TLS file not found: ${filepath}`);
+      }
+      GrafanaHttpClient.tlsFileCache.set(filepath, fs.readFileSync(filepath));
+    }
+    return GrafanaHttpClient.tlsFileCache.get(filepath)!;
+  }
+
+  /**
    * Create HTTPS agent with custom TLS configuration
    */
   private createHttpsAgent(tlsConfig: TLSConfig): https.Agent {
     const agentOptions: https.AgentOptions = {
       rejectUnauthorized: !tlsConfig.skipVerify,
+      keepAlive: true,
+      maxSockets: 10,
+      maxFreeSockets: 5,
     };
 
     try {
-      // Load client certificate if provided
+      // Load client certificate if provided (with caching)
       if (tlsConfig.certFile && tlsConfig.keyFile) {
-        if (!fs.existsSync(tlsConfig.certFile)) {
-          throw new Error(`TLS cert file not found: ${tlsConfig.certFile}`);
-        }
-        if (!fs.existsSync(tlsConfig.keyFile)) {
-          throw new Error(`TLS key file not found: ${tlsConfig.keyFile}`);
-        }
-
-        agentOptions.cert = fs.readFileSync(tlsConfig.certFile);
-        agentOptions.key = fs.readFileSync(tlsConfig.keyFile);
+        agentOptions.cert = this.loadTLSFile(tlsConfig.certFile);
+        agentOptions.key = this.loadTLSFile(tlsConfig.keyFile);
       }
 
-      // Load CA certificate if provided
+      // Load CA certificate if provided (with caching)
       if (tlsConfig.caFile) {
-        if (!fs.existsSync(tlsConfig.caFile)) {
-          throw new Error(`TLS CA file not found: ${tlsConfig.caFile}`);
-        }
-        agentOptions.ca = fs.readFileSync(tlsConfig.caFile);
+        agentOptions.ca = this.loadTLSFile(tlsConfig.caFile);
       }
     } catch (error) {
       throw new Error(
@@ -218,13 +252,7 @@ export class GrafanaHttpClient {
         };
 
         // Only include safe error details
-        if (error.response?.data) {
-          const _data = error.response.data as any;
-          // Don't expose potentially sensitive error details
-          grafanaError.error = categorizedError.publicMessage;
-        } else {
-          grafanaError.error = categorizedError.publicMessage;
-        }
+        grafanaError.error = categorizedError.publicMessage;
 
         return Promise.reject(grafanaError);
       },
@@ -232,11 +260,67 @@ export class GrafanaHttpClient {
   }
 
   /**
-   * Make a GET request
+   * Get cached response if available and not expired
    */
-  async get<T = any>(url: string, params?: Record<string, any>): Promise<T> {
-    const response = await this.client.get<T>(url, { params });
-    return response.data;
+  private getCachedResponse<T>(cacheKey: string): T | null {
+    const cached = this.responseCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data as T;
+    }
+    if (cached) {
+      this.responseCache.delete(cacheKey);
+    }
+    return null;
+  }
+
+  /**
+   * Cache response with TTL
+   */
+  private setCachedResponse(cacheKey: string, data: any): void {
+    this.responseCache.set(cacheKey, {
+      data,
+      expires: Date.now() + this.CACHE_TTL,
+    });
+  }
+
+  /**
+   * Generate cache key from URL and parameters
+   */
+  private generateCacheKey(url: string, params?: Record<string, any>): string {
+    const paramString = params ? JSON.stringify(params) : '';
+    return `${url}:${paramString}`;
+  }
+
+  /**
+   * Make a GET request with optional caching and resilience
+   */
+  async get<T = any>(url: string, params?: Record<string, any>, useCache = false): Promise<T> {
+    if (useCache) {
+      const cacheKey = this.generateCacheKey(url, params);
+      const cached = this.getCachedResponse<T>(cacheKey);
+      if (cached) {
+        return cached;
+      }
+
+      const result = await this.resilientHandler.executeWithResilience(
+        async () => {
+          const response = await this.client.get<T>(url, { params });
+          return response.data;
+        },
+        `GET ${url}`
+      );
+
+      this.setCachedResponse(cacheKey, result);
+      return result;
+    }
+
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.get<T>(url, { params });
+        return response.data;
+      },
+      `GET ${url}`
+    );
   }
 
   /**
@@ -281,6 +365,65 @@ export class GrafanaHttpClient {
   ): Promise<T> {
     const response = await this.client.patch<T>(url, data, config);
     return response.data;
+  }
+
+  /**
+   * Clear response cache
+   */
+  clearCache(): void {
+    this.responseCache.clear();
+  }
+
+  /**
+   * Clean up resources and connections
+   */
+  cleanup(): void {
+    this.clearCache();
+    // Clear static TLS file cache when appropriate
+    GrafanaHttpClient.tlsFileCache.clear();
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): { size: number; keys: string[] } {
+    return {
+      size: this.responseCache.size,
+      keys: Array.from(this.responseCache.keys()),
+    };
+  }
+
+  /**
+   * Get circuit breaker status
+   */
+  getCircuitBreakerStatus() {
+    return this.resilientHandler.getCircuitBreakerState();
+  }
+
+  /**
+   * Reset circuit breaker manually
+   */
+  resetCircuitBreaker(): void {
+    this.resilientHandler.resetCircuitBreaker();
+  }
+
+  /**
+   * Get comprehensive health status
+   */
+  getHealthStatus(): {
+    cache: { size: number; keys: string[] };
+    circuitBreaker: ReturnType<ResilientErrorHandler['getCircuitBreakerState']>;
+    config: { baseURL: string; timeout: number; debug: boolean };
+  } {
+    return {
+      cache: this.getCacheStats(),
+      circuitBreaker: this.getCircuitBreakerStatus(),
+      config: {
+        baseURL: this.config.GRAFANA_URL,
+        timeout: this.config.GRAFANA_TIMEOUT,
+        debug: this.config.GRAFANA_DEBUG,
+      },
+    };
   }
 
   /**

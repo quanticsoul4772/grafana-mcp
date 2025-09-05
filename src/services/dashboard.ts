@@ -1,16 +1,53 @@
 import { GrafanaHttpClient } from "../http-client.js";
 import { Dashboard, DashboardDetail, Panel, Target } from "../types.js";
+import { BaseHttpService } from "../core/base-service.js";
+import { AsyncResult } from "../core/interfaces.js";
 
 /**
  * Service for managing Grafana dashboards
  */
-export class DashboardService {
-  constructor(private httpClient: GrafanaHttpClient) {}
+export class DashboardService extends BaseHttpService {
+  constructor(httpClient: GrafanaHttpClient) {
+    super('DashboardService', httpClient, '1.0.0');
+  }
 
   /**
    * Search for dashboards
    */
   async searchDashboards(
+    options: {
+      query?: string;
+      tags?: string[];
+      starred?: boolean;
+      folderId?: number;
+      type?: string;
+      limit?: number;
+    } = {},
+  ): Promise<Dashboard[]> {
+    return this.executeOrThrow(async () => {
+      return this._searchDashboards(options);
+    }, 'searchDashboards');
+  }
+
+  /**
+   * Search for dashboards with Result wrapper
+   */
+  async searchDashboardsResult(
+    options: {
+      query?: string;
+      tags?: string[];
+      starred?: boolean;
+      folderId?: number;
+      type?: string;
+      limit?: number;
+    } = {},
+  ): AsyncResult<Dashboard[]> {
+    return this.execute(async () => {
+      return this._searchDashboards(options);
+    }, 'searchDashboards');
+  }
+
+  private async _searchDashboards(
     options: {
       query?: string;
       tags?: string[];

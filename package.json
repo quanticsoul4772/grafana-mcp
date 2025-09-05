@@ -14,9 +14,13 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:prod": "tsc -p tsconfig.prod.json",
+    "build:analyze": "npm run build:prod && node -e \"console.log('Bundle Size Analysis:'); const fs=require('fs'); const path=require('path'); function getSize(dir){let size=0; const files=fs.readdirSync(dir); files.forEach(file=>{const filePath=path.join(dir,file); const stats=fs.statSync(filePath); if(stats.isDirectory()){size+=getSize(filePath)}else{size+=stats.size}}); return size} const distSize=getSize('./dist'); console.log('Total dist size:', Math.round(distSize/1024) + 'KB'); console.log('Per file:'); fs.readdirSync('./dist').forEach(file=>{const stats=fs.statSync('./dist/'+file); console.log('-', file+':', Math.round(stats.size/1024)+'KB')})\"",
     "dev": "tsx src/main.ts",
+    "dev:optimized": "NODE_OPTIONS='--max-old-space-size=512 --optimize-for-size' tsx src/main.ts",
     "start": "node build/main.js",
-    "clean": "rm -rf build",
+    "start:optimized": "NODE_OPTIONS='--max-old-space-size=512 --optimize-for-size --gc-interval=100' node build/main.js",
+    "clean": "rm -rf build dist",
     "prepare": "npm run build",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
@@ -26,7 +30,10 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.{ts,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,json,md}\"",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "optimize": "npm run build:prod && npm run build:analyze",
+    "perf:monitor": "NODE_OPTIONS='--expose-gc' node build/main.js",
+    "bundle:deps": "npm ls --depth=0 --json > bundle-analysis.json && node -e \"const data=require('./bundle-analysis.json'); console.log('Dependencies Analysis:'); Object.entries(data.dependencies||{}).forEach(([name,info])=>console.log('-',name+':', info.version))\""
   },
   "keywords": [
     "mcp",

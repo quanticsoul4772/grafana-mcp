@@ -1,11 +1,15 @@
 import { GrafanaHttpClient } from "../http-client.js";
 import { PrometheusQueryResult, PrometheusMetric } from "../types.js";
+import { BaseHttpService } from "../core/base-service.js";
+import { AsyncResult } from "../core/interfaces.js";
 
 /**
  * Service for querying Prometheus datasources through Grafana
  */
-export class PrometheusService {
-  constructor(private httpClient: GrafanaHttpClient) {}
+export class PrometheusService extends BaseHttpService {
+  constructor(httpClient: GrafanaHttpClient) {
+    super('PrometheusService', httpClient, '1.0.0');
+  }
 
   /**
    * Execute a Prometheus query (instant or range)

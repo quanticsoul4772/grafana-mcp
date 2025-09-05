@@ -108,5 +108,25 @@ export function displayConfig(config: Config): void {
   console.log("");
 }
 
-// Parse and export configuration
-export const config = parseConfig();
+// Lazy configuration loading with caching
+let cachedConfig: Config | null = null;
+
+/**
+ * Get configuration with lazy loading and caching
+ */
+export function getConfig(): Config {
+  if (!cachedConfig) {
+    cachedConfig = parseConfig();
+  }
+  return cachedConfig;
+}
+
+/**
+ * Clear cached configuration (useful for testing)
+ */
+export function clearConfigCache(): void {
+  cachedConfig = null;
+}
+
+// Parse and export configuration for backward compatibility
+export const config = getConfig();
