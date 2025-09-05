@@ -386,11 +386,11 @@ We welcome contributions! Please see our contributing guidelines:
 - [ ] Documentation updated
 - [ ] Security considerations addressed
 
-## 📝 License
+## License
 
 [License information to be added]
 
-## 🆘 Support
+## Support
 
 ### Common Issues
 
@@ -423,4 +423,4 @@ Schema validation failed
 
 ---
 
-**Built with ❤️ using TypeScript, Zod, and the Model Context Protocol**
+**Built with TypeScript, Zod, and the Model Context Protocol**
