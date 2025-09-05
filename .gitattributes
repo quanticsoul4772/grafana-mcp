@@ -1,0 +1,17 @@
+# Language detection overrides
+# Exclude build artifacts and compiled files from GitHub language statistics
+
+# Build outputs
+dist/ linguist-generated=true
+build/ linguist-generated=true
+*.js.map linguist-generated=true
+
+# Compiled JavaScript from TypeScript (if any get tracked accidentally)
+*.js linguist-detectable=false
+
+# Node modules
+node_modules/ linguist-vendored=true
+
+# Configuration files that shouldn't count toward main language
+package-lock.json linguist-generated=true
+*.config.js linguist-detectable=false
