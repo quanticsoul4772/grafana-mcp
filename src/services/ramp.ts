@@ -24,11 +24,15 @@ const METRIC_QUERIES = {
   maxWorkerCpu: 'max(sum by (groupname)(rate(namedprocess_namegroup_cpu_seconds_total{groupname=~"zeek-worker-.*"}[5m])))',
   bufferUtilPct: 'sum(napatech_stream_host_buffer_enqueued_bytes - napatech_stream_host_buffer_dequeued_bytes) / clamp_min(sum(napatech_stream_host_buffer_total_bytes), 1) * 100',
   systemMemoryPct: 'node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100',
+  suricataDropsPerSec: 'sum(rate(suricata_napatech_dispatch_drop_packets_total[5m])) + sum(rate(suricata_napatech_overflow_drop_packets_total[5m]))',
+  packetLag: 'max(max by (node)(zeek_net_packet_lag_seconds))',
+  activeConnections: 'sum(zeek_active_connections)',
 } as const;
 
 export class RampService {
   private sensors = new Map<string, SensorInfo>();
   private clients = new Map<string, GrafanaHttpClient>();
+  private dashboardCache: any = null;
   private rampProjectPath: string;
   private scanPorts: { start: number; end: number };
   private sensorToken: string;
@@ -242,9 +246,12 @@ export class RampService {
       klogps: metrics.klogps ?? 0,
       nicDropsPerSec: metrics.nicDropsPerSec ?? 0,
       zeekDropsPerSec: metrics.zeekDropsPerSec ?? 0,
+      suricataDropsPerSec: metrics.suricataDropsPerSec ?? 0,
       maxWorkerCpu: metrics.maxWorkerCpu ?? 0,
       bufferUtilPct: metrics.bufferUtilPct ?? 0,
       systemMemoryPct: metrics.systemMemoryPct ?? 0,
+      packetLag: metrics.packetLag ?? 0,
+      activeConnections: metrics.activeConnections ?? 0,
     };
 
     return { sensor: info, metrics: snapshot };
@@ -306,7 +313,10 @@ export class RampService {
       );
     }
 
-    const dashboardJson = JSON.parse(fs.readFileSync(dashboardPath, 'utf-8'));
+    if (!this.dashboardCache) {
+      this.dashboardCache = JSON.parse(fs.readFileSync(dashboardPath, 'utf-8'));
+    }
+    const dashboardJson = JSON.parse(JSON.stringify(this.dashboardCache)); // deep clone
 
     // Patch datasource variable default to the sensor's Prometheus UID
     if (dashboardJson.templating?.list) {
@@ -682,7 +692,7 @@ export class RampService {
     let level: VerdictLevel;
     let summary: string;
 
-    const hasDrops = metrics.nicDropsPerSec > 0 || metrics.zeekDropsPerSec > 0;
+    const hasDrops = metrics.nicDropsPerSec > 0 || metrics.zeekDropsPerSec > 0 || metrics.suricataDropsPerSec > 0;
     const worstDelta = Math.min(...deltas.map((d) => d.deltaPct));
 
     if (hasDrops) {
@@ -769,7 +779,7 @@ export class RampService {
             sensor: sensor.hostname,
             build,
             profile,
-            metrics: { gbps: 0, kpps: 0, klogps: 0, nicDropsPerSec: 0, zeekDropsPerSec: 0, maxWorkerCpu: 0, bufferUtilPct: 0, systemMemoryPct: 0 },
+            metrics: { gbps: 0, kpps: 0, klogps: 0, nicDropsPerSec: 0, zeekDropsPerSec: 0, suricataDropsPerSec: 0, maxWorkerCpu: 0, bufferUtilPct: 0, systemMemoryPct: 0, packetLag: 0, activeConnections: 0 },
             deltas: [],
             summary: `Error: ${msg}`,
           };

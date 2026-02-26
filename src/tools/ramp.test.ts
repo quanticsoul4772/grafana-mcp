@@ -90,9 +90,12 @@ describe('Ramp Tools', () => {
           klogps: 50.1,
           nicDropsPerSec: 0.0,
           zeekDropsPerSec: 0.0,
+          suricataDropsPerSec: 0.0,
           maxWorkerCpu: 0.75,
           bufferUtilPct: 30.2,
           systemMemoryPct: 60.5,
+          packetLag: 0.12,
+          activeConnections: 5000,
         },
       });
 
@@ -106,6 +109,9 @@ describe('Ramp Tools', () => {
       expect(result.content[0].text).toContain('1.50 Gbps');
       expect(result.content[0].text).toContain('200.3 kpps');
       expect(result.content[0].text).toContain('75.0%');
+      expect(result.content[0].text).toContain('Suricata Drops');
+      expect(result.content[0].text).toContain('Packet Lag');
+      expect(result.content[0].text).toContain('Active Connections');
     });
 
     it('should handle errors', async () => {
@@ -316,9 +322,12 @@ describe('Ramp Tools', () => {
           klogps: 50,
           nicDropsPerSec: 0,
           zeekDropsPerSec: 0,
+          suricataDropsPerSec: 0,
           maxWorkerCpu: 0.75,
           bufferUtilPct: 30,
           systemMemoryPct: 60,
+          packetLag: 0,
+          activeConnections: 0,
         },
         deltas: [
           { metric: 'gbps', actual: 1.5, baseline: 1.48, deltaPct: 1.35 },
@@ -356,9 +365,12 @@ describe('Ramp Tools', () => {
           klogps: 40,
           nicDropsPerSec: 5,
           zeekDropsPerSec: 2,
+          suricataDropsPerSec: 0,
           maxWorkerCpu: 0.95,
           bufferUtilPct: 80,
           systemMemoryPct: 90,
+          packetLag: 0,
+          activeConnections: 0,
         },
         deltas: [
           { metric: 'gbps', actual: 1.2, baseline: 1.5, deltaPct: -20.0 },

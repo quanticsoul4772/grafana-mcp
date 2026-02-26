@@ -28,9 +28,12 @@ export interface MetricSnapshot {
   klogps: number;
   nicDropsPerSec: number;
   zeekDropsPerSec: number;
+  suricataDropsPerSec: number;
   maxWorkerCpu: number;
   bufferUtilPct: number;
   systemMemoryPct: number;
+  packetLag: number;
+  activeConnections: number;
 }
 
 export type VerdictLevel = 'PASS' | 'FAIL' | 'MINOR REGRESSION' | 'MAJOR REGRESSION';

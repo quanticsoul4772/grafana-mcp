@@ -470,11 +470,14 @@ describe('RampService', () => {
         if (query.includes('port_bytes')) return promResponse(2.5); // gbps
         if (query.includes('port_packets')) return promResponse(1200); // kpps
         if (query.includes('log_writer_writes')) return promResponse(500); // klogps
-        if (query.includes('drop_overflow')) return promResponse(0); // nicDrops
+        if (query.includes('drop_overflow') && query.includes('napatech_stat')) return promResponse(0); // nicDrops
         if (query.includes('pkts_dropped')) return promResponse(0); // zeekDrops
+        if (query.includes('suricata_napatech')) return promResponse(0); // suricataDrops
         if (query.includes('zeek-worker')) return promResponse(0.85); // maxWorkerCpu
         if (query.includes('host_buffer')) return promResponse(12.3); // bufferUtilPct
         if (query.includes('MemAvailable')) return promResponse(65.2); // systemMemoryPct
+        if (query.includes('packet_lag')) return promResponse(0.5); // packetLag
+        if (query.includes('active_connections')) return promResponse(15000); // activeConnections
         return promResponse(0);
       });
 
@@ -485,9 +488,12 @@ describe('RampService', () => {
       expect(result.metrics.klogps).toBe(500);
       expect(result.metrics.nicDropsPerSec).toBe(0);
       expect(result.metrics.zeekDropsPerSec).toBe(0);
+      expect(result.metrics.suricataDropsPerSec).toBe(0);
       expect(result.metrics.maxWorkerCpu).toBe(0.85);
       expect(result.metrics.bufferUtilPct).toBe(12.3);
       expect(result.metrics.systemMemoryPct).toBe(65.2);
+      expect(result.metrics.packetLag).toBe(0.5);
+      expect(result.metrics.activeConnections).toBe(15000);
     });
 
     it('should default metrics to 0 when queries fail', async () => {
@@ -504,9 +510,12 @@ describe('RampService', () => {
       expect(result.metrics.klogps).toBe(0);
       expect(result.metrics.nicDropsPerSec).toBe(0);
       expect(result.metrics.zeekDropsPerSec).toBe(0);
+      expect(result.metrics.suricataDropsPerSec).toBe(0);
       expect(result.metrics.maxWorkerCpu).toBe(0);
       expect(result.metrics.bufferUtilPct).toBe(0);
       expect(result.metrics.systemMemoryPct).toBe(0);
+      expect(result.metrics.packetLag).toBe(0);
+      expect(result.metrics.activeConnections).toBe(0);
     });
 
     it('should default metrics to 0 when result has no value', async () => {
@@ -871,9 +880,12 @@ describe('RampService', () => {
         klogps: 2000,
         nicDropsPerSec: 0,
         zeekDropsPerSec: 0,
+        suricataDropsPerSec: 0,
         maxWorkerCpu: 0.5,
         bufferUtilPct: 10,
         systemMemoryPct: 60,
+        packetLag: 0,
+        activeConnections: 0,
         ...metrics,
       };
 
@@ -882,11 +894,14 @@ describe('RampService', () => {
         if (query.includes('port_bytes')) return promResponse(defaults.gbps);
         if (query.includes('port_packets')) return promResponse(defaults.kpps);
         if (query.includes('log_writer_writes')) return promResponse(defaults.klogps);
-        if (query.includes('drop_overflow')) return promResponse(defaults.nicDropsPerSec);
+        if (query.includes('drop_overflow') && query.includes('napatech_stat')) return promResponse(defaults.nicDropsPerSec);
         if (query.includes('pkts_dropped')) return promResponse(defaults.zeekDropsPerSec);
+        if (query.includes('suricata_napatech')) return promResponse(defaults.suricataDropsPerSec);
         if (query.includes('zeek-worker')) return promResponse(defaults.maxWorkerCpu);
         if (query.includes('host_buffer')) return promResponse(defaults.bufferUtilPct);
         if (query.includes('MemAvailable')) return promResponse(defaults.systemMemoryPct);
+        if (query.includes('packet_lag')) return promResponse(defaults.packetLag);
+        if (query.includes('active_connections')) return promResponse(defaults.activeConnections);
         return promResponse(0);
       });
     }
