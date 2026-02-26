@@ -418,6 +418,142 @@ describe('GrafanaHttpClient', () => {
     });
   });
 
+  describe('mutation cache invalidation', () => {
+    let client: GrafanaHttpClient;
+    let mockAxiosInstance: any;
+
+    beforeEach(async () => {
+      const axios = vi.mocked(await import('axios')).default;
+      mockAxiosInstance = {
+        get: vi.fn().mockResolvedValue({ data: { result: 'get-data' } }),
+        post: vi.fn().mockResolvedValue({ data: { result: 'post-data' } }),
+        put: vi.fn().mockResolvedValue({ data: { result: 'put-data' } }),
+        patch: vi.fn().mockResolvedValue({ data: { result: 'patch-data' } }),
+        delete: vi.fn().mockResolvedValue({ data: { result: 'delete-data' } }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+
+      axios.create.mockReturnValue(mockAxiosInstance);
+      client = new GrafanaHttpClient(mockConfig);
+    });
+
+    it('should clear cache on POST', async () => {
+      // Populate cache via a cached GET
+      await client.get('/api/dashboards', undefined, true);
+      expect(client.getCacheStats().size).toBe(1);
+
+      await client.post('/api/dashboards', { title: 'new' });
+
+      expect(client.getCacheStats().size).toBe(0);
+    });
+
+    it('should clear cache on PUT', async () => {
+      await client.get('/api/dashboards', undefined, true);
+      expect(client.getCacheStats().size).toBe(1);
+
+      await client.put('/api/dashboards/1', { title: 'updated' });
+
+      expect(client.getCacheStats().size).toBe(0);
+    });
+
+    it('should clear cache on PATCH', async () => {
+      await client.get('/api/dashboards', undefined, true);
+      expect(client.getCacheStats().size).toBe(1);
+
+      await client.patch('/api/dashboards/1', { title: 'patched' });
+
+      expect(client.getCacheStats().size).toBe(0);
+    });
+
+    it('should clear cache on DELETE', async () => {
+      await client.get('/api/dashboards', undefined, true);
+      expect(client.getCacheStats().size).toBe(1);
+
+      await client.delete('/api/dashboards/1');
+
+      expect(client.getCacheStats().size).toBe(0);
+    });
+
+    it('should fetch fresh data after mutation invalidates cache', async () => {
+      // First GET populates cache
+      await client.get('/api/dashboards', undefined, true);
+      expect(mockAxiosInstance.get).toHaveBeenCalledTimes(1);
+
+      // POST clears cache
+      await client.post('/api/dashboards', { title: 'new' });
+
+      // Second GET should hit the server again (cache was cleared)
+      await client.get('/api/dashboards', undefined, true);
+      expect(mockAxiosInstance.get).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('mutation resilience wrapping', () => {
+    let client: GrafanaHttpClient;
+    let mockAxiosInstance: any;
+    let mockExecuteWithResilience: any;
+
+    beforeEach(async () => {
+      const axios = vi.mocked(await import('axios')).default;
+      mockAxiosInstance = {
+        get: vi.fn().mockResolvedValue({ data: { result: 'get-data' } }),
+        post: vi.fn().mockResolvedValue({ data: { result: 'post-data' } }),
+        put: vi.fn().mockResolvedValue({ data: { result: 'put-data' } }),
+        patch: vi.fn().mockResolvedValue({ data: { result: 'patch-data' } }),
+        delete: vi.fn().mockResolvedValue({ data: { result: 'delete-data' } }),
+        interceptors: {
+          request: { use: vi.fn() },
+          response: { use: vi.fn() },
+        },
+      };
+
+      axios.create.mockReturnValue(mockAxiosInstance);
+      client = new GrafanaHttpClient(mockConfig);
+
+      // Get reference to the mock resilient handler
+      mockExecuteWithResilience = (client as any).resilientHandler.executeWithResilience;
+    });
+
+    it('should use resilience handler for POST', async () => {
+      await client.post('/api/test', { data: 'test' });
+
+      expect(mockExecuteWithResilience).toHaveBeenCalledWith(
+        expect.any(Function),
+        'POST /api/test',
+      );
+    });
+
+    it('should use resilience handler for PUT', async () => {
+      await client.put('/api/test/1', { data: 'test' });
+
+      expect(mockExecuteWithResilience).toHaveBeenCalledWith(
+        expect.any(Function),
+        'PUT /api/test/1',
+      );
+    });
+
+    it('should use resilience handler for PATCH', async () => {
+      await client.patch('/api/test/1', { data: 'test' });
+
+      expect(mockExecuteWithResilience).toHaveBeenCalledWith(
+        expect.any(Function),
+        'PATCH /api/test/1',
+      );
+    });
+
+    it('should use resilience handler for DELETE', async () => {
+      await client.delete('/api/test/1');
+
+      expect(mockExecuteWithResilience).toHaveBeenCalledWith(
+        expect.any(Function),
+        'DELETE /api/test/1',
+      );
+    });
+  });
+
   describe('testConnection', () => {
     let client: GrafanaHttpClient;
     let mockAxiosInstance: any;

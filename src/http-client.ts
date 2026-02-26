@@ -326,47 +326,71 @@ export class GrafanaHttpClient {
   }
 
   /**
-   * Make a POST request
+   * Make a POST request with cache invalidation and resilience
    */
   async post<T = any>(
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await this.client.post<T>(url, data, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.post<T>(url, data, config);
+        return response.data;
+      },
+      `POST ${url}`,
+    );
   }
 
   /**
-   * Make a PUT request
+   * Make a PUT request with cache invalidation and resilience
    */
   async put<T = any>(
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await this.client.put<T>(url, data, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.put<T>(url, data, config);
+        return response.data;
+      },
+      `PUT ${url}`,
+    );
   }
 
   /**
-   * Make a DELETE request
+   * Make a DELETE request with cache invalidation and resilience
    */
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.delete<T>(url, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.delete<T>(url, config);
+        return response.data;
+      },
+      `DELETE ${url}`,
+    );
   }
 
   /**
-   * Make a PATCH request
+   * Make a PATCH request with cache invalidation and resilience
    */
   async patch<T = any>(
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await this.client.patch<T>(url, data, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.patch<T>(url, data, config);
+        return response.data;
+      },
+      `PATCH ${url}`,
+    );
   }
 
   /**
