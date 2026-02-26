@@ -1138,12 +1138,11 @@ describe('RampService', () => {
 
       const result = await service.annotateTest({ text: 'Test started at 10 Gbps' });
       expect(result.id).toBe(42);
-      expect(result.sensor).toEqual(info);
 
       // Verify correct API call
       expect(client.post).toHaveBeenCalledWith('/api/annotations', {
         text: 'Test started at 10 Gbps',
-        tags: ['ramp-result'],
+        tags: ['ramp-test'],
         time: expect.any(Number),
       });
     });
@@ -1184,7 +1183,7 @@ describe('RampService', () => {
         text: 'Annotation on sensor B',
       });
 
-      expect(result.sensor.hostname).toBe('sensor-b');
+      expect(result.id).toBe(44);
       expect(client2.post).toHaveBeenCalled();
       expect(client1.post).not.toHaveBeenCalled();
     });

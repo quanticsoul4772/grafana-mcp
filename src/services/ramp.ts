@@ -733,16 +733,22 @@ export class RampService {
     sensor?: string;
     text: string;
     tags?: string[];
-  }): Promise<{ id: number; sensor: SensorInfo }> {
+    time?: number;
+    timeEnd?: number;
+    dashboardUid?: string;
+  }): Promise<{ id: number }> {
     const { info, client } = this.resolveSensor(options.sensor);
-
-    const response = await client.post<{ id: number }>('/api/annotations', {
+    const now = Date.now();
+    const body: Record<string, any> = {
       text: options.text,
-      tags: options.tags ?? ['ramp-result'],
-      time: Date.now(),
-    });
+      tags: options.tags ?? ['ramp-test'],
+      time: options.time ?? now,
+    };
+    if (options.timeEnd) body.timeEnd = options.timeEnd;
+    if (options.dashboardUid) body.dashboardUID = options.dashboardUid;
 
-    return { id: response.id, sensor: info };
+    const result = await client.post<{ id: number }>('/api/annotations', body);
+    return result;
   }
 
   /**

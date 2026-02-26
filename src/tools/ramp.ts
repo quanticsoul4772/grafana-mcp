@@ -324,7 +324,7 @@ export function registerRampTools(
       name: 'annotate_test',
       description:
         'Add a Grafana annotation on a sensor for test events ' +
-        '(start/end/result/rate change). Tagged with ramp-result by default.',
+        '(start/end/result/rate change). Supports range annotations and dashboard association. Tagged with ramp-test by default.',
       inputSchema: zodToJsonSchema(AnnotateTestSchema),
     },
     async (request) => {
@@ -334,13 +334,16 @@ export function registerRampTools(
           sensor: params.sensor,
           text: params.text,
           tags: params.tags,
+          time: params.time,
+          timeEnd: params.timeEnd,
+          dashboardUid: params.dashboardUid,
         });
 
         return {
           content: [
             {
               type: 'text',
-              text: `Annotation created on ${result.sensor.hostname} (id: ${result.id})`,
+              text: `Annotation created (id: ${result.id})`,
             },
           ],
         };
@@ -366,7 +369,7 @@ export function registerRampTools(
         const params = FleetVerdictSchema.parse(request.params.arguments);
         const { verdicts, summary } = await rampService.getFleetVerdict(params.build, params.profile);
         const lines = verdicts.map((v) =>
-          `| ${v.sensor} | ${v.level} | ${v.deltas.map((d) => `${d.metric}: ${d.deltaPct >= 0 ? '+' : ''}${d.deltaPct.toFixed(1)}%`).join(', ') || v.summary} |`
+          `| ${v.sensor} | ${v.level} | ${v.deltas.map((d) => `${d.metric}: ${d.deltaPct >= 0 ? '+' : ''}${d.deltaPct.toFixed(1)}%`).join(', ') || v.summary} |`,
         );
         const text = [
           `**Fleet Verdict — ${params.build} / ${params.profile}**`,

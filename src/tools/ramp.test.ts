@@ -409,12 +409,6 @@ describe('Ramp Tools', () => {
   describe('annotate_test', () => {
     it('should call annotateTest and format response', async () => {
       vi.mocked(mockService.annotateTest).mockResolvedValue({
-        sensor: {
-          hostname: 'sensor-1',
-          port: 3100,
-          grafanaUrl: 'http://localhost:3100',
-          prometheusUid: 'prom-abc',
-        },
         id: 42,
       });
 
@@ -423,13 +417,13 @@ describe('Ramp Tools', () => {
         params: {
           arguments: {
             text: 'Test started at 10 Gbps',
-            tags: ['ramp-result'],
+            tags: ['ramp-test'],
           },
         },
       });
 
       expect(mockService.annotateTest).toHaveBeenCalled();
-      expect(result.content[0].text).toContain('Annotation created on sensor-1');
+      expect(result.content[0].text).toContain('Annotation created');
       expect(result.content[0].text).toContain('id: 42');
     });
 
@@ -438,7 +432,7 @@ describe('Ramp Tools', () => {
       const handler = registry.getHandler('annotate_test')!;
       const result = await handler({
         params: {
-          arguments: { text: 'Test', tags: ['ramp-result'] },
+          arguments: { text: 'Test', tags: ['ramp-test'] },
         },
       });
       expect(result.isError).toBe(true);

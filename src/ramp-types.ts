@@ -96,9 +96,12 @@ export const SensorPerformanceVerdictSchema = z.object({
 });
 
 export const AnnotateTestSchema = z.object({
-  sensor: z.string().optional().describe('Sensor hostname. If omitted, uses first discovered sensor.'),
-  text: z.string().min(1).describe('Annotation text (e.g., "Test started at 10 Gbps")'),
-  tags: z.array(z.string()).default(['ramp-result']).describe('Tags for the annotation'),
+  sensor: z.string().optional().describe('Sensor hostname'),
+  text: z.string().min(1).describe('Annotation text'),
+  tags: z.array(z.string()).optional().describe('Annotation tags (e.g., ["ramp-test", "ns2"])'),
+  time: z.number().optional().describe('Annotation epoch timestamp (defaults to now)'),
+  timeEnd: z.number().optional().describe('End epoch timestamp for range annotations'),
+  dashboardUid: z.string().optional().describe('Dashboard UID to associate annotation with'),
 });
 
 export const FleetVerdictSchema = z.object({
@@ -152,5 +155,9 @@ export const GetTestResultSchema = z.object({
 });
 
 export const GetTestVitalsSchema = z.object({
+  path: z.string().min(1).describe('Full path to the test run directory'),
+});
+
+export const SummarizeRunSchema = z.object({
   path: z.string().min(1).describe('Full path to the test run directory'),
 });
