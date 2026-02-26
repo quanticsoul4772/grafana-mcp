@@ -25,6 +25,7 @@ import { AlertingService } from './services/alerting.js';
 import { AdminService } from './services/admin.js';
 import { NavigationService } from './services/navigation.js';
 import { RampService } from './services/ramp.js';
+import { RampResultsService } from './services/ramp-results.js';
 
 // Import tool registrations
 import { registerDashboardTools } from './tools/dashboard.js';
@@ -35,6 +36,7 @@ import { registerLokiTools } from './tools/loki.js';
 import { registerAlertingTools } from './tools/alerting.js';
 import { registerNavigationTools } from './tools/navigation.js';
 import { registerRampTools } from './tools/ramp.js';
+import { registerRampResultsTools } from './tools/ramp-results.js';
 
 /**
  * Ensure the Grafana Docker container is running if the target is localhost.
@@ -109,6 +111,7 @@ async function main() {
     const adminService = new AdminService(httpClient);
     const navigationService = new NavigationService(config);
     const rampService = new RampService();
+    const rampResultsService = new RampResultsService();
 
     // Create tool registry
     const toolRegistry = new ToolRegistry();
@@ -172,6 +175,7 @@ async function main() {
 
     if (isToolCategoryEnabled('ramp')) {
       registerRampTools(toolRegistry, rampService);
+      registerRampResultsTools(toolRegistry, rampResultsService);
 
       // Auto-discover sensors on startup (non-blocking)
       rampService.discoverSensors().then((sensors) => {

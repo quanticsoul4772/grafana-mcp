@@ -90,3 +90,18 @@ export const AnnotateTestSchema = z.object({
   text: z.string().min(1).describe('Annotation text (e.g., "Test started at 10 Gbps")'),
   tags: z.array(z.string()).default(['ramp-result']).describe('Tags for the annotation'),
 });
+
+// --- Result tool schemas ---
+
+export const ListTestRunsSchema = z.object({
+  date: z.string().optional().describe('Filter to specific date (YYYY-MM-DD)'),
+  sensor: z.string().optional().describe('Filter by sensor name substring'),
+});
+
+export const GetTestResultSchema = z.object({
+  path: z.string().min(1).describe('Full path to the test run directory'),
+});
+
+export const GetTestVitalsSchema = z.object({
+  path: z.string().min(1).describe('Full path to the test run directory'),
+});
