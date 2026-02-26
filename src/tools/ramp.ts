@@ -170,8 +170,9 @@ export function registerRampTools(
         };
       } catch (error) {
         const msg = error instanceof Error ? error.message : 'Unknown error';
+        const sensorName = params.sensor || 'default sensor';
         return {
-          content: [{ type: 'text', text: `Prometheus query failed: ${msg}` }],
+          content: [{ type: 'text', text: `Prometheus query failed on ${sensorName}: ${msg}. Check if the sensor is running a test.` }],
           isError: true,
         };
       }

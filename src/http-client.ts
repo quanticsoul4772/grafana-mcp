@@ -45,7 +45,9 @@ export class GrafanaHttpClient {
       baseURL: config.GRAFANA_URL,
       timeout: config.GRAFANA_TIMEOUT,
       headers: {
-        Authorization: `Bearer ${config.GRAFANA_TOKEN}`,
+        Authorization: config.GRAFANA_TOKEN.includes(':')
+          ? `Basic ${Buffer.from(config.GRAFANA_TOKEN).toString('base64')}`
+          : `Bearer ${config.GRAFANA_TOKEN}`,
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
