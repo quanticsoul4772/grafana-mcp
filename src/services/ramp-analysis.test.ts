@@ -470,6 +470,26 @@ describe('RampAnalysisService', () => {
 
       expect(comparison.entries[0].verdict).toBe('stable');
     });
+
+    it('should compare two builds with shared sensor types using real baselines', () => {
+      const realRampService = new RampService({ rampProjectPath: '/Users/russellsmith/Projects/ramp' });
+      const service = new RampAnalysisService(realRampService);
+      const result = service.compareBuilds('28.4.0 NGS-Brolin-latest', '28.4.1 NGS-Brolin');
+      expect(result.entries.length).toBeGreaterThan(0);
+      expect(result.buildA).toBe('28.4.0 NGS-Brolin-latest');
+      expect(result.buildB).toBe('28.4.1 NGS-Brolin');
+      for (const entry of result.entries) {
+        expect(entry.sensorType).toBeDefined();
+        expect(entry.profile).toBeDefined();
+        expect(['improved', 'regressed', 'stable']).toContain(entry.verdict);
+      }
+    });
+
+    it('should throw for nonexistent build using real baselines', () => {
+      const realRampService = new RampService({ rampProjectPath: '/Users/russellsmith/Projects/ramp' });
+      const service = new RampAnalysisService(realRampService);
+      expect(() => service.compareBuilds('FAKE', '28.4.1 NGS-Brolin')).toThrow(/not found/);
+    });
   });
 
   describe('watchTest', () => {
