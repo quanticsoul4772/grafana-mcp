@@ -28,7 +28,8 @@ export type ToolCategory =
   | 'sift'
   | 'oncall'
   | 'admin'
-  | 'navigation';
+  | 'navigation'
+  | 'ramp';
 
 // Dashboard types
 export interface Dashboard {

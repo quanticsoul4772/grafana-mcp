@@ -1,5 +1,5 @@
 export type ToolCategory = 'dashboards' | 'datasources' | 'prometheus' | 'loki' | 
-  'alerting' | 'incident' | 'sift' | 'oncall' | 'admin' | 'navigation';
+  'alerting' | 'incident' | 'sift' | 'oncall' | 'admin' | 'navigation' | 'ramp';
 
 export interface ToolDefinition {
   name: string;

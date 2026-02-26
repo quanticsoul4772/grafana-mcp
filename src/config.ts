@@ -67,6 +67,7 @@ export function getEnabledToolCategories(config: Config): ToolCategory[] {
     'oncall',
     'admin',
     'navigation',
+    'ramp',
   ];
 
   return allCategories.filter((category) =>

@@ -4,85 +4,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Grafana MCP (Model Context Protocol) Server that provides AI-powered integration with Grafana instances. It exposes Grafana's functionality through MCP tools for dashboard management, data source operations, Prometheus/Loki querying, alerting, and administrative tasks.
+Grafana MCP Server — exposes Grafana functionality (dashboards, datasources, Prometheus, Loki, alerting, admin) as MCP tools over stdio transport. Built with TypeScript, Zod, and the `@modelcontextprotocol/sdk`.
 
-## Development Commands
+## Commands
 
-### Build & Development
-- `npm run build` - Compile TypeScript to JavaScript in `build/` directory
-- `npm run dev` - Run development server with hot reload using tsx
-- `npm run start` - Run compiled server from `build/main.js`
-- `npm run clean` - Remove build artifacts
+### Build & Run
+- `npm run build` — compile TypeScript to `build/` (uses `tsconfig.json`)
+- `npm run build:prod` — production build to `dist/` (uses `tsconfig.prod.json`, strips tests/sourcemaps)
+- `npm run dev` — run with tsx hot reload
+- `npm start` — run compiled `build/main.js`
 
-### Testing
-- `npm test` or `npm run test` - Run tests with Vitest
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:run` - Run tests once (non-watch mode)
+### Test
+- `npm test` — run Vitest (interactive watch mode by default)
+- `npm run test:run` — run tests once, no watch
+- `npx vitest run src/services/dashboard.test.ts` — run a single test file
+- `npm run test:coverage` — coverage report (60% threshold for statements/branches/functions/lines)
 
-### Code Quality
-- `npm run lint` - Run ESLint with zero warnings policy
-- `npm run lint:fix` - Run ESLint with auto-fix
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
-- `npm run type-check` - Run TypeScript type checking without emitting
-
-### Other
-- `npm run prepare` - Runs build (used for npm lifecycle)
+### Lint & Format
+- `npm run lint` — ESLint (allows up to 200 warnings; errors must be zero)
+- `npm run lint:fix` — ESLint with auto-fix
+- `npm run format` — Prettier
+- `npm run type-check` — `tsc --noEmit`
 
 ## Architecture
 
-### Core Components
+### Request Flow
 
-**Entry Point**: `src/main.ts` - Initializes the MCP server, creates services, registers tools, and handles MCP protocol communication via stdio transport.
+```
+MCP Client → stdio → Server (main.ts) → ToolRegistry → Tool Handler → Service → GrafanaHttpClient → Grafana API
+```
 
-**Configuration**: `src/config.ts` + `src/types.ts` - Environment-based configuration with Zod validation. Supports Grafana URL, authentication token, debug mode, timeouts, TLS settings, and selective tool category disabling.
+### Key Layers
 
-**HTTP Client**: `src/http-client.ts` - Centralized HTTP client with Grafana API authentication, error handling, and optional TLS configuration.
+**Entry point** (`src/main.ts`): Creates `GrafanaHttpClient`, instantiates all services, registers tools by category (skipping categories listed in `GRAFANA_DISABLE_TOOLS`), wires up MCP `ListTools` and `CallTool` handlers, connects stdio transport.
 
-**Tool Registry**: `src/tool-registry.ts` - Central registry that manages MCP tool definitions and their handlers. Maps tool names to schemas and execution handlers.
+**Tool Registry** (`src/tool-registry.ts`): Maps tool names to `{ definition, handler }`. Tools are registered via `registerTool(definition, handler)` where `definition.inputSchema` is a JSON Schema object produced by `zodToJsonSchema()`.
 
-### Service Layer (`src/services/`)
-Business logic services that wrap Grafana API calls:
-- `dashboard.ts` - Dashboard CRUD operations and search
-- `datasource.ts` - Data source management and metadata
-- `prometheus.ts` - Prometheus metric queries and metadata  
-- `loki.ts` - Loki log queries and label operations
-- `alerting.ts` - Alert rule and notification management
-- `admin.ts` - User, team, and organization management
-- `navigation.ts` - Deep link generation for Grafana URLs
+**Tool files** (`src/tools/*.ts`): Each exports a `registerXxxTools(registry, service)` function. Inside, each tool: (1) parses input with a Zod schema, (2) calls the corresponding service method, (3) formats the result as MCP text content, (4) catches errors via `handleToolError()`. Tool categories: dashboards, datasources, prometheus, loki, alerting, admin, navigation, ramp.
 
-### Tool Layer (`src/tools/`)
-MCP tool definitions that expose services through the protocol:
-- Each file corresponds to a service and registers tools with the registry
-- Tools validate input parameters using Zod schemas
-- Tool categories can be selectively disabled via configuration
+**Service files** (`src/services/*.ts`): Business logic wrapping Grafana REST API calls. Most extend `BaseHttpService` (from `src/core/base-service.ts`) which provides `execute()` (returns `Result<T>`) and `executeOrThrow()` wrappers. Services receive `GrafanaHttpClient` via constructor. Exceptions: `NavigationService` takes `Config` directly (no HTTP calls, just URL generation); `RampService` manages its own per-sensor `GrafanaHttpClient` instances (auto-discovered via SSH tunnel port scanning).
 
-### Type System (`src/types.ts`)
-Comprehensive TypeScript definitions for:
-- Grafana API response types (dashboards, panels, datasources, etc.)
-- Configuration schemas with Zod validation
-- MCP tool parameter schemas
-- Domain-specific types for Prometheus, Loki, alerting, incidents, etc.
+**HTTP Client** (`src/http-client.ts`): Axios-based client with Bearer token auth, optional TLS/mTLS, response caching (1-min TTL), and resilience (retry with exponential backoff + circuit breaker via `src/retry-client.ts`).
+
+**Error handling**: `src/error-handler.ts` provides `handleToolError()` used by all tool handlers. `src/security-utils.ts` categorizes errors (user/system/network/validation) and sanitizes sensitive data from logs.
+
+### Core Infrastructure (`src/core/`)
+
+Contains DI container, base service classes, interfaces, service registry, and a declarative tool system. These are partially adopted — services extend `BaseHttpService`, but the DI container and decorator-based tool registration (`src/core/tool-system.ts`) are not yet used by the main entry point. See `REFACTORING_GUIDE.md` for the planned migration.
+
+### Type System
+
+- `src/types.ts` — Grafana domain types (Dashboard, Panel, AlertRule, etc.), `Config`/`ConfigSchema`, and tool parameter Zod schemas (e.g., `SearchDashboardsSchema`, `QueryPrometheusSchema`)
+- `src/common-schemas.ts` — Reusable Zod schemas (branded UIDs, pagination, time ranges) and validation helpers
+
+## Key Conventions
+
+- **ES Modules**: `"type": "module"` — all imports must use `.js` extensions (e.g., `import { config } from './config.js'`)
+- **TypeScript strict mode** with all strict flags enabled
+- **Zod for all validation**: tool inputs, config parsing, schema generation for MCP via `zodToJsonSchema()`
+- **Single quotes**, **semicolons**, **trailing commas** (enforced by ESLint + Prettier)
+- **Unused vars**: prefix with `_` (e.g., `_error`) — configured in ESLint
+- **Logging goes to stderr** (`console.error`) since stdout is reserved for MCP stdio transport
 
 ## Configuration
 
-The server is configured via environment variables:
-- `GRAFANA_URL` - Grafana instance URL (required)
-- `GRAFANA_TOKEN` - API token for authentication (required)
-- `GRAFANA_DEBUG` - Enable debug logging (default: false)
-- `GRAFANA_TIMEOUT` - HTTP request timeout in ms (default: 30000)
-- `GRAFANA_DISABLE_TOOLS` - Comma-separated tool categories to disable
-- TLS options: `GRAFANA_TLS_CERT_FILE`, `GRAFANA_TLS_KEY_FILE`, `GRAFANA_TLS_CA_FILE`, `GRAFANA_TLS_SKIP_VERIFY`
-
-Tool categories that can be disabled: dashboards, datasources, prometheus, loki, alerting, incident, sift, oncall, admin, navigation
-
-## Development Notes
-
-- Uses ES modules (`"type": "module"` in package.json)
-- TypeScript with strict mode enabled and comprehensive type checking
-- Modern Node.js targeting (ES2022, Node 18+)
-- Service-oriented architecture with clear separation between HTTP operations, business logic, and MCP tool exposure
-- All services depend on a shared HTTP client for consistent error handling and authentication
-- Zod schemas provide runtime validation for both configuration and tool parameters
-- Tool registration is modular and conditional based on configuration
+Environment variables (validated by `ConfigSchema` in `src/types.ts`):
+- `GRAFANA_URL` (required) — Grafana instance URL
+- `GRAFANA_TOKEN` (required) — service account token, API key, or `user:password`
+- `GRAFANA_DEBUG` — enable verbose HTTP logging (default: false)
+- `GRAFANA_TIMEOUT` — HTTP timeout in ms (default: 30000)
+- `GRAFANA_DISABLE_TOOLS` — comma-separated categories to skip: dashboards, datasources, prometheus, loki, alerting, incident, sift, oncall, admin, navigation, ramp
+- `GRAFANA_TLS_*` — optional mTLS config (cert, key, CA files, skip verify)
+- `RAMP_PROJECT_PATH` — path to ramp project root for dashboard/baseline files (default: `~/Projects/ramp`)
+- `RAMP_SCAN_PORTS` — port range for SSH tunnel auto-discovery (default: `8080-8099`)

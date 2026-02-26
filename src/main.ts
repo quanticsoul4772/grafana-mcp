@@ -7,6 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
+import { execSync } from 'child_process';
 import { config } from './config.js';
 import { GrafanaHttpClient } from './http-client.js';
 import { ToolRegistry } from './tool-registry.js';
@@ -19,6 +20,7 @@ import { LokiService } from './services/loki.js';
 import { AlertingService } from './services/alerting.js';
 import { AdminService } from './services/admin.js';
 import { NavigationService } from './services/navigation.js';
+import { RampService } from './services/ramp.js';
 
 // Import tool registrations
 import { registerDashboardTools } from './tools/dashboard.js';
@@ -28,12 +30,50 @@ import { registerPrometheusTools } from './tools/prometheus.js';
 import { registerLokiTools } from './tools/loki.js';
 import { registerAlertingTools } from './tools/alerting.js';
 import { registerNavigationTools } from './tools/navigation.js';
+import { registerRampTools } from './tools/ramp.js';
+
+/**
+ * Ensure the Grafana Docker container is running if the target is localhost.
+ */
+async function ensureGrafanaContainer(): Promise<void> {
+  const url = config.GRAFANA_URL;
+  if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
+    return; // remote instance, nothing to manage
+  }
+
+  try {
+    const status = execSync('docker inspect -f "{{.State.Running}}" grafana 2>/dev/null', { encoding: 'utf-8' }).trim();
+    if (status === 'true') {
+      return; // already running
+    }
+    console.error('[INFO] Grafana container exists but is stopped, starting...');
+    execSync('docker start grafana', { stdio: 'pipe' });
+  } catch {
+    // container doesn't exist — nothing to auto-start
+    console.error('[WARN] No "grafana" Docker container found. Create one with: docker run -d -p 3000:3000 --name grafana grafana/grafana');
+    return;
+  }
+
+  // Wait for Grafana to become healthy (up to 15s)
+  for (let i = 0; i < 15; i++) {
+    try {
+      execSync(`curl -sf ${url}/api/health`, { stdio: 'pipe' });
+      console.error('[INFO] Grafana container is ready');
+      return;
+    } catch {
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+  console.error('[WARN] Grafana container started but health check timed out');
+}
 
 /**
  * Main entry point for the Grafana MCP Server
  */
 async function main() {
   try {
+    await ensureGrafanaContainer();
+
     // Create HTTP client
     const httpClient = new GrafanaHttpClient(config);
 
@@ -45,6 +85,7 @@ async function main() {
     const alertingService = new AlertingService(httpClient);
     const adminService = new AdminService(httpClient);
     const navigationService = new NavigationService(config);
+    const rampService = new RampService();
 
     // Create tool registry
     const toolRegistry = new ToolRegistry();
@@ -94,6 +135,21 @@ async function main() {
 
     if (isToolCategoryEnabled('navigation')) {
       registerNavigationTools(toolRegistry, navigationService);
+    }
+
+    if (isToolCategoryEnabled('ramp')) {
+      registerRampTools(toolRegistry, rampService);
+
+      // Auto-discover sensors on startup (non-blocking)
+      rampService.discoverSensors().then((sensors) => {
+        if (sensors.length > 0) {
+          console.error(`[INFO] RAMP: Discovered ${sensors.length} sensor(s): ${sensors.map((s) => s.hostname).join(', ')}`);
+        } else {
+          console.error('[INFO] RAMP: No sensor tunnels detected. Use discover_sensors tool to scan later.');
+        }
+      }).catch((err) => {
+        console.error(`[WARN] RAMP: Sensor discovery failed: ${err instanceof Error ? err.message : err}`);
+      });
     }
 
     // Implement proper MCP request handlers
