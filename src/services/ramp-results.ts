@@ -124,4 +124,37 @@ export class RampResultsService {
     if (lines.length === 0) return null;
     return JSON.parse(lines[0]);
   }
+
+  summarizeRun(runPath: string): {
+    meta: TestResult | null;
+    result: TestResult | null;
+    vitalCount: number;
+    hasErrors: boolean;
+    summary: string;
+  } {
+    const meta = this.getTestMeta(runPath);
+    const result = this.getTestResult(runPath);
+    const vitals = this.getTestVitals(runPath);
+    const errorPath = path.join(runPath, 'error.jsonl');
+    const hasErrors = fs.existsSync(errorPath);
+
+    const parts: string[] = [];
+    if (meta) {
+      parts.push(`Sensor: ${meta.sensor_uid ?? 'unknown'}, Version: ${meta.version ?? 'unknown'}`);
+    }
+    if (result) {
+      parts.push(`Result: ${result.gbps?.toFixed(1) ?? '?'} Gbps, ${result.kpps?.toFixed(0) ?? '?'} kpps, ${result.klogps?.toFixed(1) ?? '?'} klogps`);
+      parts.push(`Status: ${result.status ?? 'unknown'}`);
+    }
+    parts.push(`Vitals: ${vitals.length} samples`);
+    if (hasErrors) parts.push('ERRORS PRESENT');
+
+    return {
+      meta,
+      result,
+      vitalCount: vitals.length,
+      hasErrors,
+      summary: parts.join(' | '),
+    };
+  }
 }
