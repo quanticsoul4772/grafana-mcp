@@ -7,10 +7,14 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { execSync } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { getConfig } from './config.js';
 import { GrafanaHttpClient } from './http-client.js';
+import { TokenBucketRateLimiter } from './rate-limiter.js';
 import { ToolRegistry } from './tool-registry.js';
+
+const execFileAsync = promisify(execFile);
 
 // Import services
 import { DashboardService } from './services/dashboard.js';
@@ -21,6 +25,10 @@ import { AlertingService } from './services/alerting.js';
 import { AdminService } from './services/admin.js';
 import { NavigationService } from './services/navigation.js';
 import { RampService } from './services/ramp.js';
+import { RampResultsService } from './services/ramp-results.js';
+import { RampAnalysisService } from './services/ramp-analysis.js';
+import { RampControlService } from './services/ramp-control.js';
+import { RampForecastService } from './services/ramp-forecast.js';
 
 // Import tool registrations
 import { registerDashboardTools } from './tools/dashboard.js';
@@ -31,33 +39,54 @@ import { registerLokiTools } from './tools/loki.js';
 import { registerAlertingTools } from './tools/alerting.js';
 import { registerNavigationTools } from './tools/navigation.js';
 import { registerRampTools } from './tools/ramp.js';
+import { registerRampResultsTools } from './tools/ramp-results.js';
+import { registerRampAnalysisTools } from './tools/ramp-analysis.js';
+import { registerRampControlTools } from './tools/ramp-control.js';
+import { registerRampForecastTools } from './tools/ramp-forecast.js';
 
 /**
  * Ensure the Grafana Docker container is running if the target is localhost.
+ * Set GRAFANA_SKIP_DOCKER=true to bypass this check entirely.
  */
 async function ensureGrafanaContainer(config: { GRAFANA_URL: string }): Promise<void> {
+  if (process.env.GRAFANA_SKIP_DOCKER === 'true') {
+    console.error('[INFO] GRAFANA_SKIP_DOCKER is set, skipping Docker container check');
+    return;
+  }
+
   const url = config.GRAFANA_URL;
   if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
     return; // remote instance, nothing to manage
   }
 
   try {
-    const status = execSync('docker inspect -f "{{.State.Running}}" grafana 2>/dev/null', { encoding: 'utf-8' }).trim();
+    const { stdout } = await execFileAsync('docker', [
+      'inspect',
+      '-f',
+      '{{.State.Running}}',
+      'grafana',
+    ]);
+    const status = stdout.trim();
     if (status === 'true') {
       return; // already running
     }
     console.error('[INFO] Grafana container exists but is stopped, starting...');
-    execSync('docker start grafana', { stdio: 'pipe' });
-  } catch {
+    await execFileAsync('docker', ['start', 'grafana']);
+  } catch (error) {
     // container doesn't exist — nothing to auto-start
-    console.error('[WARN] No "grafana" Docker container found. Create one with: docker run -d -p 3000:3000 --name grafana grafana/grafana');
+    console.error(
+      '[WARN] No "grafana" Docker container found. Create one with: docker run -d -p 3000:3000 --name grafana grafana/grafana',
+    );
+    if (process.env.GRAFANA_DEBUG === 'true') {
+      console.error('[DEBUG] Docker inspect error:', error instanceof Error ? error.message : error);
+    }
     return;
   }
 
   // Wait for Grafana to become healthy (up to 15s)
   for (let i = 0; i < 15; i++) {
     try {
-      execSync(`curl -sf ${url}/api/health`, { stdio: 'pipe' });
+      await execFileAsync('curl', ['-sf', `${url}/api/health`]);
       console.error('[INFO] Grafana container is ready');
       return;
     } catch {
@@ -77,6 +106,7 @@ async function main() {
 
     // Create HTTP client
     const httpClient = new GrafanaHttpClient(config);
+    activeHttpClient = httpClient;
 
     // Create services
     const dashboardService = new DashboardService(httpClient);
@@ -87,6 +117,10 @@ async function main() {
     const adminService = new AdminService(httpClient);
     const navigationService = new NavigationService(config);
     const rampService = new RampService();
+    const rampResultsService = new RampResultsService();
+    const rampAnalysisService = new RampAnalysisService(rampService);
+    const rampControlService = new RampControlService(rampService, rampAnalysisService);
+    const rampForecastService = new RampForecastService(rampService);
 
     // Create tool registry
     const toolRegistry = new ToolRegistry();
@@ -103,6 +137,16 @@ async function main() {
         },
       },
     );
+
+    // Optional rate limiting
+    const rateLimitRaw = process.env.GRAFANA_RATE_LIMIT;
+    const rateLimitRate = rateLimitRaw ? Number(rateLimitRaw) : 0;
+    let rateLimiter: TokenBucketRateLimiter | null = null;
+    if (rateLimitRate > 0) {
+      // maxTokens = 10x the per-second rate to allow reasonable bursts
+      rateLimiter = new TokenBucketRateLimiter(rateLimitRate * 10, rateLimitRate);
+      console.error(`[INFO] Rate limiting enabled: ${rateLimitRate} requests/sec (burst: ${rateLimitRate * 10})`);
+    }
 
     // Track which tools are disabled
     const disabledTools = config.GRAFANA_DISABLE_TOOLS || [];
@@ -140,6 +184,10 @@ async function main() {
 
     if (isToolCategoryEnabled('ramp')) {
       registerRampTools(toolRegistry, rampService);
+      registerRampResultsTools(toolRegistry, rampResultsService);
+      registerRampAnalysisTools(toolRegistry, rampAnalysisService);
+      registerRampControlTools(toolRegistry, rampControlService);
+      registerRampForecastTools(toolRegistry, rampForecastService);
 
       // Auto-discover sensors on startup (non-blocking)
       rampService.discoverSensors().then((sensors) => {
@@ -159,6 +207,20 @@ async function main() {
 
       if (config.GRAFANA_DEBUG) {
         console.error(`[DEBUG] Tool called: ${name} with args:`, args);
+      }
+
+      // Rate limit check (if enabled)
+      if (rateLimiter && !rateLimiter.tryAcquire()) {
+        console.error(`[WARN] Rate limited: ${name}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Rate limited. Please wait before making another request.',
+            },
+          ],
+          isError: true,
+        };
       }
 
       try {
@@ -224,7 +286,8 @@ async function main() {
       `[INFO] Debug mode: ${config.GRAFANA_DEBUG ? 'enabled' : 'disabled'}`,
     );
     console.error(`[INFO] Timeout: ${config.GRAFANA_TIMEOUT}ms`);
-    console.error(`[INFO] Registered ${toolRegistry.getTools().length} tools`);
+    const toolCount = toolRegistry.getToolCount();
+    console.error(`[grafana-mcp] Registered ${toolCount} tools (ramp: ${isToolCategoryEnabled('ramp') ? 'enabled' : 'disabled'})`);
 
     if (disabledTools.length > 0) {
       console.error(
@@ -238,15 +301,18 @@ async function main() {
 }
 
 // Handle graceful shutdown
-process.on('SIGINT', () => {
-  console.error('[INFO] Shutting down Grafana MCP Server...');
-  process.exit(0);
-});
+let activeHttpClient: GrafanaHttpClient | null = null;
 
-process.on('SIGTERM', () => {
+function shutdown() {
   console.error('[INFO] Shutting down Grafana MCP Server...');
+  if (activeHttpClient) {
+    activeHttpClient.cleanup();
+  }
   process.exit(0);
-});
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 // Start the server
 main().catch((error) => {

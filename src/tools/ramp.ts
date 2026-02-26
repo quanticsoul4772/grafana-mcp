@@ -9,6 +9,8 @@ import {
   ListBaselinesSchema,
   SensorPerformanceVerdictSchema,
   AnnotateTestSchema,
+  FleetVerdictSchema,
+  SensorTrendSchema,
 } from '../ramp-types.js';
 
 /**
@@ -93,6 +95,9 @@ export function registerRampTools(
           `| Logs | ${metrics.klogps.toFixed(1)} klps |`,
           `| NIC Drops | ${metrics.nicDropsPerSec.toFixed(1)} /s |`,
           `| Zeek Drops | ${metrics.zeekDropsPerSec.toFixed(1)} /s |`,
+          `| Suricata Drops | ${metrics.suricataDropsPerSec.toFixed(1)} /s |`,
+          `| Packet Lag | ${metrics.packetLag.toFixed(2)} s |`,
+          `| Active Connections | ${metrics.activeConnections.toFixed(0)} |`,
           `| Max Worker CPU | ${(metrics.maxWorkerCpu * 100).toFixed(1)}% |`,
           `| Buffer Utilization | ${metrics.bufferUtilPct.toFixed(1)}% |`,
           `| System Memory Available | ${metrics.systemMemoryPct.toFixed(1)}% |`,
@@ -319,7 +324,7 @@ export function registerRampTools(
       name: 'annotate_test',
       description:
         'Add a Grafana annotation on a sensor for test events ' +
-        '(start/end/result/rate change). Tagged with ramp-result by default.',
+        '(start/end/result/rate change). Supports range annotations and dashboard association. Tagged with ramp-test by default.',
       inputSchema: zodToJsonSchema(AnnotateTestSchema),
     },
     async (request) => {
@@ -329,13 +334,16 @@ export function registerRampTools(
           sensor: params.sensor,
           text: params.text,
           tags: params.tags,
+          time: params.time,
+          timeEnd: params.timeEnd,
+          dashboardUid: params.dashboardUid,
         });
 
         return {
           content: [
             {
               type: 'text',
-              text: `Annotation created on ${result.sensor.hostname} (id: ${result.id})`,
+              text: `Annotation created (id: ${result.id})`,
             },
           ],
         };
@@ -345,6 +353,67 @@ export function registerRampTools(
           content: [{ type: 'text', text: `Error creating annotation: ${msg}` }],
           isError: true,
         };
+      }
+    },
+  );
+
+  // 8. fleet_verdict
+  registry.registerTool(
+    {
+      name: 'fleet_verdict',
+      description: 'Run performance verdict against all discovered sensors in parallel. Returns per-sensor results and fleet summary.',
+      inputSchema: zodToJsonSchema(FleetVerdictSchema),
+    },
+    async (request) => {
+      try {
+        const params = FleetVerdictSchema.parse(request.params.arguments);
+        const { verdicts, summary } = await rampService.getFleetVerdict(params.build, params.profile);
+        const lines = verdicts.map((v) =>
+          `| ${v.sensor} | ${v.level} | ${v.deltas.map((d) => `${d.metric}: ${d.deltaPct >= 0 ? '+' : ''}${d.deltaPct.toFixed(1)}%`).join(', ') || v.summary} |`,
+        );
+        const text = [
+          `**Fleet Verdict — ${params.build} / ${params.profile}**`,
+          '',
+          '| Sensor | Verdict | Details |',
+          '|--------|---------|---------|',
+          ...lines,
+          '',
+          summary,
+        ].join('\n');
+        return { content: [{ type: 'text', text }] };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        return { content: [{ type: 'text', text: `Error: ${msg}` }], isError: true };
+      }
+    },
+  );
+
+  // 9. sensor_trend
+  registry.registerTool(
+    {
+      name: 'sensor_trend',
+      description: 'Show a sensor type\'s performance across all builds in baselines.json. Useful for spotting when regressions were introduced.',
+      inputSchema: zodToJsonSchema(SensorTrendSchema),
+    },
+    async (request) => {
+      try {
+        const params = SensorTrendSchema.parse(request.params.arguments);
+        const trend = rampService.getSensorTrend(params.sensorType, params.profile);
+        if (trend.length === 0) {
+          return { content: [{ type: 'text', text: `No baseline data for ${params.sensorType} / ${params.profile}` }] };
+        }
+        const lines = trend.map((e) => `| ${e.build} | ${e.gbps.toFixed(1)} | ${e.kpps.toFixed(0)} | ${e.klps.toFixed(1)} |`);
+        const text = [
+          `**Trend: ${params.sensorType} / ${params.profile}** (${trend.length} builds)`,
+          '',
+          '| Build | Gbps | kpps | klps |',
+          '|-------|------|------|------|',
+          ...lines,
+        ].join('\n');
+        return { content: [{ type: 'text', text }] };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        return { content: [{ type: 'text', text: `Error: ${msg}` }], isError: true };
       }
     },
   );

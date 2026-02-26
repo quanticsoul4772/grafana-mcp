@@ -10,7 +10,9 @@ import {
   Verdict,
   VerdictLevel,
   MetricDelta,
+  TrendEntry,
 } from '../ramp-types.js';
+import { parseRelativeTime } from '../utils/time.js';
 
 // PromQL queries for sensor_status
 const METRIC_QUERIES = {
@@ -22,11 +24,15 @@ const METRIC_QUERIES = {
   maxWorkerCpu: 'max(sum by (groupname)(rate(namedprocess_namegroup_cpu_seconds_total{groupname=~"zeek-worker-.*"}[5m])))',
   bufferUtilPct: 'sum(napatech_stream_host_buffer_enqueued_bytes - napatech_stream_host_buffer_dequeued_bytes) / clamp_min(sum(napatech_stream_host_buffer_total_bytes), 1) * 100',
   systemMemoryPct: 'node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100',
+  suricataDropsPerSec: 'sum(rate(suricata_napatech_dispatch_drop_packets_total[5m])) + sum(rate(suricata_napatech_overflow_drop_packets_total[5m]))',
+  packetLag: 'max(max by (node)(zeek_net_packet_lag_seconds))',
+  activeConnections: 'sum(zeek_active_connections)',
 } as const;
 
 export class RampService {
   private sensors = new Map<string, SensorInfo>();
   private clients = new Map<string, GrafanaHttpClient>();
+  private dashboardCache: any = null;
   private rampProjectPath: string;
   private scanPorts: { start: number; end: number };
   private sensorToken: string;
@@ -240,9 +246,12 @@ export class RampService {
       klogps: metrics.klogps ?? 0,
       nicDropsPerSec: metrics.nicDropsPerSec ?? 0,
       zeekDropsPerSec: metrics.zeekDropsPerSec ?? 0,
+      suricataDropsPerSec: metrics.suricataDropsPerSec ?? 0,
       maxWorkerCpu: metrics.maxWorkerCpu ?? 0,
       bufferUtilPct: metrics.bufferUtilPct ?? 0,
       systemMemoryPct: metrics.systemMemoryPct ?? 0,
+      packetLag: metrics.packetLag ?? 0,
+      activeConnections: metrics.activeConnections ?? 0,
     };
 
     return { sensor: info, metrics: snapshot };
@@ -268,8 +277,8 @@ export class RampService {
       if (!options.start || !options.end) {
         throw new Error('start and end are required for range queries (instant: false)');
       }
-      params.start = options.start;
-      params.end = options.end;
+      params.start = parseRelativeTime(options.start);
+      params.end = parseRelativeTime(options.end);
       params.step = options.step ?? '15s';
     }
 
@@ -304,7 +313,10 @@ export class RampService {
       );
     }
 
-    const dashboardJson = JSON.parse(fs.readFileSync(dashboardPath, 'utf-8'));
+    if (!this.dashboardCache) {
+      this.dashboardCache = JSON.parse(fs.readFileSync(dashboardPath, 'utf-8'));
+    }
+    const dashboardJson = JSON.parse(JSON.stringify(this.dashboardCache)); // deep clone
 
     // Patch datasource variable default to the sensor's Prometheus UID
     if (dashboardJson.templating?.list) {
@@ -509,16 +521,77 @@ export class RampService {
   }
 
   /**
-   * Detect sensor type from hostname
+   * Detect sensor type from hostname.
+   *
+   * Strategy:
+   * 1. Direct substring match (hostname contains "ap3000", etc.)
+   * 2. Extract IP from sensor_192_168_X_Y hostnames and look up in
+   *    dashboards/sensor-types.json
    */
   private detectSensorType(hostname: string, buildData: Record<string, any>): string | null {
     const normalizedHost = hostname.toLowerCase();
+
+    // Strategy 1: hostname contains sensor type (e.g. "ap3000-xxxx-132")
     for (const sensorType of Object.keys(buildData)) {
       if (normalizedHost.includes(sensorType.toLowerCase())) {
         return sensorType;
       }
     }
+
+    // Strategy 2: parse IP from "sensor_192_168_X_Y" hostname pattern
+    const ipMatch = normalizedHost.match(/sensor_(\d+)_(\d+)_(\d+)_(\d+)/);
+    if (ipMatch) {
+      const ip = `${ipMatch[1]}.${ipMatch[2]}.${ipMatch[3]}.${ipMatch[4]}`;
+      const sensorType = this.lookupSensorTypeByIp(ip);
+      if (sensorType) {
+        // Verify this sensor type exists in the build data (case-insensitive)
+        for (const key of Object.keys(buildData)) {
+          if (key.toUpperCase() === sensorType.toUpperCase()) {
+            return key;
+          }
+        }
+      }
+    }
+
     return null;
+  }
+
+  /**
+   * Look up sensor type by IP from dashboards/sensor-types.json
+   */
+  private lookupSensorTypeByIp(ip: string): string | null {
+    const config = this.getSensorConfig(ip);
+    return config?.type ?? null;
+  }
+
+  /**
+   * Get rich sensor config (type, replayer, control, password) by IP
+   */
+  getSensorConfig(ip: string): { type: string; replayer?: string; control?: string; password?: string } | null {
+    const sensorTypesPath = path.join(this.rampProjectPath, 'dashboards', 'sensor-types.json');
+    try {
+      if (!fs.existsSync(sensorTypesPath)) return null;
+      const data = JSON.parse(fs.readFileSync(sensorTypesPath, 'utf-8'));
+      const entry = data.sensors?.[ip];
+      if (!entry) return null;
+      // Backward compatible: string → { type: string }
+      if (typeof entry === 'string') return { type: entry };
+      return entry;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Get rich sensor config by hostname (e.g. sensor_192_168_21_132)
+   */
+  getSensorConfigByHostname(hostname: string): { type: string; replayer?: string; control?: string; password?: string; ip?: string } | null {
+    const ipMatch = hostname.toLowerCase().match(/sensor_(\d+)_(\d+)_(\d+)_(\d+)/);
+    if (!ipMatch) return null;
+    const ip = `${ipMatch[1]}.${ipMatch[2]}.${ipMatch[3]}.${ipMatch[4]}`;
+    const config = this.getSensorConfig(ip);
+    if (!config) return null;
+    return { ...config, ip };
   }
 
   /**
@@ -636,7 +709,7 @@ export class RampService {
     let level: VerdictLevel;
     let summary: string;
 
-    const hasDrops = metrics.nicDropsPerSec > 0 || metrics.zeekDropsPerSec > 0;
+    const hasDrops = metrics.nicDropsPerSec > 0 || metrics.zeekDropsPerSec > 0 || metrics.suricataDropsPerSec > 0;
     const worstDelta = Math.min(...deltas.map((d) => d.deltaPct));
 
     if (hasDrops) {
@@ -677,16 +750,22 @@ export class RampService {
     sensor?: string;
     text: string;
     tags?: string[];
-  }): Promise<{ id: number; sensor: SensorInfo }> {
+    time?: number;
+    timeEnd?: number;
+    dashboardUid?: string;
+  }): Promise<{ id: number }> {
     const { info, client } = this.resolveSensor(options.sensor);
-
-    const response = await client.post<{ id: number }>('/api/annotations', {
+    const now = Date.now();
+    const body: Record<string, any> = {
       text: options.text,
-      tags: options.tags ?? ['ramp-result'],
-      time: Date.now(),
-    });
+      tags: options.tags ?? ['ramp-test'],
+      time: options.time ?? now,
+    };
+    if (options.timeEnd) body.timeEnd = options.timeEnd;
+    if (options.dashboardUid) body.dashboardUID = options.dashboardUid;
 
-    return { id: response.id, sensor: info };
+    const result = await client.post<{ id: number }>('/api/annotations', body);
+    return result;
   }
 
   /**
@@ -701,5 +780,68 @@ export class RampService {
    */
   getAllSensors(): SensorInfo[] {
     return [...this.sensors.values()];
+  }
+
+  /**
+   * Run performance verdict against all discovered sensors in parallel
+   */
+  async getFleetVerdict(build: string, profile: string): Promise<{ verdicts: Verdict[]; summary: string }> {
+    const sensors = this.getAllSensors();
+    if (sensors.length === 0) {
+      throw new Error('No sensors discovered. Run discover_sensors first.');
+    }
+
+    const verdicts = await Promise.all(
+      sensors.map(async (sensor) => {
+        try {
+          return await this.getPerformanceVerdict({ sensor: sensor.hostname, build, profile });
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          return {
+            level: 'FAIL' as VerdictLevel,
+            sensor: sensor.hostname,
+            build,
+            profile,
+            metrics: { gbps: 0, kpps: 0, klogps: 0, nicDropsPerSec: 0, zeekDropsPerSec: 0, suricataDropsPerSec: 0, maxWorkerCpu: 0, bufferUtilPct: 0, systemMemoryPct: 0, packetLag: 0, activeConnections: 0 },
+            deltas: [],
+            summary: `Error: ${msg}`,
+          };
+        }
+      }),
+    );
+
+    const passed = verdicts.filter((v) => v.level === 'PASS').length;
+    const failed = verdicts.filter((v) => v.level !== 'PASS').length;
+    const summary = `Fleet verdict: ${passed} passed, ${failed} failed/regressed across ${sensors.length} sensors`;
+
+    return { verdicts, summary };
+  }
+
+  /**
+   * Show a sensor type's performance across all builds in baselines.json
+   */
+  getSensorTrend(sensorType: string, profile: string): TrendEntry[] {
+    const baselines = this.loadBaselines();
+    const entries: TrendEntry[] = [];
+
+    for (const build of baselines.builds) {
+      const buildData = baselines.data[build];
+      if (!buildData) continue;
+      const matchedType = Object.keys(buildData).find(
+        (k) => k.toUpperCase() === sensorType.toUpperCase(),
+      );
+      if (!matchedType) continue;
+      const profileData = buildData[matchedType]?.[profile];
+      if (!profileData) continue;
+
+      entries.push({
+        build,
+        gbps: profileData.gbps,
+        kpps: profileData.kpps,
+        klps: profileData.klps,
+      });
+    }
+
+    return entries;
   }
 }

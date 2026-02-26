@@ -28,9 +28,12 @@ export interface MetricSnapshot {
   klogps: number;
   nicDropsPerSec: number;
   zeekDropsPerSec: number;
+  suricataDropsPerSec: number;
   maxWorkerCpu: number;
   bufferUtilPct: number;
   systemMemoryPct: number;
+  packetLag: number;
+  activeConnections: number;
 }
 
 export type VerdictLevel = 'PASS' | 'FAIL' | 'MINOR REGRESSION' | 'MAJOR REGRESSION';
@@ -50,6 +53,13 @@ export interface Verdict {
   metrics: MetricSnapshot;
   deltas: MetricDelta[];
   summary: string;
+}
+
+export interface TrendEntry {
+  build: string;
+  gbps: number;
+  kpps: number;
+  klps: number;
 }
 
 // --- Zod schemas for tool inputs ---
@@ -86,7 +96,148 @@ export const SensorPerformanceVerdictSchema = z.object({
 });
 
 export const AnnotateTestSchema = z.object({
-  sensor: z.string().optional().describe('Sensor hostname. If omitted, uses first discovered sensor.'),
-  text: z.string().min(1).describe('Annotation text (e.g., "Test started at 10 Gbps")'),
-  tags: z.array(z.string()).default(['ramp-result']).describe('Tags for the annotation'),
+  sensor: z.string().optional().describe('Sensor hostname'),
+  text: z.string().min(1).describe('Annotation text'),
+  tags: z.array(z.string()).optional().describe('Annotation tags (e.g., ["ramp-test", "ns2"])'),
+  time: z.number().optional().describe('Annotation epoch timestamp (defaults to now)'),
+  timeEnd: z.number().optional().describe('End epoch timestamp for range annotations'),
+  dashboardUid: z.string().optional().describe('Dashboard UID to associate annotation with'),
+});
+
+export const FleetVerdictSchema = z.object({
+  build: z.string().min(1).describe('Build name from baselines.json'),
+  profile: z.string().min(1).describe('Profile name (e.g., "NS2/Yes")'),
+});
+
+export const SensorTrendSchema = z.object({
+  sensorType: z.string().min(1).describe('Sensor type (e.g., "AP3000", "AP5000")'),
+  profile: z.string().min(1).describe('Profile name (e.g., "NS2/Yes")'),
+});
+
+// --- Analysis tool schemas ---
+
+export const DiagnoseDropsSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  from: z.string().optional().describe('Start time (epoch or relative like now-1h)'),
+  to: z.string().optional().describe('End time (epoch or relative like now)'),
+});
+
+export const FingerprintRegressionSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  build: z.string().min(1).describe('Build name from baselines.json'),
+  profile: z.string().min(1).describe('Profile name'),
+});
+
+export const CompareBuildsSchema = z.object({
+  buildA: z.string().min(1).describe('First build name'),
+  buildB: z.string().min(1).describe('Second build name'),
+});
+
+export const WatchTestSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  interval: z.number().default(10).describe('Poll interval in seconds (default 10)'),
+  duration: z.number().default(300).describe('Watch duration in seconds (default 300)'),
+});
+
+export const ExploreSensorMetricsSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+});
+
+// --- Result tool schemas ---
+
+export const ListTestRunsSchema = z.object({
+  date: z.string().optional().describe('Filter to specific date (YYYY-MM-DD)'),
+  sensor: z.string().optional().describe('Filter by sensor name substring'),
+});
+
+export const GetTestResultSchema = z.object({
+  path: z.string().min(1).describe('Full path to the test run directory'),
+});
+
+export const GetTestVitalsSchema = z.object({
+  path: z.string().min(1).describe('Full path to the test run directory'),
+});
+
+export const SummarizeRunSchema = z.object({
+  path: z.string().min(1).describe('Full path to the test run directory'),
+});
+
+// --- Control tool schemas ---
+
+export const IxiaSetRateSchema = z.object({
+  replayer: z
+    .string()
+    .min(1)
+    .describe('Replayer ID (e.g., "ixia-199-qa-team2-Ixia-1234")'),
+  rate: z.number().positive().describe('Rate in Gbps'),
+});
+
+export const IxiaStopSchema = z.object({
+  replayer: z.string().min(1).describe('Replayer ID'),
+});
+
+export const IxiaStatusSchema = z.object({
+  replayer: z.string().min(1).describe('Replayer ID'),
+});
+
+export const StartRampTestSchema = z.object({
+  appliance: z.string().min(1).describe('Appliance ID'),
+  replayer: z.string().min(1).describe('Replayer ID'),
+  tests: z
+    .string()
+    .min(1)
+    .describe(
+      'Comma-separated test profiles (e.g., "base,ns2,ew2,all")',
+    ),
+  duration: z
+    .number()
+    .positive()
+    .describe('Test duration in seconds'),
+  controlSelector: z
+    .string()
+    .min(1)
+    .describe('Control selector (e.g., "ap3000-ramp")'),
+  jsonServer: z
+    .string()
+    .min(1)
+    .describe('JSON server address (e.g., "192.168.22.159:5146")'),
+  confirm: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Must be true to actually start. False = dry run.',
+    ),
+});
+
+export const StopRampTestSchema = z.object({
+  session: z
+    .string()
+    .min(1)
+    .describe('tmux session name to kill'),
+});
+
+export const TestStatusSchema = z.object({});
+
+export const FleetRegressionSweepSchema = z.object({
+  build: z
+    .string()
+    .min(1)
+    .describe(
+      'Build name from baselines.json to check against',
+    ),
+});
+
+// --- Forecast tool schemas ---
+
+export const ForecastMaxRateSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+});
+
+export const PreflightRiskSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  profile: z.string().optional().describe('Profile for historical lookup (e.g., "NS2/Yes")'),
+});
+
+export const PredictFirmwareImpactSchema = z.object({
+  sensorType: z.string().optional().describe('Sensor type to filter (e.g., "AP3000"). Omit for all types.'),
 });

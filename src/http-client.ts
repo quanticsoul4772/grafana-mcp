@@ -166,23 +166,23 @@ export class GrafanaHttpClient {
     // Request interceptor
     client.interceptors.request.use(
       (config) => {
-        console.log(
+        console.error(
           `[Grafana HTTP] ${config.method?.toUpperCase()} ${config.url}`,
         );
         if (config.data) {
-          console.log(
+          console.error(
             '[Grafana HTTP] Request body:',
             safeStringify(config.data),
           );
         }
         if (config.params) {
-          console.log(
+          console.error(
             '[Grafana HTTP] Query params:',
             safeStringify(config.params),
           );
         }
         if (config.headers) {
-          console.log(
+          console.error(
             '[Grafana HTTP] Headers:',
             safeStringify(
               sanitizeHeaders(config.headers as Record<string, any>),
@@ -200,14 +200,14 @@ export class GrafanaHttpClient {
     // Response interceptor
     client.interceptors.response.use(
       (response) => {
-        console.log(`[Grafana HTTP] ${response.status} ${response.statusText}`);
+        console.error(`[Grafana HTTP] ${response.status} ${response.statusText}`);
         if (this.config.GRAFANA_DEBUG && response.data) {
           // Only log response data if it's not too large and sanitize it
           const responseStr = safeStringify(response.data);
           if (responseStr.length < 5000) {
-            console.log('[Grafana HTTP] Response:', responseStr);
+            console.error('[Grafana HTTP] Response:', responseStr);
           } else {
-            console.log(
+            console.error(
               '[Grafana HTTP] Response: [Large response body - truncated for security]',
             );
           }
@@ -326,47 +326,71 @@ export class GrafanaHttpClient {
   }
 
   /**
-   * Make a POST request
+   * Make a POST request with cache invalidation and resilience
    */
   async post<T = any>(
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await this.client.post<T>(url, data, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.post<T>(url, data, config);
+        return response.data;
+      },
+      `POST ${url}`,
+    );
   }
 
   /**
-   * Make a PUT request
+   * Make a PUT request with cache invalidation and resilience
    */
   async put<T = any>(
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await this.client.put<T>(url, data, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.put<T>(url, data, config);
+        return response.data;
+      },
+      `PUT ${url}`,
+    );
   }
 
   /**
-   * Make a DELETE request
+   * Make a DELETE request with cache invalidation and resilience
    */
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.delete<T>(url, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.delete<T>(url, config);
+        return response.data;
+      },
+      `DELETE ${url}`,
+    );
   }
 
   /**
-   * Make a PATCH request
+   * Make a PATCH request with cache invalidation and resilience
    */
   async patch<T = any>(
     url: string,
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<T> {
-    const response = await this.client.patch<T>(url, data, config);
-    return response.data;
+    this.clearCache();
+    return this.resilientHandler.executeWithResilience(
+      async () => {
+        const response = await this.client.patch<T>(url, data, config);
+        return response.data;
+      },
+      `PATCH ${url}`,
+    );
   }
 
   /**
