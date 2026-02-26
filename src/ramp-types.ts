@@ -161,3 +161,68 @@ export const GetTestVitalsSchema = z.object({
 export const SummarizeRunSchema = z.object({
   path: z.string().min(1).describe('Full path to the test run directory'),
 });
+
+// --- Control tool schemas ---
+
+export const IxiaSetRateSchema = z.object({
+  replayer: z
+    .string()
+    .min(1)
+    .describe('Replayer ID (e.g., "ixia-199-qa-team2-Ixia-1234")'),
+  rate: z.number().positive().describe('Rate in Gbps'),
+});
+
+export const IxiaStopSchema = z.object({
+  replayer: z.string().min(1).describe('Replayer ID'),
+});
+
+export const IxiaStatusSchema = z.object({
+  replayer: z.string().min(1).describe('Replayer ID'),
+});
+
+export const StartRampTestSchema = z.object({
+  appliance: z.string().min(1).describe('Appliance ID'),
+  replayer: z.string().min(1).describe('Replayer ID'),
+  tests: z
+    .string()
+    .min(1)
+    .describe(
+      'Comma-separated test profiles (e.g., "base,ns2,ew2,all")',
+    ),
+  duration: z
+    .number()
+    .positive()
+    .describe('Test duration in seconds'),
+  controlSelector: z
+    .string()
+    .min(1)
+    .describe('Control selector (e.g., "ap3000-ramp")'),
+  jsonServer: z
+    .string()
+    .min(1)
+    .describe('JSON server address (e.g., "192.168.22.159:5146")'),
+  confirm: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Must be true to actually start. False = dry run.',
+    ),
+});
+
+export const StopRampTestSchema = z.object({
+  session: z
+    .string()
+    .min(1)
+    .describe('tmux session name to kill'),
+});
+
+export const TestStatusSchema = z.object({});
+
+export const FleetRegressionSweepSchema = z.object({
+  build: z
+    .string()
+    .min(1)
+    .describe(
+      'Build name from baselines.json to check against',
+    ),
+});
