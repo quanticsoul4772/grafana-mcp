@@ -111,6 +111,35 @@ export const SensorTrendSchema = z.object({
   profile: z.string().min(1).describe('Profile name (e.g., "NS2/Yes")'),
 });
 
+// --- Analysis tool schemas ---
+
+export const DiagnoseDropsSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  from: z.string().optional().describe('Start time (epoch or relative like now-1h)'),
+  to: z.string().optional().describe('End time (epoch or relative like now)'),
+});
+
+export const FingerprintRegressionSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  build: z.string().min(1).describe('Build name from baselines.json'),
+  profile: z.string().min(1).describe('Profile name'),
+});
+
+export const CompareBuildsSchema = z.object({
+  buildA: z.string().min(1).describe('First build name'),
+  buildB: z.string().min(1).describe('Second build name'),
+});
+
+export const WatchTestSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  interval: z.number().default(10).describe('Poll interval in seconds (default 10)'),
+  duration: z.number().default(300).describe('Watch duration in seconds (default 300)'),
+});
+
+export const ExploreSensorMetricsSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+});
+
 // --- Result tool schemas ---
 
 export const ListTestRunsSchema = z.object({
