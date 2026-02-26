@@ -41,6 +41,9 @@ export class RampService {
       || path.join(process.env.HOME || '~', 'Projects', 'ramp');
     const portRange = options?.scanPorts || process.env.RAMP_SCAN_PORTS || '8080-8099';
     const [start, end] = portRange.split('-').map(Number);
+    if (isNaN(start) || isNaN(end) || start > end) {
+      throw new Error(`Invalid port range: "${portRange}". Expected format: "start-end" (e.g., "8080-8099")`);
+    }
     this.scanPorts = { start, end };
   }
 
@@ -230,10 +233,18 @@ export class RampService {
 
     await Promise.all(queryPromises);
 
-    return {
-      sensor: info,
-      metrics: metrics as unknown as MetricSnapshot,
+    const snapshot: MetricSnapshot = {
+      gbps: metrics.gbps ?? 0,
+      kpps: metrics.kpps ?? 0,
+      klogps: metrics.klogps ?? 0,
+      nicDropsPerSec: metrics.nicDropsPerSec ?? 0,
+      zeekDropsPerSec: metrics.zeekDropsPerSec ?? 0,
+      maxWorkerCpu: metrics.maxWorkerCpu ?? 0,
+      bufferUtilPct: metrics.bufferUtilPct ?? 0,
+      systemMemoryPct: metrics.systemMemoryPct ?? 0,
     };
+
+    return { sensor: info, metrics: snapshot };
   }
 
   /**
@@ -253,9 +264,12 @@ export class RampService {
     const params: Record<string, any> = { query: options.query };
 
     if (endpoint === 'query_range') {
-      if (options.start) params.start = options.start;
-      if (options.end) params.end = options.end;
-      if (options.step) params.step = options.step;
+      if (!options.start || !options.end) {
+        throw new Error('start and end are required for range queries (instant: false)');
+      }
+      params.start = options.start;
+      params.end = options.end;
+      params.step = options.step || '15s';
     }
 
     const result = await client.get<any>(
