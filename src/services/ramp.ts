@@ -10,6 +10,7 @@ import {
   Verdict,
   VerdictLevel,
   MetricDelta,
+  TrendEntry,
 } from '../ramp-types.js';
 import { parseRelativeTime } from '../utils/time.js';
 
@@ -746,5 +747,68 @@ export class RampService {
    */
   getAllSensors(): SensorInfo[] {
     return [...this.sensors.values()];
+  }
+
+  /**
+   * Run performance verdict against all discovered sensors in parallel
+   */
+  async getFleetVerdict(build: string, profile: string): Promise<{ verdicts: Verdict[]; summary: string }> {
+    const sensors = this.getAllSensors();
+    if (sensors.length === 0) {
+      throw new Error('No sensors discovered. Run discover_sensors first.');
+    }
+
+    const verdicts = await Promise.all(
+      sensors.map(async (sensor) => {
+        try {
+          return await this.getPerformanceVerdict({ sensor: sensor.hostname, build, profile });
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          return {
+            level: 'FAIL' as VerdictLevel,
+            sensor: sensor.hostname,
+            build,
+            profile,
+            metrics: { gbps: 0, kpps: 0, klogps: 0, nicDropsPerSec: 0, zeekDropsPerSec: 0, maxWorkerCpu: 0, bufferUtilPct: 0, systemMemoryPct: 0 },
+            deltas: [],
+            summary: `Error: ${msg}`,
+          };
+        }
+      }),
+    );
+
+    const passed = verdicts.filter((v) => v.level === 'PASS').length;
+    const failed = verdicts.filter((v) => v.level !== 'PASS').length;
+    const summary = `Fleet verdict: ${passed} passed, ${failed} failed/regressed across ${sensors.length} sensors`;
+
+    return { verdicts, summary };
+  }
+
+  /**
+   * Show a sensor type's performance across all builds in baselines.json
+   */
+  getSensorTrend(sensorType: string, profile: string): TrendEntry[] {
+    const baselines = this.loadBaselines();
+    const entries: TrendEntry[] = [];
+
+    for (const build of baselines.builds) {
+      const buildData = baselines.data[build];
+      if (!buildData) continue;
+      const matchedType = Object.keys(buildData).find(
+        (k) => k.toUpperCase() === sensorType.toUpperCase(),
+      );
+      if (!matchedType) continue;
+      const profileData = buildData[matchedType]?.[profile];
+      if (!profileData) continue;
+
+      entries.push({
+        build,
+        gbps: profileData.gbps,
+        kpps: profileData.kpps,
+        klps: profileData.klps,
+      });
+    }
+
+    return entries;
   }
 }

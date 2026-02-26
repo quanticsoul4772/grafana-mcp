@@ -1193,6 +1193,99 @@ describe('RampService', () => {
     });
   });
 
+  describe('getSensorTrend', () => {
+    it('should return trend entries for AP3000 NS2/Yes', () => {
+      const trend = service.getSensorTrend('AP3000', 'NS2/Yes');
+      expect(trend.length).toBeGreaterThan(0);
+      for (const entry of trend) {
+        expect(entry.build).toBeDefined();
+        expect(typeof entry.gbps).toBe('number');
+        expect(typeof entry.kpps === 'number' || entry.kpps === null).toBe(true);
+      }
+    });
+
+    it('should return empty for nonexistent sensor type', () => {
+      expect(service.getSensorTrend('NONEXISTENT', 'NS2/Yes')).toEqual([]);
+    });
+
+    it('should return empty for nonexistent profile', () => {
+      expect(service.getSensorTrend('AP3000', 'NONEXISTENT')).toEqual([]);
+    });
+  });
+
+  describe('getFleetVerdict', () => {
+    it('should throw when no sensors are discovered', async () => {
+      await expect(
+        service.getFleetVerdict('some-build', 'some-profile'),
+      ).rejects.toThrow(/No sensors discovered/);
+    });
+
+    it('should return verdicts for all discovered sensors', async () => {
+      const client1 = makeMockClient();
+      const client2 = makeMockClient();
+      const info1 = makeSensorInfo({ hostname: 'ap3000-test-132' });
+      const info2 = makeSensorInfo({ hostname: 'ap1001-test-80', port: 8081 });
+      populateSensors(service, [
+        { info: info1, client: client1 },
+        { info: info2, client: client2 },
+      ]);
+
+      // Find a build with AP3000 data
+      const baselines = service.loadBaselines();
+      let buildName: string | undefined;
+      let profile: string | undefined;
+      for (const build of baselines.builds) {
+        const bd = baselines.data[build];
+        if (bd['AP3000']) {
+          buildName = build;
+          profile = Object.keys(bd['AP3000'])[0];
+          break;
+        }
+      }
+      expect(buildName).toBeDefined();
+      expect(profile).toBeDefined();
+
+      // Set up metrics for both sensors (client1 returns values, client2 will error since AP1001 may not match)
+      const baseline = baselines.data[buildName!]['AP3000'][profile!];
+      client1.get.mockImplementation(async (_url: string, params?: any) => {
+        const query = params?.query ?? '';
+        if (query.includes('port_bytes')) return promResponse(baseline.gbps);
+        if (query.includes('port_packets')) return promResponse(baseline.kpps);
+        if (query.includes('log_writer_writes')) return promResponse(baseline.klps);
+        return promResponse(0);
+      });
+      client2.get.mockImplementation(async (_url: string, params?: any) => {
+        const query = params?.query ?? '';
+        if (query.includes('port_bytes')) return promResponse(10);
+        if (query.includes('port_packets')) return promResponse(5000);
+        if (query.includes('log_writer_writes')) return promResponse(2000);
+        return promResponse(0);
+      });
+
+      const result = await service.getFleetVerdict(buildName!, profile!);
+      expect(result.verdicts).toHaveLength(2);
+      expect(result.summary).toContain('2 sensors');
+      // First sensor should have a verdict (AP3000 matches)
+      expect(result.verdicts[0].sensor).toBe('ap3000-test-132');
+    });
+
+    it('should return FAIL verdict when getPerformanceVerdict throws', async () => {
+      const client = makeMockClient();
+      const info = makeSensorInfo({ hostname: 'unknown-sensor-xyz' });
+      populateSensors(service, [{ info, client }]);
+
+      client.get.mockResolvedValue(promResponse(0));
+
+      const baselines = service.loadBaselines();
+      const buildName = baselines.builds[0];
+
+      const result = await service.getFleetVerdict(buildName, 'NS2/Yes');
+      expect(result.verdicts).toHaveLength(1);
+      expect(result.verdicts[0].level).toBe('FAIL');
+      expect(result.verdicts[0].summary).toContain('Error:');
+    });
+  });
+
   describe('findSshTunnelPorts (via private access)', () => {
     it('should parse ports from lsof output', () => {
       const lsofOutput = [

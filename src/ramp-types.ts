@@ -52,6 +52,13 @@ export interface Verdict {
   summary: string;
 }
 
+export interface TrendEntry {
+  build: string;
+  gbps: number;
+  kpps: number;
+  klps: number;
+}
+
 // --- Zod schemas for tool inputs ---
 
 export const DiscoverSensorsSchema = z.object({}).describe('No parameters needed');
@@ -89,6 +96,16 @@ export const AnnotateTestSchema = z.object({
   sensor: z.string().optional().describe('Sensor hostname. If omitted, uses first discovered sensor.'),
   text: z.string().min(1).describe('Annotation text (e.g., "Test started at 10 Gbps")'),
   tags: z.array(z.string()).default(['ramp-result']).describe('Tags for the annotation'),
+});
+
+export const FleetVerdictSchema = z.object({
+  build: z.string().min(1).describe('Build name from baselines.json'),
+  profile: z.string().min(1).describe('Profile name (e.g., "NS2/Yes")'),
+});
+
+export const SensorTrendSchema = z.object({
+  sensorType: z.string().min(1).describe('Sensor type (e.g., "AP3000", "AP5000")'),
+  profile: z.string().min(1).describe('Profile name (e.g., "NS2/Yes")'),
 });
 
 // --- Result tool schemas ---
