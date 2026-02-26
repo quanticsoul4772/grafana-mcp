@@ -77,6 +77,7 @@ async function main() {
 
     // Create HTTP client
     const httpClient = new GrafanaHttpClient(config);
+    activeHttpClient = httpClient;
 
     // Create services
     const dashboardService = new DashboardService(httpClient);
@@ -238,15 +239,18 @@ async function main() {
 }
 
 // Handle graceful shutdown
-process.on('SIGINT', () => {
-  console.error('[INFO] Shutting down Grafana MCP Server...');
-  process.exit(0);
-});
+let activeHttpClient: GrafanaHttpClient | null = null;
 
-process.on('SIGTERM', () => {
+function shutdown() {
   console.error('[INFO] Shutting down Grafana MCP Server...');
+  if (activeHttpClient) {
+    activeHttpClient.cleanup();
+  }
   process.exit(0);
-});
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 // Start the server
 main().catch((error) => {

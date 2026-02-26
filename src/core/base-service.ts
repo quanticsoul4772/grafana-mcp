@@ -2,7 +2,6 @@
  * Base service implementation providing common functionality
  */
 
-import { EventEmitter } from 'events';
 import { IService, IHttpService, AsyncResult } from './interfaces.js';
 import { GrafanaHttpClient } from '../http-client.js';
 import type { GrafanaError } from '../types.js';
@@ -10,16 +9,14 @@ import type { GrafanaError } from '../types.js';
 /**
  * Abstract base service with common functionality
  */
-export abstract class BaseService extends EventEmitter implements IService {
+export abstract class BaseService implements IService {
   private _initialized = false;
   private _healthy = true;
 
   constructor(
     public readonly name: string,
     public readonly version = '1.0.0',
-  ) {
-    super();
-  }
+  ) {}
 
   get initialized(): boolean {
     return this._initialized;
@@ -41,10 +38,10 @@ export abstract class BaseService extends EventEmitter implements IService {
       await this.onInitialize();
       this._initialized = true;
       this._healthy = true;
-      this.emit('initialized');
+
     } catch (error) {
       this._healthy = false;
-      this.emit('error', error);
+
       throw error;
     }
   }
@@ -56,9 +53,9 @@ export abstract class BaseService extends EventEmitter implements IService {
     try {
       await this.onCleanup();
       this._initialized = false;
-      this.emit('cleanup');
+
     } catch (error) {
-      this.emit('error', error);
+
       throw error;
     }
   }
@@ -73,7 +70,7 @@ export abstract class BaseService extends EventEmitter implements IService {
       return isHealthy;
     } catch (error) {
       this._healthy = false;
-      this.emit('error', error);
+
       return false;
     }
   }
@@ -91,7 +88,7 @@ export abstract class BaseService extends EventEmitter implements IService {
     } catch (error) {
       const errorContext = context ? `${this.name}.${context}` : this.name;
       const wrappedError = this.wrapError(error, errorContext);
-      this.emit('error', wrappedError);
+
       return { success: false, error: wrappedError as unknown as Error };
     }
   }
