@@ -278,7 +278,8 @@ async function main() {
       `[INFO] Debug mode: ${config.GRAFANA_DEBUG ? 'enabled' : 'disabled'}`,
     );
     console.error(`[INFO] Timeout: ${config.GRAFANA_TIMEOUT}ms`);
-    console.error(`[INFO] Registered ${toolRegistry.getTools().length} tools`);
+    const toolCount = toolRegistry.getToolCount();
+    console.error(`[grafana-mcp] Registered ${toolCount} tools (ramp: ${isToolCategoryEnabled('ramp') ? 'enabled' : 'disabled'})`);
 
     if (disabledTools.length > 0) {
       console.error(

@@ -99,6 +99,13 @@ export class ToolRegistry {
   }
 
   /**
+   * Get total number of registered tools
+   */
+  getToolCount(): number {
+    return this.tools.size;
+  }
+
+  /**
    * Get registry statistics
    */
   getStats(): { totalTools: number; categories: Record<ToolCategory, number> } {
