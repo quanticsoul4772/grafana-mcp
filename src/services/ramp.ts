@@ -37,9 +37,9 @@ export class RampService {
     scanPorts?: string;
   }) {
     this.rampProjectPath = options?.rampProjectPath
-      || process.env.RAMP_PROJECT_PATH
-      || path.join(process.env.HOME || '~', 'Projects', 'ramp');
-    const portRange = options?.scanPorts || process.env.RAMP_SCAN_PORTS || '8080-8099';
+      ?? process.env.RAMP_PROJECT_PATH
+      ?? path.join(process.env.HOME ?? '~', 'Projects', 'ramp');
+    const portRange = options?.scanPorts ?? process.env.RAMP_SCAN_PORTS ?? '8080-8099';
     const [start, end] = portRange.split('-').map(Number);
     if (isNaN(start) || isNaN(end) || start > end) {
       throw new Error(`Invalid port range: "${portRange}". Expected format: "start-end" (e.g., "8080-8099")`);
@@ -126,7 +126,7 @@ export class RampService {
     // Find Prometheus datasource UID
     const datasources = await tempClient.get<Array<{ uid: string; type: string }>>('/api/datasources');
     const promDs = datasources.find((ds) => ds.type === 'prometheus');
-    const prometheusUid = promDs?.uid || 'prometheus';
+    const prometheusUid = promDs?.uid ?? 'prometheus';
 
     // Get sensor hostname via PromQL
     let hostname = `sensor-${port}`;
@@ -269,7 +269,7 @@ export class RampService {
       }
       params.start = options.start;
       params.end = options.end;
-      params.step = options.step || '15s';
+      params.step = options.step ?? '15s';
     }
 
     const result = await client.get<any>(
@@ -382,7 +382,7 @@ export class RampService {
     }
 
     // Add template variables for comparison info
-    if (!dashboard.templating) dashboard.templating = { list: [] };
+    dashboard.templating ??= { list: [] };
     dashboard.templating.list.push(
       {
         name: 'compare_build',
@@ -409,7 +409,7 @@ export class RampService {
 
     // Add comparison row at top
     const comparisonPanels = this.buildComparisonPanels(profileData, sensorType, buildName, profile);
-    dashboard.panels = [...comparisonPanels, ...(dashboard.panels || [])];
+    dashboard.panels = [...comparisonPanels, ...(dashboard.panels ?? [])];
   }
 
   /**
@@ -681,7 +681,7 @@ export class RampService {
 
     const response = await client.post<{ id: number }>('/api/annotations', {
       text: options.text,
-      tags: options.tags || ['ramp-result'],
+      tags: options.tags ?? ['ramp-result'],
       time: Date.now(),
     });
 

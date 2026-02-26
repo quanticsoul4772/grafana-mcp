@@ -46,7 +46,7 @@ export function registerRampTools(
         const sensorList = sensors
           .map(
             (s) =>
-              `- **${s.hostname}** — port ${s.port}, Grafana ${s.grafanaVersion || 'unknown'}, ` +
+              `- **${s.hostname}** — port ${s.port}, Grafana ${s.grafanaVersion ?? 'unknown'}, ` +
               `Prometheus UID: ${s.prometheusUid}`,
           )
           .join('\n');
@@ -145,7 +145,7 @@ export function registerRampTools(
 
         const resultText = result.data.result
           .map((item: any) => {
-            const labels = Object.entries(item.metric || {})
+            const labels = Object.entries(item.metric ?? {})
               .map(([k, v]) => `${k}="${v}"`)
               .join(', ');
             if (item.value) {
