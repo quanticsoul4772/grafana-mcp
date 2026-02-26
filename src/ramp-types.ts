@@ -226,3 +226,18 @@ export const FleetRegressionSweepSchema = z.object({
       'Build name from baselines.json to check against',
     ),
 });
+
+// --- Forecast tool schemas ---
+
+export const ForecastMaxRateSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+});
+
+export const PreflightRiskSchema = z.object({
+  sensor: z.string().optional().describe('Sensor hostname'),
+  profile: z.string().optional().describe('Profile for historical lookup (e.g., "NS2/Yes")'),
+});
+
+export const PredictFirmwareImpactSchema = z.object({
+  sensorType: z.string().optional().describe('Sensor type to filter (e.g., "AP3000"). Omit for all types.'),
+});
