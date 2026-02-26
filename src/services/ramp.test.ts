@@ -1300,6 +1300,29 @@ describe('RampService', () => {
     });
   });
 
+  describe('getSensorConfig', () => {
+    it('should return rich config for known IP', () => {
+      const config = service.getSensorConfig('192.168.21.132');
+      expect(config).not.toBeNull();
+      expect(config!.type).toBe('AP3000');
+      expect(config!.replayer).toBeDefined();
+      expect(config!.control).toBeDefined();
+    });
+
+    it('should return null for unknown IP', () => {
+      expect(service.getSensorConfig('10.0.0.99')).toBeNull();
+    });
+  });
+
+  describe('getSensorConfigByHostname', () => {
+    it('should extract IP and return config', () => {
+      const config = service.getSensorConfigByHostname('sensor_192_168_21_132');
+      expect(config).not.toBeNull();
+      expect(config!.type).toBe('AP3000');
+      expect(config!.ip).toBe('192.168.21.132');
+    });
+  });
+
   describe('findSshTunnelPorts (via private access)', () => {
     it('should parse ports from lsof output', () => {
       const lsofOutput = [

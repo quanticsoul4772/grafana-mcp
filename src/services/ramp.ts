@@ -560,21 +560,38 @@ export class RampService {
    * Look up sensor type by IP from dashboards/sensor-types.json
    */
   private lookupSensorTypeByIp(ip: string): string | null {
-    const sensorTypesPath = path.join(
-      this.rampProjectPath,
-      'dashboards',
-      'sensor-types.json',
-    );
+    const config = this.getSensorConfig(ip);
+    return config?.type ?? null;
+  }
 
+  /**
+   * Get rich sensor config (type, replayer, control, password) by IP
+   */
+  getSensorConfig(ip: string): { type: string; replayer?: string; control?: string; password?: string } | null {
+    const sensorTypesPath = path.join(this.rampProjectPath, 'dashboards', 'sensor-types.json');
     try {
-      if (!fs.existsSync(sensorTypesPath)) {
-        return null;
-      }
+      if (!fs.existsSync(sensorTypesPath)) return null;
       const data = JSON.parse(fs.readFileSync(sensorTypesPath, 'utf-8'));
-      return data.sensors?.[ip] ?? null;
+      const entry = data.sensors?.[ip];
+      if (!entry) return null;
+      // Backward compatible: string → { type: string }
+      if (typeof entry === 'string') return { type: entry };
+      return entry;
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Get rich sensor config by hostname (e.g. sensor_192_168_21_132)
+   */
+  getSensorConfigByHostname(hostname: string): { type: string; replayer?: string; control?: string; password?: string; ip?: string } | null {
+    const ipMatch = hostname.toLowerCase().match(/sensor_(\d+)_(\d+)_(\d+)_(\d+)/);
+    if (!ipMatch) return null;
+    const ip = `${ipMatch[1]}.${ipMatch[2]}.${ipMatch[3]}.${ipMatch[4]}`;
+    const config = this.getSensorConfig(ip);
+    if (!config) return null;
+    return { ...config, ip };
   }
 
   /**
