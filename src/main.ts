@@ -7,10 +7,13 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { execSync } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { getConfig } from './config.js';
 import { GrafanaHttpClient } from './http-client.js';
 import { ToolRegistry } from './tool-registry.js';
+
+const execFileAsync = promisify(execFile);
 
 // Import services
 import { DashboardService } from './services/dashboard.js';
@@ -34,30 +37,47 @@ import { registerRampTools } from './tools/ramp.js';
 
 /**
  * Ensure the Grafana Docker container is running if the target is localhost.
+ * Set GRAFANA_SKIP_DOCKER=true to bypass this check entirely.
  */
 async function ensureGrafanaContainer(config: { GRAFANA_URL: string }): Promise<void> {
+  if (process.env.GRAFANA_SKIP_DOCKER === 'true') {
+    console.error('[INFO] GRAFANA_SKIP_DOCKER is set, skipping Docker container check');
+    return;
+  }
+
   const url = config.GRAFANA_URL;
   if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
     return; // remote instance, nothing to manage
   }
 
   try {
-    const status = execSync('docker inspect -f "{{.State.Running}}" grafana 2>/dev/null', { encoding: 'utf-8' }).trim();
+    const { stdout } = await execFileAsync('docker', [
+      'inspect',
+      '-f',
+      '{{.State.Running}}',
+      'grafana',
+    ]);
+    const status = stdout.trim();
     if (status === 'true') {
       return; // already running
     }
     console.error('[INFO] Grafana container exists but is stopped, starting...');
-    execSync('docker start grafana', { stdio: 'pipe' });
-  } catch {
+    await execFileAsync('docker', ['start', 'grafana']);
+  } catch (error) {
     // container doesn't exist — nothing to auto-start
-    console.error('[WARN] No "grafana" Docker container found. Create one with: docker run -d -p 3000:3000 --name grafana grafana/grafana');
+    console.error(
+      '[WARN] No "grafana" Docker container found. Create one with: docker run -d -p 3000:3000 --name grafana grafana/grafana',
+    );
+    if (process.env.GRAFANA_DEBUG === 'true') {
+      console.error('[DEBUG] Docker inspect error:', error instanceof Error ? error.message : error);
+    }
     return;
   }
 
   // Wait for Grafana to become healthy (up to 15s)
   for (let i = 0; i < 15; i++) {
     try {
-      execSync(`curl -sf ${url}/api/health`, { stdio: 'pipe' });
+      await execFileAsync('curl', ['-sf', `${url}/api/health`]);
       console.error('[INFO] Grafana container is ready');
       return;
     } catch {
