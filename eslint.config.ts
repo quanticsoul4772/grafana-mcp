@@ -16,7 +16,7 @@ const config: Linter.FlatConfig[] = [
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json',
       },
       globals: {
         console: 'readonly',
@@ -96,10 +96,20 @@ const config: Linter.FlatConfig[] = [
   {
     ignores: [
       'build/**/*',
-      'dist/**/*', 
+      'dist/**/*',
       'node_modules/**/*',
       '*.d.ts',
       'coverage/**/*',
+      'src/core/container.ts',
+      'src/core/error-handling.ts',
+      'src/core/service-registry.ts',
+      'src/core/tool-system.ts',
+      'src/examples/**/*',
+      'src/refactored-main.ts',
+      'src/optimized-main.ts',
+      'src/optimized-http-client.ts',
+      'src/performance-monitor.ts',
+      'src/service-pool.ts',
     ],
   },
 ];

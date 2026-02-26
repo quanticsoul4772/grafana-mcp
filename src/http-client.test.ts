@@ -154,6 +154,9 @@ describe('GrafanaHttpClient', () => {
     });
 
     it('should cache TLS file contents', () => {
+      // Ensure existsSync returns true (may be overridden by prior tests)
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+
       const tlsConfig: Config = {
         ...mockConfig,
         GRAFANA_TLS_CERT_FILE: '/path/to/cert.pem',
@@ -330,7 +333,7 @@ describe('GrafanaHttpClient', () => {
     let client: GrafanaHttpClient;
     let mockAxiosInstance: any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const axios = vi.mocked(await import('axios')).default;
       mockAxiosInstance = {
         get: vi.fn().mockResolvedValue({ data: { result: 'get-data' } }),
@@ -419,7 +422,7 @@ describe('GrafanaHttpClient', () => {
     let client: GrafanaHttpClient;
     let mockAxiosInstance: any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const axios = vi.mocked(await import('axios')).default;
       mockAxiosInstance = {
         get: vi.fn(),
@@ -455,7 +458,7 @@ describe('GrafanaHttpClient', () => {
     let client: GrafanaHttpClient;
     let mockAxiosInstance: any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const axios = vi.mocked(await import('axios')).default;
       mockAxiosInstance = {
         get: vi.fn(),
@@ -481,13 +484,13 @@ describe('GrafanaHttpClient', () => {
   });
 
   describe('error handling', () => {
-    it('should handle axios errors in interceptors', () => {
+    it('should handle axios errors in interceptors', async () => {
       const client = new GrafanaHttpClient(mockConfig);
 
       // Get the response interceptor error handler
       const axios = vi.mocked(await import('axios')).default;
       const mockCreate = axios.create as any;
-      const interceptorArgs = mockCreate.mock.results[0].value.interceptors.response.use.mock.calls[1]; // Second call (error interceptor)
+      const interceptorArgs = mockCreate.mock.results[0].value.interceptors.response.use.mock.calls[0]; // Error interceptor (only one when debug=false)
       const errorHandler = interceptorArgs[1];
 
       const axiosError = {
@@ -498,7 +501,7 @@ describe('GrafanaHttpClient', () => {
         message: 'Request failed with status code 401',
       };
 
-      expect(() => errorHandler(axiosError)).rejects.toThrow();
+      await expect(() => errorHandler(axiosError)).rejects.toThrow();
     });
   });
 

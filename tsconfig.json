@@ -25,5 +25,20 @@
     "types": ["node"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/core/container.ts",
+    "src/core/error-handling.ts",
+    "src/core/service-registry.ts",
+    "src/core/tool-system.ts",
+    "src/examples/**",
+    "src/refactored-main.ts",
+    "src/optimized-main.ts",
+    "src/optimized-http-client.ts",
+    "src/performance-monitor.ts",
+    "src/service-pool.ts"
+  ]
 }

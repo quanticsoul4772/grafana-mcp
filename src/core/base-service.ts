@@ -3,9 +3,9 @@
  */
 
 import { EventEmitter } from 'events';
-import { IService, IHttpService, Result, AsyncResult } from './interfaces.js';
+import { IService, IHttpService, AsyncResult } from './interfaces.js';
 import { GrafanaHttpClient } from '../http-client.js';
-import { GrafanaError } from '../types.js';
+import type { GrafanaError } from '../types.js';
 
 /**
  * Abstract base service with common functionality
@@ -92,7 +92,7 @@ export abstract class BaseService extends EventEmitter implements IService {
       const errorContext = context ? `${this.name}.${context}` : this.name;
       const wrappedError = this.wrapError(error, errorContext);
       this.emit('error', wrappedError);
-      return { success: false, error: wrappedError };
+      return { success: false, error: wrappedError as unknown as Error };
     }
   }
 
@@ -114,13 +114,12 @@ export abstract class BaseService extends EventEmitter implements IService {
    * Wrap and standardize errors
    */
   protected wrapError(error: unknown, context: string): GrafanaError {
-    if (error instanceof GrafanaError) {
-      return error;
+    if (typeof error === 'object' && error !== null && 'message' in error && 'status' in error) {
+      return error as GrafanaError;
     }
 
     if (error instanceof Error) {
       return {
-        name: 'ServiceError',
         message: `${context}: ${error.message}`,
         error: error.message,
         status: 500,
@@ -128,7 +127,6 @@ export abstract class BaseService extends EventEmitter implements IService {
     }
 
     return {
-      name: 'ServiceError',
       message: `${context}: Unknown error`,
       error: String(error),
       status: 500,
