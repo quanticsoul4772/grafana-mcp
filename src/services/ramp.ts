@@ -11,6 +11,7 @@ import {
   VerdictLevel,
   MetricDelta,
 } from '../ramp-types.js';
+import { parseRelativeTime } from '../utils/time.js';
 
 // PromQL queries for sensor_status
 const METRIC_QUERIES = {
@@ -268,8 +269,8 @@ export class RampService {
       if (!options.start || !options.end) {
         throw new Error('start and end are required for range queries (instant: false)');
       }
-      params.start = options.start;
-      params.end = options.end;
+      params.start = parseRelativeTime(options.start);
+      params.end = parseRelativeTime(options.end);
       params.step = options.step ?? '15s';
     }
 
