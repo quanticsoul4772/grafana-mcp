@@ -79,6 +79,55 @@ describe('RampService', () => {
     });
   });
 
+  describe('detectSensorType (via private access)', () => {
+    // Use a build that has multiple sensor types
+    function getBuildDataWithTypes(...types: string[]) {
+      const baselines = service.loadBaselines();
+      for (const build of baselines.builds) {
+        const bd = baselines.data[build];
+        if (types.every((t) => t in bd)) return bd;
+      }
+      throw new Error(`No build found with all types: ${types}`);
+    }
+
+    it('should match hostname containing sensor type', () => {
+      const buildData = getBuildDataWithTypes('AP3000', 'AP1001');
+      const detect = (service as any).detectSensorType.bind(service);
+
+      expect(detect('ap3000-8649-132', buildData)).toBe('AP3000');
+      expect(detect('ap1001-xxxx-80', buildData)).toBe('AP1001');
+    });
+
+    it('should match sensor_192_168_X_Y hostname via IP lookup', () => {
+      const buildData = getBuildDataWithTypes('AP3000');
+      const detect = (service as any).detectSensorType.bind(service);
+
+      // 192.168.21.132 = AP3000 in sensor-types.json
+      expect(detect('sensor_192_168_21_132', buildData)).toBe('AP3000');
+    });
+
+    it('should match AP5000 by IP for sensor_192_168_21_227', () => {
+      const buildData = getBuildDataWithTypes('AP5000');
+      const detect = (service as any).detectSensorType.bind(service);
+
+      expect(detect('sensor_192_168_21_227', buildData)).toBe('AP5000');
+    });
+
+    it('should return null for unknown hostname', () => {
+      const buildData = getBuildDataWithTypes('AP5000');
+      const detect = (service as any).detectSensorType.bind(service);
+
+      expect(detect('totally-unknown-host', buildData)).toBeNull();
+    });
+
+    it('should return null for unknown IP in sensor hostname pattern', () => {
+      const buildData = getBuildDataWithTypes('AP5000');
+      const detect = (service as any).detectSensorType.bind(service);
+
+      expect(detect('sensor_10_0_0_99', buildData)).toBeNull();
+    });
+  });
+
   describe('listBaselines', () => {
     it('should return builds and sensor types from baselines.json', () => {
       const result = service.listBaselines();

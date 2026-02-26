@@ -509,16 +509,60 @@ export class RampService {
   }
 
   /**
-   * Detect sensor type from hostname
+   * Detect sensor type from hostname.
+   *
+   * Strategy:
+   * 1. Direct substring match (hostname contains "ap3000", etc.)
+   * 2. Extract IP from sensor_192_168_X_Y hostnames and look up in
+   *    dashboards/sensor-types.json
    */
   private detectSensorType(hostname: string, buildData: Record<string, any>): string | null {
     const normalizedHost = hostname.toLowerCase();
+
+    // Strategy 1: hostname contains sensor type (e.g. "ap3000-xxxx-132")
     for (const sensorType of Object.keys(buildData)) {
       if (normalizedHost.includes(sensorType.toLowerCase())) {
         return sensorType;
       }
     }
+
+    // Strategy 2: parse IP from "sensor_192_168_X_Y" hostname pattern
+    const ipMatch = normalizedHost.match(/sensor_(\d+)_(\d+)_(\d+)_(\d+)/);
+    if (ipMatch) {
+      const ip = `${ipMatch[1]}.${ipMatch[2]}.${ipMatch[3]}.${ipMatch[4]}`;
+      const sensorType = this.lookupSensorTypeByIp(ip);
+      if (sensorType) {
+        // Verify this sensor type exists in the build data (case-insensitive)
+        for (const key of Object.keys(buildData)) {
+          if (key.toUpperCase() === sensorType.toUpperCase()) {
+            return key;
+          }
+        }
+      }
+    }
+
     return null;
+  }
+
+  /**
+   * Look up sensor type by IP from dashboards/sensor-types.json
+   */
+  private lookupSensorTypeByIp(ip: string): string | null {
+    const sensorTypesPath = path.join(
+      this.rampProjectPath,
+      'dashboards',
+      'sensor-types.json',
+    );
+
+    try {
+      if (!fs.existsSync(sensorTypesPath)) {
+        return null;
+      }
+      const data = JSON.parse(fs.readFileSync(sensorTypesPath, 'utf-8'));
+      return data.sensors?.[ip] ?? null;
+    } catch {
+      return null;
+    }
   }
 
   /**
