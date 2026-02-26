@@ -85,14 +85,16 @@ export function handleToolError(
  * @param handler - The actual tool logic function
  * @returns Promise that resolves to a formatted MCP tool response
  */
-export function withErrorHandling(
+export async function withErrorHandling(
   toolName: string,
   operation: string,
   handler: () => Promise<ToolResponse>,
 ): Promise<ToolResponse> {
-  return handler().catch((error) =>
-    handleToolError(error, toolName, operation),
-  );
+  try {
+    return await handler();
+  } catch (error) {
+    return handleToolError(error, toolName, operation);
+  }
 }
 
 /**
@@ -124,7 +126,7 @@ export function validateRequiredParams(
   requiredFields: string[],
   _toolName: string,
 ): void {
-  const missing = requiredFields.filter((field) => !params[field]);
+  const missing = requiredFields.filter((field) => params[field] === undefined || params[field] === null || params[field] === '');
 
   if (missing.length > 0) {
     const error = new Error(

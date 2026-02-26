@@ -182,6 +182,9 @@ describe('DashboardService', () => {
       const error = new Error('Search failed');
       vi.mocked(mockHttpClient.get).mockRejectedValue(error);
 
+      // Add error listener to prevent unhandled error from EventEmitter
+      (service as any).on('error', () => {});
+
       const result = await service.searchDashboardsResult({ query: 'test' });
 
       expect(result.success).toBe(false);

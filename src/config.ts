@@ -19,7 +19,7 @@ function parseConfig(): Config {
     GRAFANA_TOKEN: env.GRAFANA_TOKEN,
     GRAFANA_DEBUG: env.GRAFANA_DEBUG === 'true',
     GRAFANA_TIMEOUT: env.GRAFANA_TIMEOUT
-      ? parseInt(env.GRAFANA_TIMEOUT, 10)
+      ? Number(env.GRAFANA_TIMEOUT)
       : undefined,
     GRAFANA_DISABLE_TOOLS: disabledTools,
     GRAFANA_TLS_CERT_FILE: env.GRAFANA_TLS_CERT_FILE,
@@ -129,5 +129,3 @@ export function clearConfigCache(): void {
   cachedConfig = null;
 }
 
-// Parse and export configuration for backward compatibility
-export const config = getConfig();

@@ -8,16 +8,12 @@ import {
 } from './config.js';
 import type { Config, ToolCategory } from './types.js';
 
-// Mock console methods
-vi.mock('console', () => ({
-  log: vi.fn(),
-}));
-
 describe('config', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(console, 'log').mockImplementation(() => {});
     clearConfigCache();
     // Reset environment to clean state
     process.env = { ...originalEnv };
@@ -326,7 +322,7 @@ describe('config', () => {
 
       expect(enabled).toEqual([
         'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-        'incident', 'sift', 'oncall', 'admin', 'navigation'
+        'incident', 'sift', 'oncall', 'admin', 'navigation', 'ramp'
       ]);
     });
 
@@ -344,7 +340,7 @@ describe('config', () => {
 
       expect(enabled).toEqual([
         'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-        'sift', 'navigation'
+        'sift', 'navigation', 'ramp'
       ]);
       expect(enabled).not.toContain('admin');
       expect(enabled).not.toContain('oncall');
@@ -359,7 +355,7 @@ describe('config', () => {
         GRAFANA_TIMEOUT: 30000,
         GRAFANA_DISABLE_TOOLS: [
           'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-          'incident', 'sift', 'oncall', 'admin', 'navigation'
+          'incident', 'sift', 'oncall', 'admin', 'navigation', 'ramp'
         ],
         GRAFANA_TLS_SKIP_VERIFY: false,
       };
@@ -388,7 +384,7 @@ describe('config', () => {
       expect(console.log).toHaveBeenCalledWith('  Debug: false');
       expect(console.log).toHaveBeenCalledWith('  Timeout: 30000ms');
       expect(console.log).toHaveBeenCalledWith('  TLS Skip Verify: false');
-      expect(console.log).toHaveBeenCalledWith('  Enabled Tools: dashboards, datasources, prometheus, loki, alerting, incident, sift, oncall, admin, navigation');
+      expect(console.log).toHaveBeenCalledWith('  Enabled Tools: dashboards, datasources, prometheus, loki, alerting, incident, sift, oncall, admin, navigation, ramp');
     });
 
     it('should display disabled tools when present', () => {
@@ -406,7 +402,7 @@ describe('config', () => {
       expect(console.log).toHaveBeenCalledWith('  Debug: true');
       expect(console.log).toHaveBeenCalledWith('  Timeout: 60000ms');
       expect(console.log).toHaveBeenCalledWith('  TLS Skip Verify: true');
-      expect(console.log).toHaveBeenCalledWith('  Enabled Tools: dashboards, datasources, prometheus, loki, alerting, incident, sift, navigation');
+      expect(console.log).toHaveBeenCalledWith('  Enabled Tools: dashboards, datasources, prometheus, loki, alerting, incident, sift, navigation, ramp');
       expect(console.log).toHaveBeenCalledWith('  Disabled Tools: admin, oncall');
     });
 

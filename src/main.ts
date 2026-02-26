@@ -8,7 +8,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { execSync } from 'child_process';
-import { config } from './config.js';
+import { getConfig } from './config.js';
 import { GrafanaHttpClient } from './http-client.js';
 import { ToolRegistry } from './tool-registry.js';
 
@@ -35,7 +35,7 @@ import { registerRampTools } from './tools/ramp.js';
 /**
  * Ensure the Grafana Docker container is running if the target is localhost.
  */
-async function ensureGrafanaContainer(): Promise<void> {
+async function ensureGrafanaContainer(config: { GRAFANA_URL: string }): Promise<void> {
   const url = config.GRAFANA_URL;
   if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
     return; // remote instance, nothing to manage
@@ -72,7 +72,8 @@ async function ensureGrafanaContainer(): Promise<void> {
  */
 async function main() {
   try {
-    await ensureGrafanaContainer();
+    const config = getConfig();
+    await ensureGrafanaContainer(config);
 
     // Create HTTP client
     const httpClient = new GrafanaHttpClient(config);

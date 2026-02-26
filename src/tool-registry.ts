@@ -85,11 +85,10 @@ export class ToolRegistry {
   }
 
   /**
-   * Get tools by category
+   * Get tool names by category
    */
-  getToolsByCategory(category: ToolCategory): ExtendedToolDefinition[] {
-    const toolNames = this.categories.get(category) || [];
-    return toolNames.map(name => this.tools.get(name)!).filter(Boolean);
+  getToolsByCategory(category: ToolCategory): string[] {
+    return this.categories.get(category) ?? [];
   }
 
   /**
@@ -113,6 +112,24 @@ export class ToolRegistry {
       totalTools: this.tools.size,
       categories: categoryStats,
     };
+  }
+
+  /**
+   * Get tools not in disabled categories
+   */
+  getEnabledTools(disabledCategories: ToolCategory[]): ExtendedToolDefinition[] {
+    return Array.from(this.tools.values()).filter(
+      (tool) => !disabledCategories.includes(tool.category),
+    );
+  }
+
+  /**
+   * Clear all tools, handlers, and category index
+   */
+  clear(): void {
+    this.tools.clear();
+    this.handlers.clear();
+    this.categories.clear();
   }
 
   /**

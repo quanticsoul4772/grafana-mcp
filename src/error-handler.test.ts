@@ -5,16 +5,11 @@ import {
   createSuccessResponse,
   validateRequiredParams,
 } from './error-handler.js';
-import { ErrorCategory } from './security-utils.js';
-
-// Mock console.error to avoid noise in test output
-vi.mock('console', () => ({
-  error: vi.fn(),
-}));
 
 describe('error-handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   describe('handleToolError', () => {
