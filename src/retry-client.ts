@@ -120,7 +120,7 @@ export class RetryableHttpClient {
     if (error?.code) {
       return error.code;
     }
-    return error?.message || 'Unknown error';
+    return error?.message ?? 'Unknown error';
   }
 }
 

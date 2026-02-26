@@ -3,6 +3,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ToolRegistry } from '../tool-registry.js';
 import { LokiService } from '../services/loki.js';
 import { QueryLokiSchema } from '../types.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register Loki-related MCP tools
@@ -73,17 +74,7 @@ export function registerLokiTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error querying Loki: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'query_loki', 'query');
       }
     },
   );
@@ -133,17 +124,7 @@ export function registerLokiTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Loki labels: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_loki_labels', 'get');
       }
     },
   );
@@ -197,17 +178,7 @@ export function registerLokiTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Loki label values: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_loki_label_values', 'get');
       }
     },
   );
@@ -270,17 +241,7 @@ export function registerLokiTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Loki series: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_loki_series', 'get');
       }
     },
   );
@@ -398,17 +359,7 @@ export function registerLokiTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error building LogQL query: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'build_logql_query', 'build');
       }
     },
   );
@@ -444,17 +395,7 @@ export function registerLokiTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Loki stats: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_loki_stats', 'get');
       }
     },
   );

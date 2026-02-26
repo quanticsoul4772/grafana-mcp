@@ -37,8 +37,8 @@ export function registerDashboardTools(
                   (d) =>
                     `**${d.title}** (${d.uid})\\n` +
                     `  URL: ${d.url}\\n` +
-                    `  Tags: ${d.tags.join(', ') || 'None'}\\n` +
-                    `  Folder: ${d.folderTitle || 'General'}\\n` +
+                    `  Tags: ${d.tags.join(', ') ?? 'None'}\\n` +
+                    `  Folder: ${d.folderTitle ?? 'General'}\\n` +
                     `  Starred: ${d.isStarred ? 'Yes' : 'No'}`,
                 )
                 .join('\\n\\n')}`,
@@ -221,8 +221,8 @@ export function registerDashboardTools(
                       `**Version ${version.version}**\\n` +
                       `  Created: ${version.created}\\n` +
                       `  Created by: ${version.createdBy}\\n` +
-                      `  Message: ${version.message || 'No message'}\\n` +
-                      `  Parent Version: ${version.parentVersion || 'None'}`,
+                      `  Message: ${version.message ?? 'No message'}\\n` +
+                      `  Parent Version: ${version.parentVersion ?? 'None'}`,
                   )
                   .join('\\n\\n')}`,
             },

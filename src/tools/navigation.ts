@@ -3,6 +3,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ToolRegistry } from '../tool-registry.js';
 import { NavigationService } from '../services/navigation.js';
 import { GenerateDeepLinkSchema } from '../types.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register navigation-related MCP tools
@@ -65,17 +66,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error generating deeplink: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'generate_deeplink', 'generate');
       }
     },
   );
@@ -143,17 +134,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error generating dashboard URL: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'generate_dashboard_url', 'generate');
       }
     },
   );
@@ -222,17 +203,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error generating panel URL: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'generate_panel_url', 'generate');
       }
     },
   );
@@ -296,17 +267,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error generating explore URL: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'generate_explore_url', 'generate');
       }
     },
   );
@@ -373,17 +334,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error generating Prometheus explore URL: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'generate_prometheus_explore_url', 'generate');
       }
     },
   );
@@ -441,17 +392,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error generating Loki explore URL: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'generate_loki_explore_url', 'generate');
       }
     },
   );
@@ -483,17 +424,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting time range presets: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_time_range_presets', 'get');
       }
     },
   );
@@ -539,17 +470,7 @@ export function registerNavigationTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error validating time range: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'validate_time_range', 'validate');
       }
     },
   );

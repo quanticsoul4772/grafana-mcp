@@ -4,6 +4,7 @@ import { ToolRegistry, ToolCategory } from '../tool-registry.js';
 import { PrometheusService } from '../services/prometheus.js';
 import { QueryPrometheusSchema } from '../types.js';
 import { CommonSchemas } from '../common-schemas.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register Prometheus-related MCP tools
@@ -73,17 +74,7 @@ export function registerPrometheusTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error querying Prometheus: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'query_prometheus', 'query');
       }
     },
   );
@@ -125,25 +116,15 @@ export function registerPrometheusTools(
                 .map(
                   ([metricName, metricData]) =>
                     `**${metricName}**\\n` +
-                    `  Type: ${(metricData as any).type || 'unknown'}\\n` +
-                    `  Help: ${(metricData as any).help || 'No description available'}`,
+                    `  Type: ${(metricData as any).type ?? 'unknown'}\\n` +
+                    `  Help: ${(metricData as any).help ?? 'No description available'}`,
                 )
                 .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Prometheus metadata: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_prometheus_metadata', 'get');
       }
     },
   );
@@ -194,17 +175,7 @@ export function registerPrometheusTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Prometheus labels: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_prometheus_labels', 'get');
       }
     },
   );
@@ -261,17 +232,7 @@ export function registerPrometheusTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Prometheus label values: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_prometheus_label_values', 'get');
       }
     },
   );
@@ -334,17 +295,7 @@ export function registerPrometheusTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting Prometheus series: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_prometheus_series', 'get');
       }
     },
   );
@@ -416,17 +367,7 @@ export function registerPrometheusTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error building Prometheus query: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'build_prometheus_query', 'build');
       }
     },
   );

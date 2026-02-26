@@ -58,7 +58,7 @@ export class DashboardService extends BaseHttpService {
     } = {},
   ): Promise<Dashboard[]> {
     const params: Record<string, any> = {
-      limit: options.limit || 1000,
+      limit: options.limit ?? 1000,
     };
 
     if (options.query) {
@@ -102,7 +102,7 @@ export class DashboardService extends BaseHttpService {
   }): Promise<any> {
     const payload: Record<string, any> = {
       dashboard: options.dashboard,
-      overwrite: options.overwrite || false,
+      overwrite: options.overwrite ?? false,
     };
 
     if (options.folderId !== undefined) {
@@ -148,10 +148,10 @@ export class DashboardService extends BaseHttpService {
       const queries =
         panel.targets?.map((target: Target) => ({
           refId: target.refId,
-          query: target.expr || target.logQL || '',
+          query: target.expr ?? target.logQL ?? '',
           queryType: target.queryType,
           datasource: target.datasource,
-        })) || [];
+        })) ?? [];
 
       return {
         id: panel.id,

@@ -78,7 +78,7 @@ export class LokiService {
     return this.query({
       ...options,
       step:
-        options.step || this.calculateDefaultStep(options.start, options.end),
+        options.step ?? this.calculateDefaultStep(options.start, options.end),
     });
   }
 
@@ -307,8 +307,8 @@ export class LokiService {
     }
 
     // Basic validation
-    const openBraces = (query.match(/{/g) || []).length;
-    const closeBraces = (query.match(/}/g) || []).length;
+    const openBraces = (query.match(/{/g) ?? []).length;
+    const closeBraces = (query.match(/}/g) ?? []).length;
 
     if (openBraces !== closeBraces) {
       return {
@@ -318,8 +318,8 @@ export class LokiService {
       };
     }
 
-    const openParens = (query.match(/\(/g) || []).length;
-    const closeParens = (query.match(/\)/g) || []).length;
+    const openParens = (query.match(/\(/g) ?? []).length;
+    const closeParens = (query.match(/\)/g) ?? []).length;
 
     if (openParens !== closeParens) {
       return {

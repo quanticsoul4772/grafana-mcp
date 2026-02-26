@@ -51,7 +51,7 @@ describe('PrometheusService', () => {
           start: '2021-01-01T00:00:00Z',
           end: '2021-01-01T01:00:00Z',
           step: '1m',
-        }
+        },
       );
     });
 
@@ -84,7 +84,7 @@ describe('PrometheusService', () => {
         {
           query: 'up',
           time: '2021-01-01T00:00:00Z',
-        }
+        },
       );
     });
 
@@ -102,7 +102,7 @@ describe('PrometheusService', () => {
         '/api/datasources/proxy/uid/prom-uid/api/v1/query_range',
         {
           query: 'up',
-        }
+        },
       );
     });
   });
@@ -120,7 +120,7 @@ describe('PrometheusService', () => {
         {
           query: 'up',
           time: '2021-01-01T00:00:00Z',
-        }
+        },
       );
     });
 
@@ -135,7 +135,7 @@ describe('PrometheusService', () => {
         '/api/datasources/proxy/uid/prom-uid/api/v1/query',
         {
           query: 'up',
-        }
+        },
       );
     });
   });

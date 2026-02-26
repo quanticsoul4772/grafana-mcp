@@ -548,7 +548,7 @@ describe('DashboardService', () => {
 
       expect(mockHttpClient.post).toHaveBeenCalledWith(
         '/api/dashboards/uid/test-uid/permissions',
-        { items: permissions }
+        { items: permissions },
       );
     });
   });
@@ -598,7 +598,7 @@ describe('DashboardService', () => {
       expect(result).toEqual(mockResponse);
       expect(mockHttpClient.post).toHaveBeenCalledWith(
         '/api/dashboards/uid/test-uid/restore',
-        { version: 2 }
+        { version: 2 },
       );
     });
   });

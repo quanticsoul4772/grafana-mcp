@@ -191,7 +191,7 @@ export class NavigationService {
       leftPaneOptions,
       rightPaneOptions,
       ...timeOptions
-    } = options || {};
+    } = options ?? {};
 
     const left = {
       datasource: datasourceUid,
@@ -223,7 +223,7 @@ export class NavigationService {
       range?: boolean;
     },
   ): DeepLink {
-    const { range = true, step, ...timeOptions } = options || {};
+    const { range = true, step, ...timeOptions } = options ?? {};
 
     const leftPaneOptions: Record<string, any> = {
       expr: query,

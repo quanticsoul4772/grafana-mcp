@@ -1,7 +1,6 @@
 import { GrafanaHttpClient } from '../http-client.js';
 import { PrometheusQueryResult, PrometheusMetric } from '../types.js';
 import { BaseHttpService } from '../core/base-service.js';
-import { AsyncResult } from '../core/interfaces.js';
 
 /**
  * Service for querying Prometheus datasources through Grafana
@@ -254,8 +253,8 @@ export class PrometheusService extends BaseHttpService {
     }
 
     // Check for some common syntax errors
-    const openBraces = (query.match(/{/g) || []).length;
-    const closeBraces = (query.match(/}/g) || []).length;
+    const openBraces = (query.match(/{/g) ?? []).length;
+    const closeBraces = (query.match(/}/g) ?? []).length;
 
     if (openBraces !== closeBraces) {
       return { isValid: false, error: 'Unmatched braces in query' };

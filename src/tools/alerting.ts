@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ToolRegistry } from '../tool-registry.js';
 import { AlertingService } from '../services/alerting.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register alerting-related MCP tools
@@ -63,17 +64,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing alert rules: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_alert_rules', 'list');
       }
     },
   );
@@ -138,17 +129,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting alert rule: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_alert_rule', 'get');
       }
     },
   );
@@ -193,17 +174,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error creating alert rule: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'create_alert_rule', 'create');
       }
     },
   );
@@ -249,17 +220,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error updating alert rule: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'update_alert_rule', 'update');
       }
     },
   );
@@ -289,17 +250,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error deleting alert rule: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'delete_alert_rule', 'delete');
       }
     },
   );
@@ -332,17 +283,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing contact points: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_contact_points', 'list');
       }
     },
   );
@@ -382,17 +323,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting contact point: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_contact_point', 'get');
       }
     },
   );
@@ -428,7 +359,7 @@ export function registerAlertingTools(
               type: 'text',
               text:
                 `Test notification sent to contact point ${uid}:\\n\\n` +
-                `Status: ${result.status || 'Success'}\\n` +
+                `Status: ${result.status ?? 'Success'}\\n` +
                 `Message: ${message}\\n${
                   result.details
                     ? `Details: ${JSON.stringify(result.details, null, 2)}`
@@ -438,17 +369,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error testing contact point: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'test_contact_point', 'test');
       }
     },
   );
@@ -488,17 +409,7 @@ export function registerAlertingTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing alert rule groups: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_alert_rule_groups', 'list');
       }
     },
   );

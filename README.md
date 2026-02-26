@@ -4,12 +4,14 @@ A Model Context Protocol (MCP) server that provides AI-powered integration with 
 
 ## Features
 
-- **52 MCP Tools** across 8 categories for complete Grafana integration
+- **59 MCP Tools** across 9 categories for complete Grafana integration
 - **Dashboard Management** - Search, create, update, and analyze dashboards
 - **Prometheus Integration** - Execute PromQL queries and explore metrics
 - **Loki Integration** - Search logs with LogQL and manage log streams
 - **Alerting & Incident Response** - Manage alert rules and notifications
+- **RAMP Integration** - Auto-discover sensors via SSH tunnels, query metrics, compare baselines, render performance verdicts
 - **Administrative Tools** - User, team, and organization management
+- **Navigation & Deep Links** - Generate URLs for dashboards, panels, and Explore views
 - **Security-First Design** - Automatic credential sanitization and error categorization
 - **TypeScript Excellence** - Full type safety with strict mode enabled
 
@@ -122,7 +124,7 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 
 ## Available Tools
 
-### Dashboard Tools (8 tools)
+### Dashboard Tools (7 tools)
 - `search_dashboards` - Find dashboards by title, tags, or metadata
 - `get_dashboard_by_uid` - Retrieve complete dashboard details
 - `get_dashboard_panel_queries` - Extract queries from all panels
@@ -130,6 +132,15 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 - `get_dashboard_versions` - View dashboard version history
 - `restore_dashboard_version` - Restore to a specific version
 - `delete_dashboard` - Remove dashboards
+
+### Datasource Tools (7 tools)
+- `list_datasources` - List all configured datasources
+- `get_datasource_by_uid` - Get datasource details by UID
+- `get_datasource_by_name` - Get datasource details by name
+- `test_datasource_connection` - Test datasource connectivity
+- `get_datasources_by_type` - Filter datasources by type
+- `get_default_datasource` - Get the default datasource
+- `check_datasource_exists` - Check if a datasource exists
 
 ### Prometheus Tools (6 tools)
 - `query_prometheus` - Execute PromQL queries
@@ -147,31 +158,46 @@ Configure your MCP client (e.g., Claude Desktop) to use this server:
 - `build_logql_query` - LogQL query builder
 - `get_loki_stats` - Ingestion statistics
 
-### Data Source Tools (4 tools)
-- `list_datasources` - List all configured data sources
-- `get_datasource_by_uid` - Get specific data source details
-- `test_datasource` - Test data source connectivity
-- `query_datasource` - Execute queries against any data source
+### Alerting Tools (9 tools)
+- `list_alert_rules` - List all alert rules
+- `get_alert_rule` - Get specific alert rule details
+- `create_alert_rule` - Create new alert rules
+- `update_alert_rule` - Update existing rules
+- `delete_alert_rule` - Delete alert rules
+- `list_contact_points` - List notification contact points
+- `get_contact_point` - Get contact point details
+- `test_contact_point` - Test notification delivery
+- `list_alert_rule_groups` - List alert rule groups
 
-### Admin Tools (8 tools)
-- `list_users` - List organization users
-- `get_current_user` - Get current user info
+### Admin Tools (9 tools)
 - `list_teams` - List teams
 - `get_team_by_uid` - Get team details
+- `list_users` - List organization users
+- `get_current_user` - Get current user info
 - `list_folders` - List dashboard folders
 - `get_folder_by_uid` - Get folder details
 - `list_api_keys` - List API keys
 - `list_service_accounts` - List service accounts
+- `get_current_organization` - Get current organization info
 
-### Alerting Tools (8 tools)
-- `list_alert_rules` - List all alert rules
-- `get_alert_rule_by_uid` - Get specific alert rule
-- `create_alert_rule` - Create new alert rules
-- `update_alert_rule` - Update existing rules
-- `delete_alert_rule` - Delete alert rules
-- `list_notification_channels` - List notification channels
-- `test_notification_channel` - Test notification delivery
-- `get_alert_history` - Query alert history
+### Navigation Tools (8 tools)
+- `generate_deeplink` - Generate deeplink URLs for dashboards, panels, or Explore
+- `generate_dashboard_url` - Generate dashboard URLs with time range and variables
+- `generate_panel_url` - Generate panel-specific URLs
+- `generate_explore_url` - Generate Explore view URLs
+- `generate_prometheus_explore_url` - Generate Prometheus Explore URLs
+- `generate_loki_explore_url` - Generate Loki Explore URLs
+- `get_time_range_presets` - Get common time range presets
+- `validate_time_range` - Validate time range parameters
+
+### RAMP Tools (7 tools)
+- `discover_sensors` - Auto-discover Corelight sensors via SSH tunnels (ports 8080-8099)
+- `sensor_status` - Get health and version info for a sensor
+- `query_sensor_metric` - Query Prometheus metrics from a sensor's Grafana
+- `deploy_ramp_dashboard` - Deploy a standard RAMP dashboard to a sensor
+- `list_baselines` - List available performance baselines for comparison
+- `sensor_performance_verdict` - Compare current metrics against baselines (pass/marginal/fail)
+- `annotate_test` - Create Grafana annotations to mark test events
 
 ## Examples
 
@@ -284,21 +310,31 @@ grafana-mcp/
 │   ├── error-handler.ts     # Centralized error handling
 │   ├── tool-registry.ts     # MCP tool registration
 │   ├── types.ts             # TypeScript definitions
+│   ├── core/                # Base classes and interfaces
+│   │   ├── base-service.ts  # Base service with execute/health patterns
+│   │   └── interfaces.ts    # Service and HTTP interfaces
 │   ├── services/            # Business logic services
 │   │   ├── dashboard.ts     # Dashboard operations
+│   │   ├── datasource.ts    # Datasource management
 │   │   ├── prometheus.ts    # Prometheus queries
 │   │   ├── loki.ts          # Loki log queries
 │   │   ├── alerting.ts      # Alert management
-│   │   └── admin.ts         # Administrative functions
+│   │   ├── admin.ts         # Administrative functions
+│   │   ├── navigation.ts    # URL and deeplink generation
+│   │   └── ramp.ts          # RAMP sensor discovery and metrics
 │   └── tools/               # MCP tool definitions
 │       ├── dashboard.ts     # Dashboard tools
+│       ├── datasource.ts    # Datasource tools
 │       ├── prometheus.ts    # Prometheus tools
 │       ├── loki.ts          # Loki tools
-│       └── admin.ts         # Admin tools
+│       ├── alerting.ts      # Alerting tools
+│       ├── admin.ts         # Admin tools
+│       ├── navigation.ts    # Navigation tools
+│       └── ramp.ts          # RAMP tools
 ├── build/                   # Compiled JavaScript output
 ├── package.json
 ├── tsconfig.json
-├── eslint.config.js
+├── eslint.config.ts
 └── README.md
 ```
 

@@ -39,21 +39,11 @@
   },
   "include": ["src/**/*"],
   "exclude": [
-    "node_modules", 
-    "build", 
+    "node_modules",
+    "build",
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/**/*.d.ts",
-    "src/core/container.ts",
-    "src/core/error-handling.ts",
-    "src/core/service-registry.ts",
-    "src/core/tool-system.ts",
-    "src/examples/**",
-    "src/refactored-main.ts",
-    "src/optimized-main.ts",
-    "src/optimized-http-client.ts",
-    "src/performance-monitor.ts",
-    "src/service-pool.ts"
+    "src/**/*.d.ts"
   ]
 }

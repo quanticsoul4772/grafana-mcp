@@ -146,7 +146,7 @@ export class DatasourceService {
    */
   async getDefaultDatasource(): Promise<Datasource | null> {
     const datasources = await this.listDatasources();
-    return datasources.find((ds) => ds.isDefault) || null;
+    return datasources.find((ds) => ds.isDefault) ?? null;
   }
 
   /**

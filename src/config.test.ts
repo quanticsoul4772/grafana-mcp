@@ -298,7 +298,7 @@ describe('config', () => {
 
       const allCategories: ToolCategory[] = [
         'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-        'incident', 'sift', 'oncall', 'admin', 'navigation'
+        'incident', 'sift', 'oncall', 'admin', 'navigation',
       ];
 
       allCategories.forEach(category => {
@@ -322,7 +322,7 @@ describe('config', () => {
 
       expect(enabled).toEqual([
         'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-        'incident', 'sift', 'oncall', 'admin', 'navigation', 'ramp'
+        'incident', 'sift', 'oncall', 'admin', 'navigation', 'ramp',
       ]);
     });
 
@@ -340,7 +340,7 @@ describe('config', () => {
 
       expect(enabled).toEqual([
         'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-        'sift', 'navigation', 'ramp'
+        'sift', 'navigation', 'ramp',
       ]);
       expect(enabled).not.toContain('admin');
       expect(enabled).not.toContain('oncall');
@@ -355,7 +355,7 @@ describe('config', () => {
         GRAFANA_TIMEOUT: 30000,
         GRAFANA_DISABLE_TOOLS: [
           'dashboards', 'datasources', 'prometheus', 'loki', 'alerting',
-          'incident', 'sift', 'oncall', 'admin', 'navigation', 'ramp'
+          'incident', 'sift', 'oncall', 'admin', 'navigation', 'ramp',
         ],
         GRAFANA_TLS_SKIP_VERIFY: false,
       };

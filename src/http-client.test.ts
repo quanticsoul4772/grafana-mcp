@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GrafanaHttpClient } from './http-client.js';
-import type { Config, TLSConfig } from './types.js';
+import type { Config } from './types.js';
 import fs from 'fs';
 
 // Mock axios to avoid actual HTTP calls
@@ -485,7 +485,7 @@ describe('GrafanaHttpClient', () => {
 
   describe('error handling', () => {
     it('should handle axios errors in interceptors', async () => {
-      const client = new GrafanaHttpClient(mockConfig);
+      const _client = new GrafanaHttpClient(mockConfig);
 
       // Get the response interceptor error handler
       const axios = vi.mocked(await import('axios')).default;

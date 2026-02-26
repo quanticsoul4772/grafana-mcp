@@ -225,7 +225,7 @@ export function categorizeError(
   return {
     category: ErrorCategory.SYSTEM_ERROR,
     publicMessage: 'An unexpected error occurred. Please try again.',
-    internalMessage: `${contextPrefix}Unknown error: ${error?.message || 'No error message available'}`,
+    internalMessage: `${contextPrefix}Unknown error: ${error?.message ?? 'No error message available'}`,
     originalError: error,
   };
 }

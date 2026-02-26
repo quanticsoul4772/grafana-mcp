@@ -3,6 +3,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ToolRegistry } from '../tool-registry.js';
 import { DatasourceService } from '../services/datasource.js';
 import { GetDatasourceSchema, GetDatasourceByNameSchema } from '../types.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register datasource-related MCP tools
@@ -43,17 +44,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing datasources: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_datasources', 'list');
       }
     },
   );
@@ -102,17 +93,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting datasource: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_datasource_by_uid', 'get');
       }
     },
   );
@@ -163,17 +144,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting datasource: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_datasource_by_name', 'get');
       }
     },
   );
@@ -196,8 +167,8 @@ export function registerDatasourceTools(
               type: 'text',
               text:
                 '**Datasource Connection Test Results:**\\n\\n' +
-                `Status: ${result.status || 'Unknown'}\\n` +
-                `Message: ${result.message || 'No message provided'}\\n${
+                `Status: ${result.status ?? 'Unknown'}\\n` +
+                `Message: ${result.message ?? 'No message provided'}\\n${
                   result.details
                     ? `Details: ${JSON.stringify(result.details, null, 2)}`
                     : ''
@@ -206,17 +177,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error testing datasource connection: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'test_datasource_connection', 'test');
       }
     },
   );
@@ -267,17 +228,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting datasources by type: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_datasources_by_type', 'get');
       }
     },
   );
@@ -318,17 +269,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting default datasource: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_default_datasource', 'get');
       }
     },
   );
@@ -347,7 +288,7 @@ export function registerDatasourceTools(
               .describe('The datasource name to check')
               .optional(),
           })
-          .refine((data) => data.uid || data.name, {
+          .refine((data) => data.uid ?? data.name, {
             message: 'Either uid or name must be provided',
           }),
       ),
@@ -379,17 +320,7 @@ export function registerDatasourceTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error checking datasource existence: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'check_datasource_exists', 'check');
       }
     },
   );

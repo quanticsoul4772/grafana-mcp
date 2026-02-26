@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ToolRegistry } from '../tool-registry.js';
 import { AdminService } from '../services/admin.js';
+import { handleToolError } from '../error-handler.js';
 
 /**
  * Register admin-related MCP tools
@@ -29,8 +30,8 @@ export function registerAdminTools(
           perpage?: number;
         };
         const result = await adminService.listTeams(
-          params.page || 1,
-          params.perpage || 1000,
+          params.page ?? 1,
+          params.perpage ?? 1000,
         );
 
         return {
@@ -51,17 +52,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing teams: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_teams', 'list');
       }
     },
   );
@@ -98,17 +89,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting team: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_team_by_uid', 'get');
       }
     },
   );
@@ -132,8 +113,8 @@ export function registerAdminTools(
           perpage?: number;
         };
         const result = await adminService.listUsers(
-          params.page || 1,
-          params.perpage || 1000,
+          params.page ?? 1,
+          params.perpage ?? 1000,
         );
 
         return {
@@ -155,17 +136,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing users: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_users', 'list');
       }
     },
   );
@@ -201,17 +172,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting current user: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_current_user', 'get');
       }
     },
   );
@@ -245,17 +206,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing folders: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_folders', 'list');
       }
     },
   );
@@ -299,17 +250,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting folder: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_folder_by_uid', 'get');
       }
     },
   );
@@ -336,25 +277,15 @@ export function registerAdminTools(
                     `  ID: ${key.id}\\n` +
                     `  Role: ${key.role}\\n` +
                     `  Created: ${key.created}\\n` +
-                    `  Expires: ${key.expiration || 'Never'}\\n` +
-                    `  Last Used: ${key.lastUsedAt || 'Never'}`,
+                    `  Expires: ${key.expiration ?? 'Never'}\\n` +
+                    `  Last Used: ${key.lastUsedAt ?? 'Never'}`,
                 )
                 .join('\\n\\n')}`,
             },
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing API keys: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_api_keys', 'list');
       }
     },
   );
@@ -390,17 +321,7 @@ export function registerAdminTools(
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error listing service accounts: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'list_service_accounts', 'list');
       }
     },
   );
@@ -423,26 +344,16 @@ export function registerAdminTools(
               text:
                 `**Current Organization: ${org.name}**\\n\\n` +
                 `- ID: ${org.id}\\n` +
-                `- Address: ${org.address1 || 'N/A'}\\n` +
-                `- City: ${org.city || 'N/A'}\\n` +
-                `- Country: ${org.country || 'N/A'}\\n` +
-                `- State: ${org.state || 'N/A'}\\n` +
-                `- ZIP Code: ${org.zipCode || 'N/A'}`,
+                `- Address: ${org.address1 ?? 'N/A'}\\n` +
+                `- City: ${org.city ?? 'N/A'}\\n` +
+                `- Country: ${org.country ?? 'N/A'}\\n` +
+                `- State: ${org.state ?? 'N/A'}\\n` +
+                `- ZIP Code: ${org.zipCode ?? 'N/A'}`,
             },
           ],
         };
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting current organization: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return handleToolError(error, 'get_current_organization', 'get');
       }
     },
   );

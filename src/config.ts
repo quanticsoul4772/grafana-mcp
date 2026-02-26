@@ -116,9 +116,7 @@ let cachedConfig: Config | null = null;
  * Get configuration with lazy loading and caching
  */
 export function getConfig(): Config {
-  if (!cachedConfig) {
-    cachedConfig = parseConfig();
-  }
+  cachedConfig ??= parseConfig();
   return cachedConfig;
 }
 

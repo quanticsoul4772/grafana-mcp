@@ -156,7 +156,7 @@ export abstract class BaseHttpService extends BaseService implements IHttpServic
       // Basic health check - try to make a simple API call
       await this.httpClient.get('/api/health');
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

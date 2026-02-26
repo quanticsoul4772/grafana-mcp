@@ -207,11 +207,11 @@ describe('main', () => {
           capabilities: {
             tools: {},
           },
-        }
+        },
       );
     });
 
-    const server = mockCreateServer();
+    const _server = mockCreateServer();
 
     expect(Server).toHaveBeenCalledWith(
       {
@@ -222,7 +222,7 @@ describe('main', () => {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
   });
 

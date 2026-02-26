@@ -26,7 +26,7 @@ describe('error-handler', () => {
       expect(result.content[0].text).toContain('Authentication failed');
       expect(result.content[0].text).toContain('Operation: test-tool');
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('[Tool Error]')
+        expect.stringContaining('[Tool Error]'),
       );
     });
 
@@ -89,7 +89,7 @@ describe('error-handler', () => {
       handleToolError(error, 'test-tool', 'test-operation');
 
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('test-tool:test-operation')
+        expect.stringContaining('test-tool:test-operation'),
       );
     });
 
@@ -100,7 +100,7 @@ describe('error-handler', () => {
 
       expect(result.isError).toBe(true);
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('[Tool Error]')
+        expect.stringContaining('[Tool Error]'),
       );
     });
 
@@ -176,7 +176,7 @@ describe('error-handler', () => {
       const result = await withErrorHandling('auth-tool', 'login', handler);
 
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('auth-tool:login')
+        expect.stringContaining('auth-tool:login'),
       );
       expect(result.content[0].text).toContain('Operation: auth-tool');
     });
@@ -408,7 +408,7 @@ describe('error-handler', () => {
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('Permission denied');
       expect(console.error).toHaveBeenCalledWith(
-        expect.stringContaining('multi-layer-tool:deep-operation')
+        expect.stringContaining('multi-layer-tool:deep-operation'),
       );
     });
   });
