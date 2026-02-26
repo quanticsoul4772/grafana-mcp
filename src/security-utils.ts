@@ -81,10 +81,23 @@ function isSensitiveField(fieldName: string): boolean {
  */
 function sanitizeString(str: string): string {
   // Mask potential tokens/keys (anything that looks like a long alphanumeric string)
-  return str
-    .replace(/\b[A-Za-z0-9+/]{20,}={0,2}\b/g, '[REDACTED]')
-    .replace(/\b[A-Fa-f0-9]{32,}\b/g, '[REDACTED]')
-    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]');
+  return (
+    str
+      // JWT tokens (three base64url segments separated by dots)
+      .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[REDACTED]')
+      // URL-embedded credentials (e.g., https://user:password@host)
+      .replace(/\/\/[^@\s]+:[^@\s]+@/g, '//[REDACTED]@')
+      // GitHub tokens (ghp_, gho_, ghs_, github_pat_)
+      .replace(/\b(ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{10,}\b/g, '[REDACTED]')
+      // Generic API keys with common prefixes (sk-, pk-, api_key_, api-key-)
+      .replace(/\b(sk-|pk-|api[_-]key[_-]?)[A-Za-z0-9]{10,}\b/gi, '[REDACTED]')
+      // Long alphanumeric strings (potential tokens/keys, 20+ chars)
+      .replace(/\b[A-Za-z0-9+/]{20,}={0,2}\b/g, '[REDACTED]')
+      // Long hex strings (32+ chars)
+      .replace(/\b[A-Fa-f0-9]{32,}\b/g, '[REDACTED]')
+      // Bearer token headers
+      .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]')
+  );
 }
 
 /**

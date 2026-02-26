@@ -118,6 +118,81 @@ describe('security-utils', () => {
       expect(current).toBe('[Max Depth Reached]');
     });
 
+    it('should sanitize JWT tokens', () => {
+      const jwt =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';
+      const input = { message: `Access with ${jwt} granted` };
+
+      const result = sanitizeObject(input);
+
+      expect(result.message).not.toContain('eyJ');
+      expect(result.message).toContain('[REDACTED]');
+      expect(result.message).toContain('granted');
+    });
+
+    it('should sanitize URL-embedded credentials', () => {
+      const input = {
+        message: 'Connecting to https://admin:supersecret@grafana.example.com/api',
+      };
+
+      const result = sanitizeObject(input);
+
+      expect(result.message).not.toContain('admin:supersecret');
+      expect(result.message).toContain('//[REDACTED]@');
+      expect(result.message).toContain('grafana.example.com/api');
+    });
+
+    it('should sanitize GitHub tokens', () => {
+      const ghpToken = 'ghp_ABCDEFghij1234567890';
+      const ghoToken = 'gho_klmnopqrst0987654321';
+      const ghsToken = 'ghs_UVWXYZabcdef123456';
+      const patToken = 'github_pat_ABCDEFGHIJ1234567890abcdefghij';
+
+      const input = {
+        msg1: `Token: ${ghpToken}`,
+        msg2: `Token: ${ghoToken}`,
+        msg3: `Token: ${ghsToken}`,
+        msg4: `Token: ${patToken}`,
+      };
+
+      const result = sanitizeObject(input);
+
+      expect(result.msg1).not.toContain('ghp_');
+      expect(result.msg2).not.toContain('gho_');
+      expect(result.msg3).not.toContain('ghs_');
+      expect(result.msg4).not.toContain('github_pat_');
+      expect(result.msg1).toContain('[REDACTED]');
+      expect(result.msg2).toContain('[REDACTED]');
+      expect(result.msg3).toContain('[REDACTED]');
+      expect(result.msg4).toContain('[REDACTED]');
+    });
+
+    it('should sanitize generic API keys with common prefixes', () => {
+      const input = {
+        msg1: 'Key: sk-abc123def456ghi',
+        msg2: 'Key: pk-xyz789012345abc',
+        msg3: 'Key: api_key_abcdefghij1234',
+        msg4: 'Key: api-key-xyz1234567890',
+        msg5: 'Key: API_KEY_ABCDEFGHIJ',
+      };
+
+      const result = sanitizeObject(input);
+
+      expect(result.msg1).toBe('Key: [REDACTED]');
+      expect(result.msg2).toBe('Key: [REDACTED]');
+      expect(result.msg3).toBe('Key: [REDACTED]');
+      expect(result.msg4).toBe('Key: [REDACTED]');
+      expect(result.msg5).toBe('Key: [REDACTED]');
+    });
+
+    it('should not redact short non-sensitive strings', () => {
+      const input = { message: 'Hello world, user john logged in' };
+
+      const result = sanitizeObject(input);
+
+      expect(result.message).toBe('Hello world, user john logged in');
+    });
+
     it('should sanitize long alphanumeric strings that look like tokens', () => {
       const input = {
         message: 'Token is: abcdef1234567890abcdef1234567890 and user is john',
