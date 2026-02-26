@@ -171,18 +171,3 @@ export abstract class BaseHttpService extends BaseService implements IHttpServic
     // Subclasses can override for custom cleanup
   }
 }
-
-/**
- * Service factory base class
- */
-export abstract class ServiceFactory<T extends IService> {
-  abstract create(): T;
-
-  async createAsync(): Promise<T> {
-    const service = this.create();
-    if (service.initialize) {
-      await service.initialize();
-    }
-    return service;
-  }
-}
