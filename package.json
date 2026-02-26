@@ -23,6 +23,7 @@
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest --watch",
     "test:run": "vitest run",
+    "test:integration": "GRAFANA_URL=http://localhost:3333 GRAFANA_TOKEN=admin:admin vitest run src/integration.test.ts",
     "lint": "eslint src --ext .ts --max-warnings 200",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.{ts,json,md}\"",

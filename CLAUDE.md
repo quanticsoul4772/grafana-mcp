@@ -73,6 +73,7 @@ Environment variables (validated by `ConfigSchema` in `src/types.ts`):
 - `GRAFANA_TOKEN` (required) — service account token, API key, or `user:password`
 - `GRAFANA_DEBUG` — enable verbose HTTP logging (default: false)
 - `GRAFANA_TIMEOUT` — HTTP timeout in ms (default: 30000)
+- `GRAFANA_RATE_LIMIT` — max tool calls per second; 0 or unset to disable (default: disabled)
 - `GRAFANA_DISABLE_TOOLS` — comma-separated categories to skip: dashboards, datasources, prometheus, loki, alerting, incident, sift, oncall, admin, navigation, ramp
 - `GRAFANA_TLS_*` — optional mTLS config (cert, key, CA files, skip verify)
 - `RAMP_PROJECT_PATH` — path to ramp project root for dashboard/baseline files (default: `~/Projects/ramp`)

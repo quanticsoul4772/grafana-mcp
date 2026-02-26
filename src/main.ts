@@ -11,6 +11,7 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { getConfig } from './config.js';
 import { GrafanaHttpClient } from './http-client.js';
+import { TokenBucketRateLimiter } from './rate-limiter.js';
 import { ToolRegistry } from './tool-registry.js';
 
 const execFileAsync = promisify(execFile);
@@ -125,6 +126,16 @@ async function main() {
       },
     );
 
+    // Optional rate limiting
+    const rateLimitRaw = process.env.GRAFANA_RATE_LIMIT;
+    const rateLimitRate = rateLimitRaw ? Number(rateLimitRaw) : 0;
+    let rateLimiter: TokenBucketRateLimiter | null = null;
+    if (rateLimitRate > 0) {
+      // maxTokens = 10x the per-second rate to allow reasonable bursts
+      rateLimiter = new TokenBucketRateLimiter(rateLimitRate * 10, rateLimitRate);
+      console.error(`[INFO] Rate limiting enabled: ${rateLimitRate} requests/sec (burst: ${rateLimitRate * 10})`);
+    }
+
     // Track which tools are disabled
     const disabledTools = config.GRAFANA_DISABLE_TOOLS || [];
     const isToolCategoryEnabled = (category: string) =>
@@ -180,6 +191,20 @@ async function main() {
 
       if (config.GRAFANA_DEBUG) {
         console.error(`[DEBUG] Tool called: ${name} with args:`, args);
+      }
+
+      // Rate limit check (if enabled)
+      if (rateLimiter && !rateLimiter.tryAcquire()) {
+        console.error(`[WARN] Rate limited: ${name}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Rate limited. Please wait before making another request.',
+            },
+          ],
+          isError: true,
+        };
       }
 
       try {
