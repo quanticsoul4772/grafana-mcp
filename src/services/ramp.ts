@@ -24,17 +24,17 @@ const METRIC_QUERIES = {
   systemMemoryPct: 'node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100',
 } as const;
 
-const SENSOR_AUTH = { username: 'admin', password: 'REDACTED' };
-
 export class RampService {
   private sensors = new Map<string, SensorInfo>();
   private clients = new Map<string, GrafanaHttpClient>();
   private rampProjectPath: string;
   private scanPorts: { start: number; end: number };
+  private sensorToken: string;
 
   constructor(options?: {
     rampProjectPath?: string;
     scanPorts?: string;
+    sensorToken?: string;
   }) {
     this.rampProjectPath = options?.rampProjectPath
       ?? process.env.RAMP_PROJECT_PATH
@@ -45,6 +45,9 @@ export class RampService {
       throw new Error(`Invalid port range: "${portRange}". Expected format: "start-end" (e.g., "8080-8099")`);
     }
     this.scanPorts = { start, end };
+    this.sensorToken = options?.sensorToken
+      ?? process.env.RAMP_SENSOR_TOKEN
+      ?? 'admin:admin';
   }
 
   /**
@@ -108,12 +111,10 @@ export class RampService {
    */
   private async probeSensorGrafana(port: number): Promise<SensorInfo | null> {
     const grafanaUrl = `http://localhost:${port}/grafana`;
-    const token = `${SENSOR_AUTH.username}:${SENSOR_AUTH.password}`;
-
     // Create a temporary client for probing
     const tempClient = new GrafanaHttpClient({
       GRAFANA_URL: grafanaUrl,
-      GRAFANA_TOKEN: token,
+      GRAFANA_TOKEN: this.sensorToken,
       GRAFANA_DEBUG: false,
       GRAFANA_TIMEOUT: 5000,
       GRAFANA_DISABLE_TOOLS: [],
@@ -158,7 +159,7 @@ export class RampService {
   private createSensorClient(sensor: SensorInfo): GrafanaHttpClient {
     return new GrafanaHttpClient({
       GRAFANA_URL: sensor.grafanaUrl,
-      GRAFANA_TOKEN: `${SENSOR_AUTH.username}:${SENSOR_AUTH.password}`,
+      GRAFANA_TOKEN: this.sensorToken,
       GRAFANA_DEBUG: false,
       GRAFANA_TIMEOUT: 10000,
       GRAFANA_DISABLE_TOOLS: [],

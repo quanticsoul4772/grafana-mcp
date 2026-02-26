@@ -19,7 +19,7 @@ On startup and via `discover_sensors` tool, scan TCP ports 8080-8099 for SSH-tun
 
 ### Multi-Sensor HTTP Clients
 
-`RampService` maintains a map of `GrafanaHttpClient` instances — one per discovered sensor, each configured with the sensor's Grafana URL and basic auth (`admin:REDACTED`). Generic tools continue using the single default client from `GRAFANA_URL`.
+`RampService` maintains a map of `GrafanaHttpClient` instances — one per discovered sensor, each configured with the sensor's Grafana URL and basic auth (`RAMP_SENSOR_TOKEN env var`). Generic tools continue using the single default client from `GRAFANA_URL`.
 
 ### File Structure
 
@@ -55,7 +55,7 @@ New environment variables:
 - `RAMP_PROJECT_PATH` — Path to ramp project root (default: `~/Projects/ramp`). Locates `dashboards/ramp-performance-analysis.json` and `dashboards/baselines.json`.
 - `RAMP_SCAN_PORTS` — Port range for tunnel discovery (default: `8080-8099`).
 
-Sensor Grafana auth: hardcoded `admin:REDACTED` basic auth (matches `grafana-tunnel.sh` password reset).
+Sensor Grafana auth: hardcoded `RAMP_SENSOR_TOKEN env var` basic auth (matches `grafana-tunnel.sh` password reset).
 
 ## Key PromQL Queries (sensor_status)
 
