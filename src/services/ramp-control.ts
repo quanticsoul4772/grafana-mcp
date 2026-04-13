@@ -67,7 +67,7 @@ export class RampControlService {
   startRampTest(config: RampTestConfig, confirm: boolean): string {
     if (!confirm) {
       return (
-        `DRY RUN: Would start RAMP test:\n` +
+        'DRY RUN: Would start RAMP test:\n' +
         `  Appliance: ${config.appliance}\n` +
         `  Replayer: ${config.replayer}\n` +
         `  Tests: ${config.tests}\n` +

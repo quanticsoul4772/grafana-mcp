@@ -9,8 +9,8 @@ export class TokenBucketRateLimiter {
   private lastRefill: number;
 
   constructor(
-    private maxTokens: number = 100,
-    private refillRate: number = 10,
+    private maxTokens = 100,
+    private refillRate = 10,
   ) {
     this.tokens = maxTokens;
     this.lastRefill = Date.now();

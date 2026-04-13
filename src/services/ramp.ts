@@ -313,9 +313,7 @@ export class RampService {
       );
     }
 
-    if (!this.dashboardCache) {
-      this.dashboardCache = JSON.parse(fs.readFileSync(dashboardPath, 'utf-8'));
-    }
+    this.dashboardCache ??= JSON.parse(fs.readFileSync(dashboardPath, 'utf-8'));
     const dashboardJson = JSON.parse(JSON.stringify(this.dashboardCache)); // deep clone
 
     // Patch datasource variable default to the sensor's Prometheus UID
@@ -754,7 +752,7 @@ export class RampService {
     timeEnd?: number;
     dashboardUid?: string;
   }): Promise<{ id: number }> {
-    const { info, client } = this.resolveSensor(options.sensor);
+    const { info: _info, client } = this.resolveSensor(options.sensor);
     const now = Date.now();
     const body: Record<string, any> = {
       text: options.text,
