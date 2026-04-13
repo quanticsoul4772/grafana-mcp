@@ -50,14 +50,8 @@ export abstract class BaseService implements IService {
    * Cleanup service resources
    */
   async cleanup(): Promise<void> {
-    try {
-      await this.onCleanup();
-      this._initialized = false;
-
-    } catch (error) {
-
-      throw error;
-    }
+    await this.onCleanup();
+    this._initialized = false;
   }
 
   /**
@@ -68,7 +62,7 @@ export abstract class BaseService implements IService {
       const isHealthy = await this.onHealthCheck();
       this._healthy = isHealthy;
       return isHealthy;
-    } catch (error) {
+    } catch (_error) {
       this._healthy = false;
 
       return false;

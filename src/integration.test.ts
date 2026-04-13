@@ -7,8 +7,8 @@ import { AlertingService } from './services/alerting.js';
 import { NavigationService } from './services/navigation.js';
 import type { Config } from './types.js';
 
-const GRAFANA_URL = process.env.GRAFANA_URL || 'http://localhost:3333';
-const GRAFANA_TOKEN = process.env.GRAFANA_TOKEN || 'admin:admin';
+const GRAFANA_URL = process.env.GRAFANA_URL ?? 'http://localhost:3333';
+const GRAFANA_TOKEN = process.env.GRAFANA_TOKEN ?? 'admin:admin';
 
 /**
  * Check whether the test Grafana instance is reachable.
