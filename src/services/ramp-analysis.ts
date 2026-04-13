@@ -1,6 +1,5 @@
 import { RampService } from './ramp.js';
 import type {
-  SensorInfo,
   MetricSnapshot,
   Verdict,
   BaselineEntry,

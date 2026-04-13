@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('child_process', () => ({ execSync: vi.fn(() => '') }));
 
@@ -11,7 +11,7 @@ vi.mock('../http-client.js', () => ({
 
 import { RampAnalysisService, DIAGNOSTIC_QUERIES } from './ramp-analysis.js';
 import { RampService } from './ramp.js';
-import type { SensorInfo, MetricSnapshot, Verdict } from '../ramp-types.js';
+import type { SensorInfo } from '../ramp-types.js';
 
 const RAMP_PROJECT_PATH = '/Users/russellsmith/Projects/ramp';
 
@@ -513,9 +513,9 @@ describe('RampAnalysisService', () => {
     });
 
     it('should collect snapshots for the specified duration', async () => {
-      let callCount = 0;
+      let _callCount = 0;
       vi.spyOn(rampService, 'getSensorStatus').mockImplementation(async () => {
-        callCount++;
+        _callCount++;
         return {
           sensor: sensorInfo,
           metrics: {
@@ -555,10 +555,10 @@ describe('RampAnalysisService', () => {
     });
 
     it('should detect drop events', async () => {
-      let callCount = 0;
+      let _callCount = 0;
       vi.spyOn(rampService, 'getSensorStatus').mockImplementation(async () => {
-        callCount++;
-        const hasDrops = callCount >= 2;
+        _callCount++;
+        const hasDrops = _callCount >= 2;
         return {
           sensor: sensorInfo,
           metrics: {
