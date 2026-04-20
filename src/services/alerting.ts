@@ -230,7 +230,7 @@ export class AlertingService {
     const instances = await this.listAlertInstances();
     return instances.filter(
       (instance) =>
-        instance.labels && instance.labels.__alert_rule_uid__ === ruleUid,
+        instance.labels?.__alert_rule_uid__ === ruleUid,
     );
   }
 
