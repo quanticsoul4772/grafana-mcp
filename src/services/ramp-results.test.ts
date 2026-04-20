@@ -1,6 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import fs from 'fs';
-import path from 'path';
 
 vi.mock('child_process', () => ({ execSync: vi.fn(() => '') }));
 
