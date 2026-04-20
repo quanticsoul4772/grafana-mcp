@@ -34,7 +34,7 @@ export function registerRampControlTools(
           params.rate,
         );
         const text = [
-          `**Ixia Rate Set**`,
+          '**Ixia Rate Set**',
           '',
           `Replayer: ${params.replayer}`,
           `Rate: ${params.rate} Gbps`,
@@ -77,7 +77,7 @@ export function registerRampControlTools(
         );
         const result = service.ixiaStop(params.replayer);
         const text = [
-          `**Ixia Stopped**`,
+          '**Ixia Stopped**',
           '',
           `Replayer: ${params.replayer}`,
           '',
@@ -119,7 +119,7 @@ export function registerRampControlTools(
         );
         const status = service.ixiaStatus(params.replayer);
         const text = [
-          `**Ixia Status**`,
+          '**Ixia Status**',
           '',
           `Replayer: ${params.replayer}`,
           `Running: ${status.running ? 'Yes' : 'No'}`,
@@ -215,7 +215,7 @@ export function registerRampControlTools(
         );
         const result = service.stopRampTest(params.session);
         const text = [
-          `**RAMP Test Stopped**`,
+          '**RAMP Test Stopped**',
           '',
           result,
         ].join('\n');
@@ -305,7 +305,7 @@ export function registerRampControlTools(
             `| ${s.hostname} | ${s.type} | ${s.verdict} | ${s.error ?? '' } |`,
         );
         const text = [
-          `**Fleet Regression Sweep**`,
+          '**Fleet Regression Sweep**',
           '',
           report.summary,
           '',
