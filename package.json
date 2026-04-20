@@ -59,7 +59,7 @@
     "jiti": "^2.6.1",
     "prettier": "^3.4.2",
     "tsx": "^4.20.5",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "vitest": "^2.1.8"
   }
 }
